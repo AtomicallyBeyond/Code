@@ -13,16 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kidzcolor.ImageUpdater;
 import com.example.kidzcolor.R;
+import com.example.kidzcolor.ShadedPathsDepletedListener;
 import com.example.kidzcolor.models.CircleColorDrawable;
-import com.example.kidzcolor.models.PathModel;
 import com.example.kidzcolor.models.VectorModel;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
-public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.ViewHolder> {
+public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.ViewHolder> implements ShadedPathsDepletedListener {
 
     private Context context;
     private List<Integer> colorKeys;
@@ -85,6 +83,16 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
         super.onViewDetachedFromWindow(holder);
     }
 
+    @Override
+    public void notifyShadedPathsDepleted() {
+            colorKeys.remove(selectedPosition);
+            notifyDataSetChanged();
+            if(!colorKeys.isEmpty())
+                vectorModel.shadePaths(colorKeys.get(viewHolder.getPosition()));
+    }
+
+
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView colorView;
@@ -132,7 +140,6 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
 
                     ColorPickerAdapter.this.viewHolder = ViewHolder.this;
                     selectedPosition = position;
-
                     vectorModel.unShadePaths();
                     vectorModel.shadePaths(colorKeys.get(position));
                     imageUpdater.updateImage();

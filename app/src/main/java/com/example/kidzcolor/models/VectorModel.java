@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+
+import com.example.kidzcolor.ShadedPathsDepletedListener;
 import com.example.kidzcolor.utils.DefaultValues;
 import com.example.kidzcolor.utils.Utils;
 import org.xmlpull.v1.XmlPullParser;
@@ -33,6 +35,7 @@ public class VectorModel {
     Bitmap patternMap;
     private Paint strokePaint;
     private List<PathModel> shadedModels = null;
+    private ShadedPathsDepletedListener shadedPathsDepletedListener = null;
 
     //old variables
     private float width, height;
@@ -194,34 +197,37 @@ public class VectorModel {
     }
 
     public boolean paintShadedPath(int pixelPatternColor) {
-        if(shadedModels != null) {
-            for(PathModel pathModel : shadedModels){
 
-                int patternColor = pathModel.getPatternColor();
+        if(shadedModels != null) {
+            int i = 0;
+            int actualColor = shadedModels.get(0).getFillColor();
+            int patternColor;
+            for(PathModel pathModel : shadedModels){
+                patternColor = pathModel.getPatternColor();
 
                 if(patternColor == pixelPatternColor) {
                     pathModel.setFillColorStatus(PathModel.YES_FILL_COLOR);
-                    //shadedModels.remove(pathModel);
+                    shadedModels.remove(i);
+
+                    if(shadedModels.isEmpty()) {
+                        shadeAndColorMap.remove(actualColor);
+                        shadedPathsDepletedListener.notifyShadedPathsDepleted();
+                    }
                     return true;
                 }
+                i++;
             }
         }
-
-/*        Bitmap bitmap = Bitmap.createBitmap(Utils.dpToPx((int) getWidth()), Utils.dpToPx((int) getHeight()), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        for(PathModel pathModel : shadedModels) {
-            pathModel.setFillColorStatus(PathModel.YES_FILL_COLOR);
-            pathModel.makeFillPaint();
-            canvas.drawPath(pathModel.getPath(), pathModel.getPathPaint());
-        }
-
-        int a = 1;*/
         return false;
+    }
+
+    public void setShadedPathDepletedListener(ShadedPathsDepletedListener shadedPathDepletedListener) {
+        this.shadedPathsDepletedListener = shadedPathDepletedListener;
     }
 
 
     public List<Integer> getColorKeys() {
-        return new ArrayList<>(fillPathsMap.keySet());
+        return new ArrayList<>(shadeAndColorMap.keySet());
     }
 
 
@@ -283,9 +289,10 @@ public class VectorModel {
             shadeAndColorMap.get(fillColor).add(pathModel);
         } else {
             List<PathModel> newList = new ArrayList<>();
+            List<PathModel> newList2 = new ArrayList<>();
             newList.add(pathModel);
             fillPathsMap.put(fillColor, newList);
-            shadeAndColorMap.put(fillColor, newList);
+            shadeAndColorMap.put(fillColor, newList2);
         }
     }
 

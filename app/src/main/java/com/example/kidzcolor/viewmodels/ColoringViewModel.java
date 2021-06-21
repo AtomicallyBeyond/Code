@@ -19,7 +19,7 @@ public class ColoringViewModel extends AndroidViewModel {
 
     public ColoringViewModel(@NonNull Application application) {
         super(application);
-        vectorModel = new VectorModel(application.getApplicationContext(), "ic_school.xml");
+        vectorModel = new VectorModel(application.getApplicationContext(), "ic_park.xml");
         vectorDrawable = new VectorMasterDrawable(vectorModel);
     }
 

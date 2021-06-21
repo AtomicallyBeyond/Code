@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,7 +50,6 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
             @Override
             public void run() {
                 vectorModel.drawPatternMap();
-                //((ImageView)findViewById(R.id.patternImage)).setImageBitmap(vectorModel.getPatternMap());
             }
         });
 
@@ -57,8 +57,9 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
 
         RecyclerView colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
         colorsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        colorsRecyclerView.setAdapter( new ColorPickerAdapter(this, coloringViewModel.getVectorModel(), this));
-
+        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(this, coloringViewModel.getVectorModel(), this);
+        colorsRecyclerView.setAdapter(colorPickerAdapter);
+        vectorModel.setShadedPathDepletedListener(colorPickerAdapter);
     }
 
     private void setZoomageViewListener(ZoomageView zoomageview) {
@@ -125,5 +126,14 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
             if(vectorModel.paintShadedPath(pixelColor))
                 vectorMasterDrawable.invalidateSelf();
         }
+    }
+
+    private void setHintButtonListener(ImageButton imageButton) {
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 }
