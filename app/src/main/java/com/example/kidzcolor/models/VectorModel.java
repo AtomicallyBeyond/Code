@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 
 import com.example.kidzcolor.ShadedPathsDepletedListener;
 import com.example.kidzcolor.utils.DefaultValues;
@@ -36,6 +37,22 @@ public class VectorModel {
     private Paint strokePaint;
     private List<PathModel> shadedModels = null;
     private ShadedPathsDepletedListener shadedPathsDepletedListener = null;
+    float xC;
+    float yC;
+    boolean yCircle = false;
+    RectF testRect;
+    boolean drawRect = false;
+
+    public void setRectDraw(RectF rectf) {
+        testRect = rectf;
+        drawRect = true;
+    }
+
+    public void setCircle (float x, float y, boolean yCircle) {
+        xC = x;
+        yC = y;
+        this.yCircle = yCircle;
+    }
 
     //old variables
     private float width, height;
@@ -263,7 +280,35 @@ public class VectorModel {
                 canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), pathModel.getPathPaint());
             }
         }
+
+        if(yCircle) {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setColor(Color.BLACK);
+            canvas.drawCircle(xC, yC, 40f, paint);
+        }
+
+        if(drawRect) {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.RED);
+            paint.setStrokeWidth(10.0f);
+            canvas.drawRect(testRect, paint);
+        }
     }
+
+    public RectF getNextShadedPathBounds() {
+        if(shadedModels != null){
+            RectF rectF = new RectF();
+            Path path = shadedModels.get(0).getPath();
+            path.computeBounds(rectF, true);
+
+            return rectF;
+        }
+        return null;
+    }
+
+
 
 
     public void scaleAllPaths(Matrix scaleMatrix) {
