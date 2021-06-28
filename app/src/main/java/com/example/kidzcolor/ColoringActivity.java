@@ -2,12 +2,15 @@ package com.example.kidzcolor;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -36,14 +39,23 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
     private ZoomageView zoomageView;
     private VectorModel vectorModel;
     private VectorMasterDrawable vectorMasterDrawable;
+    private int displayHeight;
+    private int displayWidth;
+    private float minScale;
+    private float maxScale;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coloring);
 
-        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        displayHeight = displayMetrics.heightPixels;
+        displayWidth = displayMetrics.widthPixels;
 
+        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
         vectorModel = coloringViewModel.getVectorModel();
         vectorMasterDrawable = new VectorMasterDrawable(vectorModel);
 
@@ -53,16 +65,38 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
             @Override
             public void run() {
                 vectorModel.drawPatternMap();
+                zoomageView.setScaleType(ImageView.ScaleType.MATRIX);
+                zoomageView.setStartValues();
+                minScale = zoomageView.getDefaultScale();
+                maxScale = zoomageView.getCalculatedMaxScale();
             }
         });
+
 
         setZoomageViewListener(zoomageView);
         setHintButtonListener(findViewById(R.id.hint_button));
 
         RecyclerView colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
-        colorsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(this, coloringViewModel.getVectorModel(), this);
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            colorsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        } else {
+            colorsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        }
+
+        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(this, coloringViewModel.getVectorModel(), this, coloringViewModel);
         colorsRecyclerView.setAdapter(colorPickerAdapter);
+        colorsRecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                int position = coloringViewModel.getPosition();
+                colorsRecyclerView.scrollToPosition(position);
+                View view  = colorsRecyclerView.getLayoutManager().findViewByPosition(position);
+                if(view != null) {
+                    view.callOnClick();
+                }
+            }
+        });
         vectorModel.setShadedPathDepletedListener(colorPickerAdapter);
     }
 
@@ -140,126 +174,62 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
             private float xCenter;
             private float yCenter;
             private float scaleFactor;
-            private float originalScaleFactor;
             private Matrix inverse = new Matrix();
 
             @Override
             public void onClick(View v) {
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                int displayHeight = displayMetrics.heightPixels;
-                int displayWidth = displayMetrics.widthPixels;
-
 
                 rectF = vectorModel.getNextShadedPathBounds();
 
-                RectF drawRect = new RectF(0, 0, vectorMasterDrawable.getIntrinsicWidth(), vectorMasterDrawable.getIntrinsicHeight());
-                //inverse.setRectToRect(rectF, drawRect, Matrix.ScaleToFit.CENTER);
+                xCenter = rectF.centerX();
+                yCenter = rectF.centerY();
 
-                float yOffset = drawRect.centerY() / 2;
-                float translateY = (yOffset - rectF.top) / 2;
-                float xOffset = drawRect.centerX() / 2;
-                float translateX = (xOffset - rectF.left) / 2;
+                ZoomageView zoom = zoomageView;
+                float scaleFactor = getZoomScaleFactor();
+                float x = (float)((xCenter * scaleFactor) - (displayWidth * 0.5));
+                float y = (float)((yCenter * scaleFactor) - (displayHeight * 0.5));
 
-                final float[] values = new float[9];
-                zoomageView.getImageMatrix().getValues(values);
-                float xScale = values[Matrix.MSCALE_X];
-                float yScale = values[Matrix.MSCALE_Y];
-                float yTranslate = values[Matrix.MTRANS_Y];
-                float xTranslate = values[Matrix.MTRANS_X];
+                inverse.setScale(scaleFactor, scaleFactor);
+                inverse.postTranslate(-x, -y);
+
+/*                zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 1000);
+
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        zoomageView.animateScaleAndTranslationToMatrix(inverse, 2000);
+                    }
+                }, 1200);*/
 
 
-                //inverse.setTranslate(translateX, translateY );
-
-
-                inverse.setScale(1 ,1);
-                inverse.postTranslate(0, 0);
-                //inverse.postTranslate(displayWidth - 1000, displayHeight - 1000);
                 zoomageView.animateScaleAndTranslationToMatrix(inverse, 1000);
 
-/*                inverse.postTranslate(drawRect.centerX() / 2, drawRect.centerY() / 2);
-                zoomageView.animateScaleAndTranslationToMatrix(inverse, 10000);*/
-                xCenter = translateX;
-                yCenter = translateY;
-                vectorModel.setCircle(xCenter, yCenter, true);
+                //vectorModel.setRectDraw(rectF);
 
-
-                drawRect.right = (drawRect.right - (drawRect.right / 2));
-                vectorModel.setRectDraw(drawRect);
-
-
-
-               /* xCenter = rectF.centerX();
-                yCenter = rectF.centerY();
-                //vectorModel.setCircle(xCenter, yCenter, true);
-
-
-                zoomageView.getImageMatrix().invert(inverse);
-                inverse.invert(inverse);
-                float[] touchPoint = new float[] {xCenter, yCenter};
-                inverse.mapPoints(touchPoint);
-                xCenter = touchPoint[0];
-                yCenter = touchPoint[1];
-
-
-                //zoomageView.reset();
-                scaleFactor = getZoomScaleFactor();
-                originalScaleFactor = zoomageView.getDoubleTapToZoomScaleFactor();
-                zoomageView.setDoubleTapToZoomScaleFactor(scaleFactor);
-                fireZoomageViewDoubleTap();
-                zoomageView.setDoubleTapToZoomScaleFactor(originalScaleFactor);
-            }
-
-
-            private void fireZoomageViewDoubleTap() {
-                MotionEvent motionEvent = MotionEvent.obtain(
-                        SystemClock.uptimeMillis(),
-                        SystemClock.uptimeMillis() + 100,
-                        MotionEvent.ACTION_DOWN,
-                        xCenter,
-                        yCenter,
-                        0
-                );
-                zoomageView.onTouchEvent(motionEvent);
-
-                motionEvent = MotionEvent.obtain(
-                        SystemClock.uptimeMillis() + 200,
-                        SystemClock.uptimeMillis() + 300,
-                        MotionEvent.ACTION_UP,
-                        xCenter,
-                        yCenter,
-                        0
-                );
-                zoomageView.onTouchEvent(motionEvent);
-                motionEvent = MotionEvent.obtain(
-                        SystemClock.uptimeMillis() + 400,
-                        SystemClock.uptimeMillis() + 500,
-                        MotionEvent.ACTION_DOWN,
-                        xCenter,
-                        yCenter,
-                        0
-                );
-                zoomageView.onTouchEvent(motionEvent);
-                motionEvent = MotionEvent.obtain(
-                        SystemClock.uptimeMillis() +600,
-                        SystemClock.uptimeMillis() + 700,
-                        MotionEvent.ACTION_UP,
-                        xCenter,
-                        yCenter,
-                        0
-                );
-                zoomageView.onTouchEvent(motionEvent);*/
             }
 
             private float getZoomScaleFactor() {
 
-                float width = vectorModel.getWidth();
-                float width2 = rectF.width();
+                float zoomScale;
 
-                if(rectF.height() > vectorModel.getHeight())
-                    return  (vectorModel.getHeight() / rectF.height());
-                else
-                    return  (vectorModel.getWidth() / rectF.width());
+                if(rectF.height() > rectF.width()){
+                    zoomScale = (vectorMasterDrawable.getIntrinsicHeight() / rectF.height()) * (zoomageView.getDefaultScale() / 2);
+                    return getScaleInRange(zoomScale);
+                } else {
+                    zoomScale = (vectorMasterDrawable.getIntrinsicWidth() / rectF.width()) * (zoomageView.getDefaultScale() / 2);
+                    return getScaleInRange(zoomScale);
+                }
+
+            }
+
+            private float getScaleInRange(float zoomScale){
+                if(zoomScale < minScale)
+                    return minScale;
+                else if(zoomScale > maxScale)
+                    return maxScale;
+
+                return  zoomScale;
             }
         });
     }

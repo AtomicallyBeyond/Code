@@ -78,6 +78,10 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
     private boolean doubleTapDetected = false;
     private boolean singleTapDetected = false;
 
+    public float getDefaultScale() {return startValues[Matrix.MSCALE_X];}
+
+    public float getCalculatedMaxScale() {return calculatedMaxScale;}
+
     public ZoomageView(Context context) {
         super(context);
         init(context, null);
@@ -425,7 +429,7 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
     /**
      * Remember our starting values so we can animate our image back to its original position.
      */
-    private void setStartValues() {
+    public void setStartValues() {
         startValues = new float[9];
         startMatrix = new Matrix(getImageMatrix());
         startMatrix.getValues(startValues);
@@ -462,6 +466,8 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
                     reset();
                 } else {
                     Matrix zoomMatrix = new Matrix(matrix);
+                    float a = scaleDetector.getFocusX();
+                    float b = scaleDetector.getFocusY();
                     zoomMatrix.postScale(doubleTapToZoomScaleFactor, doubleTapToZoomScaleFactor, scaleDetector.getFocusX(), scaleDetector.getFocusY());
                     animateScaleAndTranslationToMatrix(zoomMatrix, RESET_DURATION);
                 }

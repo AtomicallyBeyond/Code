@@ -9,7 +9,7 @@ import android.graphics.Rect;
 public class ShadeMap {
 
     public static final ShadeMap instance = new ShadeMap();
-    private final int size = 40;
+    private final int size = 10;
     private final int colorOdd = 0xFFC2C2C2;
     private final int colorEven = 0xFFF3F3F3;
     private BitmapShader bitmapShader;

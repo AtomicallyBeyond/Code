@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kidzcolor.ImageUpdater;
+import com.example.kidzcolor.PositionListener;
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.ShadedPathsDepletedListener;
 import com.example.kidzcolor.models.CircleColorDrawable;
@@ -26,14 +27,16 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
     private List<Integer> colorKeys;
     private VectorModel vectorModel;
     private ImageUpdater imageUpdater;
+    private PositionListener positionListener;
     private ViewHolder viewHolder = null;
-    private int selectedPosition = -1;
+    private int selectedPosition = 0;
 
-    public ColorPickerAdapter (Context context, VectorModel vectorModel, ImageUpdater imageUpdater){
+    public ColorPickerAdapter (Context context, VectorModel vectorModel, ImageUpdater imageUpdater, PositionListener positionListener){
         this.context = context;
         this.vectorModel = vectorModel;
         colorKeys = vectorModel.getColorKeys();
         this.imageUpdater = imageUpdater;
+        this.positionListener = positionListener;
 
     }
 
@@ -85,12 +88,12 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
 
     @Override
     public void notifyShadedPathsDepleted() {
-            colorKeys.remove(selectedPosition);
-            notifyDataSetChanged();
-            if(!colorKeys.isEmpty())
-                vectorModel.shadePaths(colorKeys.get(viewHolder.getPosition()));
-    }
+        colorKeys.remove(selectedPosition);
+        notifyDataSetChanged();
+        if(!colorKeys.isEmpty())
+            vectorModel.shadePaths(colorKeys.get(viewHolder.getPosition()));
 
+    }
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -118,6 +121,7 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
                 public void onClick(View v) {
 
                     int position = ViewHolder.this.getLayoutPosition();
+                    positionListener.positionChanged(position);
 
 
                     if(viewHolder != null) {

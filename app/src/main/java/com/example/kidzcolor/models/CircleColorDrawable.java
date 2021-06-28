@@ -292,16 +292,10 @@ public class CircleColorDrawable extends Drawable {
     @Override
     public void draw(@NonNull Canvas canvas) {
 
-        Paint border = new Paint();
-        border.setStyle(Paint.Style.STROKE);
-        border.setColor(Color.rgb(211,211,211));
-        border.setStrokeWidth(1);
 
         mouthInset = mRadius / 5;
         mArcBounds.set(mouthInset, mouthInset, mRadius * 2 - mouthInset, mRadius * 2 - mouthInset);
 
-        //canvas.drawRect(mArcBounds, border);
-        canvas.drawCircle(mArcBounds.centerX(), mArcBounds.centerY(), mouthInset * 3.61f, border);
         canvas.drawCircle(mArcBounds.centerX(), mArcBounds.centerY(), mouthInset * 3.6f, innerCirclePaint);
         canvas.drawArc(mArcBounds, 0f, 360f, false, backgroundPaint);
         canvas.drawArc(mArcBounds, 270f, drawUpTo / getMaxValue() * 360, false, progressBarPaint);

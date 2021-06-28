@@ -42,7 +42,7 @@ public class PathModel {
 
     private boolean isFillAndStroke = false;
 
-
+    //do i need originalPath and path?
     private Path originalPath;
     private Path path;
     private Path trimmedPath;

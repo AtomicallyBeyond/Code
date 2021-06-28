@@ -292,7 +292,7 @@ public class VectorModel {
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.RED);
-            paint.setStrokeWidth(10.0f);
+            paint.setStrokeWidth(1.0f);
             canvas.drawRect(testRect, paint);
         }
     }
@@ -302,7 +302,6 @@ public class VectorModel {
             RectF rectF = new RectF();
             Path path = shadedModels.get(0).getPath();
             path.computeBounds(rectF, true);
-
             return rectF;
         }
         return null;
@@ -332,10 +331,12 @@ public class VectorModel {
         if(fillPathsMap.containsKey(fillColor)) {
             fillPathsMap.get(fillColor).add(pathModel);
             shadeAndColorMap.get(fillColor).add(pathModel);
+            int a = 1;
         } else {
             List<PathModel> newList = new ArrayList<>();
             List<PathModel> newList2 = new ArrayList<>();
             newList.add(pathModel);
+            newList2.add(pathModel);
             fillPathsMap.put(fillColor, newList);
             shadeAndColorMap.put(fillColor, newList2);
         }
