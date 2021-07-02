@@ -11,6 +11,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -81,6 +82,8 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
     public float getDefaultScale() {return startValues[Matrix.MSCALE_X];}
 
     public float getCalculatedMaxScale() {return calculatedMaxScale;}
+
+    public Matrix getStartMatrix() { return startMatrix; }
 
     public ZoomageView(Context context) {
         super(context);
@@ -437,8 +440,26 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
         calculatedMaxScale = maxScale * startValues[Matrix.MSCALE_X];
     }
 
+/*    long mLastClickTime = 0;
+    int tapCount = 0;*/
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+/*        if(event.getPointerCount() < 2) {
+            if(SystemClock.elapsedRealtime() - mLastClickTime > 1000) {
+                mLastClickTime = SystemClock.elapsedRealtime();
+                tapCount = 0;
+            } else if(tapCount > 10) {
+                tapCount = 0;
+                return false;
+            } else if(((SystemClock.elapsedRealtime() - mLastClickTime) < 1000) && (tapCount < 10)) {
+                tapCount++;
+            }
+
+        }*/
+
+
 
         if (!isClickable() && isEnabled() && (zoomable || translatable)) {
             if (getScaleType() != ScaleType.MATRIX) {
@@ -876,7 +897,7 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
 
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
-            singleTapDetected = true;
+            //singleTapDetected = true;
             return false;
         }
 
