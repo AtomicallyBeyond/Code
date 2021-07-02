@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
 import com.example.kidzcolor.models.PathModel;
+import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.repository.DrawableRepository;
 
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,6 @@ public class CompletedViewModel extends AndroidViewModel {
         drawableRepository = DrawableRepository.getInstance();
     }
 
-    public List<PathModel> getColoredHistory(){return drawableRepository.getColoredHistory();}
+    public VectorModel getSelectedViewModel(){return drawableRepository.getModel();}
 
 }

@@ -1,6 +1,9 @@
 package com.example.kidzcolor;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,7 +14,7 @@ import com.example.kidzcolor.viewmodels.CompletedViewModel;
 public class CompletedActivity extends AppCompatActivity {
 
     private CompletedViewModel completedViewModel;
-    private ColoringReplay coloringReplay;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -19,10 +22,16 @@ public class CompletedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_completed);
 
         completedViewModel = new ViewModelProvider(this).get(CompletedViewModel.class);
-        coloringReplay = findViewById(R.id.replay_view);
+        imageView = findViewById(R.id.replay_view);
+        ReplayDrawable replayDrawable = new ReplayDrawable(completedViewModel.getSelectedViewModel());
+        imageView.setImageDrawable(replayDrawable);
 
-        coloringReplay.setPathsList(completedViewModel.getColoredHistory());
-        coloringReplay.startReplay();
 
+        ((Button)findViewById(R.id.replay_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                replayDrawable.startReplay();
+            }
+        });
     }
 }

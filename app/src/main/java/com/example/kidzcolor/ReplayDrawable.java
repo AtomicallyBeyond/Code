@@ -1,49 +1,91 @@
-package com.example.kidzcolor.models;
+package com.example.kidzcolor;
 
-import android.content.Context;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.example.kidzcolor.models.PathModel;
 import com.example.kidzcolor.models.VectorModel;
-import com.example.kidzcolor.utils.DefaultValues;
 import com.example.kidzcolor.utils.Utils;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
-public class VectorMasterDrawable extends Drawable {
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class ReplayDrawable extends Drawable {
+
+
+    private int drawIndex = -1;
+    private int listSize = 0;
+    private List<PathModel> pathsList;
+    private Paint outlinePaint;
 
     private VectorModel vectorModel;
     private int width = -1, height = -1;
     private int left = 0, top = 0;
-    private int tempSaveCount;
     private float offsetX = 0.0f, offsetY = 0.0f;
     private float scaleX = 1.0f, scaleY = 1.0f;
     private float scaleRatio, strokeRatio;
-    private boolean useLegacyParser = true;
-    private XmlPullParser xpp;
     private Matrix scaleMatrix;
 
-
-    public VectorMasterDrawable(VectorModel vectorModel) {
+    public ReplayDrawable(VectorModel vectorModel) {
         this.vectorModel = vectorModel;
+        pathsList = vectorModel.getColorPathsHistory();
+        listSize = pathsList.size();
+        outlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        outlinePaint.setStyle(Paint.Style.STROKE);
+        outlinePaint.setColor(Color.BLACK);
+    }
+
+
+
+/*    public void setPathsList(List<PathModel> pathsList) {
+        this.pathsList = pathsList;
+        listSize = pathsList.size();
+    }*/
+
+    public void startReplay() {
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+
+            @Override
+            public void run() {
+
+                drawIndex++;
+
+                if( drawIndex == listSize){
+                    drawIndex = -1;
+                    this.cancel();
+                }
+
+                if(drawIndex < listSize && drawIndex >= 0)
+                    ReplayDrawable.this.invalidateSelf();
+            }
+        }, 0, 500);
+    }
+
+
+
+
+    @Override
+    public void draw(Canvas canvas) {
+        int index = 0;
+        for(PathModel pathModel : pathsList) {
+
+            if(index <= drawIndex)
+                canvas.drawPath(pathModel.getPath(), pathModel.getPathPaint());
+            else
+                canvas.drawPath(pathModel.getPath(), outlinePaint);
+
+            index++;
+        }
     }
 
     @Override
@@ -63,51 +105,6 @@ public class VectorMasterDrawable extends Drawable {
             scaleAllPaths();
             scaleAllStrokes();
         }
-    }
-
-    @Override
-    public void draw(Canvas canvas) {
-
-        if (vectorModel == null) {
-            return;
-        }
-
-        if (scaleMatrix == null) {
-            int temp1 = Utils.dpToPx((int) vectorModel.getWidth());
-            int temp2 = Utils.dpToPx((int) vectorModel.getHeight());
-
-            setBounds(0, 0, temp1, temp2);
-        }
-
-
-        if (left != 0 || top != 0) {
-            tempSaveCount = canvas.save();
-            canvas.translate(left, top);
-            vectorModel.drawPaths(canvas, offsetX, offsetY, scaleX, scaleY);
-            canvas.restoreToCount(tempSaveCount);
-        } else {
-
-            vectorModel.drawPaths(canvas, offsetX, offsetY, scaleX, scaleY);
-        }
-
-        //need to take Paint border out of draw
-        Paint border = new Paint();
-        border.setStyle(Paint.Style.STROKE);
-        border.setStrokeWidth(5f);
-        border.setColor(Color.BLUE);
-
-        canvas.drawRect(0, 0, getIntrinsicWidth(), getIntrinsicHeight(), border);
-    }
-
-    @Override
-    public void setAlpha(int alpha) { }
-
-    @Override
-    public void setColorFilter(@Nullable ColorFilter colorFilter) { }
-
-    @Override
-    public int getOpacity() {
-        return PixelFormat.TRANSPARENT;
     }
 
     @Override
@@ -193,5 +190,21 @@ public class VectorMasterDrawable extends Drawable {
     public void setScaleY(float scaleY) {
         this.scaleY = scaleY;
         invalidateSelf();
+    }
+
+
+    @Override
+    public void setAlpha(int alpha) {
+
+    }
+
+    @Override
+    public void setColorFilter(@Nullable ColorFilter colorFilter) {
+
+    }
+
+    @Override
+    public int getOpacity() {
+        return PixelFormat.TRANSPARENT;
     }
 }

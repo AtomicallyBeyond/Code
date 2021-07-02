@@ -27,6 +27,4 @@ public class DrawableRepository {
     public VectorModel getModel() {
         return selectedModel;
     }
-
-    public List<PathModel> getColoredHistory() {return  selectedModel.getColorPathsHistory();}
 }
