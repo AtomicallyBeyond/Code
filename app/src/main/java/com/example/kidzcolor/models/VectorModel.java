@@ -131,7 +131,6 @@ public class VectorModel {
                             pathModel.setFillType((tempPosition != -1) ? Utils.getFillTypeFromString(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_FILL_TYPE);
 
                             tempPosition = getAttrPosition(xpp, "pathData");
-                            String tem = xpp.getAttributeValue(tempPosition);
                             pathModel.setPathData((tempPosition != -1) ? xpp.getAttributeValue(tempPosition) : null);
 
                             tempPosition = getAttrPosition(xpp, "strokeColor");
