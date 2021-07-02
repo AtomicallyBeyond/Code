@@ -1,25 +1,16 @@
 package com.example.kidzcolor;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,12 +19,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kidzcolor.adapters.ColorPickerAdapter;
+import com.example.kidzcolor.interfaces.PositionListener;
 import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.viewmodels.ColoringViewModel;
 import com.example.kidzcolor.zoomageview.ZoomageView;
 
-public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class ColoringActivity extends AppCompatActivity implements PositionListener, FinishedColoringListener{
 
     private ColoringViewModel coloringViewModel;
     private ZoomageView zoomageView;
@@ -84,7 +79,7 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
             colorsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         }
 
-        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(this, coloringViewModel.getVectorModel(), this, coloringViewModel);
+        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(this, coloringViewModel.getVectorModel(), new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)), this);
         colorsRecyclerView.setAdapter(colorPickerAdapter);
         colorsRecyclerView.post(new Runnable() {
             @Override
@@ -150,10 +145,6 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
                 || differenceY > ViewConfiguration.get(getBaseContext()).getScaledTouchSlop());
     } // end isAClick
 
-    @Override
-    public void updateImage() {
-        vectorMasterDrawable.invalidateSelf();
-    }
 
     private void paintSelectedCord(int xCoord, int yCoord) {
 
@@ -180,6 +171,8 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
             public void onClick(View v) {
 
                 rectF = vectorModel.getNextShadedPathBounds();
+                if(rectF == null)
+                    return;
 
                 xCenter = rectF.centerX();
                 yCenter = rectF.centerY();
@@ -192,20 +185,8 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
                 inverse.setScale(scaleFactor, scaleFactor);
                 inverse.postTranslate(-x, -y);
 
-/*                zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 1000);
-
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        zoomageView.animateScaleAndTranslationToMatrix(inverse, 2000);
-                    }
-                }, 1200);*/
-
-
-                zoomageView.animateScaleAndTranslationToMatrix(inverse, 1000);
-
-                //vectorModel.setRectDraw(rectF);
+                zoomageView.animateScaleAndTranslationToMatrix(inverse, 500);;
+                vectorModel.setRectDraw(rectF);
 
             }
 
@@ -224,13 +205,38 @@ public class ColoringActivity extends AppCompatActivity implements ImageUpdater{
             }
 
             private float getScaleInRange(float zoomScale){
-                if(zoomScale < minScale)
+                if(zoomScale <= minScale)
                     return minScale;
-                else if(zoomScale > maxScale)
+                else if(zoomScale >= maxScale)
                     return maxScale;
 
                 return  zoomScale;
             }
         });
     }
+
+    @Override
+    public void positionChanged(int newPosition) {
+        vectorMasterDrawable.invalidateSelf();
+        zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 500);
+    }
+
+    @Override
+    public void finished() {
+        Intent coloringIntent = new Intent(this, CompletedActivity.class);
+        startActivity(coloringIntent);
+    }
 }
+
+
+
+/*                zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 1000);
+
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        zoomageView.animateScaleAndTranslationToMatrix(inverse, 2000);
+                    }
+                }, 1200);*/
+

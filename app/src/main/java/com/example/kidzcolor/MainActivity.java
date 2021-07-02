@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        VectorModel vectorModel = new VectorModel(this, "ic_school.xml");
+/*        VectorModel vectorModel = new VectorModel(this, "ic_school.xml");
         VectorMasterDrawable vectorMasterDrawable = new VectorMasterDrawable(vectorModel);
 
         Drawable drawable = getResources().getDrawable(R.drawable.ic_school);
@@ -34,6 +34,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent coloringIntent = new Intent(MainActivity.this, ColoringActivity.class);
                 MainActivity.this.startActivity(coloringIntent);
             }
-        });
+        });*/
     }
 }

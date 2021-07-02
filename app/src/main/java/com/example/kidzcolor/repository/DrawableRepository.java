@@ -1,6 +1,9 @@
 package com.example.kidzcolor.repository;
 
+import com.example.kidzcolor.models.PathModel;
 import com.example.kidzcolor.models.VectorModel;
+
+import java.util.List;
 
 public class DrawableRepository {
 

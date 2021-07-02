@@ -11,32 +11,33 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.kidzcolor.ImageUpdater;
-import com.example.kidzcolor.PositionListener;
+import com.example.kidzcolor.FinishedColoringListener;
+import com.example.kidzcolor.interfaces.PositionListener;
 import com.example.kidzcolor.R;
-import com.example.kidzcolor.ShadedPathsDepletedListener;
+import com.example.kidzcolor.interfaces.ColorDepletedListener;
 import com.example.kidzcolor.models.CircleColorDrawable;
 import com.example.kidzcolor.models.VectorModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
-public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.ViewHolder> implements ShadedPathsDepletedListener {
+public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.ViewHolder> implements ColorDepletedListener {
 
     private Context context;
     private List<Integer> colorKeys;
     private VectorModel vectorModel;
-    private ImageUpdater imageUpdater;
-    private PositionListener positionListener;
+    private ArrayList<PositionListener> positionListeners;
+    private FinishedColoringListener finishedColoringListener;
     private ViewHolder viewHolder = null;
     private int selectedPosition = 0;
 
-    public ColorPickerAdapter (Context context, VectorModel vectorModel, ImageUpdater imageUpdater, PositionListener positionListener){
+    public ColorPickerAdapter (Context context, VectorModel vectorModel, ArrayList<PositionListener> positionListeners, FinishedColoringListener finishedColoringListener){
         this.context = context;
         this.vectorModel = vectorModel;
         colorKeys = vectorModel.getColorKeys();
-        this.imageUpdater = imageUpdater;
-        this.positionListener = positionListener;
+        this.positionListeners = positionListeners;
+        this.finishedColoringListener = finishedColoringListener;
 
     }
 
@@ -52,7 +53,6 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
         CircleColorDrawable circleColorDrawable = ((CircleColorDrawable)holder.colorView.getDrawable());
         circleColorDrawable.setInnerCircleColor(colorKeys.get(position));
         circleColorDrawable.setProgressColor(colorKeys.get(position));
-        holder.color = colorKeys.get(position);
     }
 
     @Override
@@ -87,19 +87,36 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
     }
 
     @Override
-    public void notifyShadedPathsDepleted() {
-        colorKeys.remove(selectedPosition);
-        notifyDataSetChanged();
-        if(!colorKeys.isEmpty())
-            vectorModel.shadePaths(colorKeys.get(viewHolder.getPosition()));
+    public void notifyColorDepleted() {
 
+        if(!colorKeys.isEmpty()) {
+            colorKeys.remove(selectedPosition);
+            onViewDetachedFromWindow(viewHolder);
+
+
+            if(selectedPosition > 0 || colorKeys.isEmpty())
+                selectedPosition--;
+
+            notifyDataSetChanged();
+
+            if(selectedPosition >= 0 && !colorKeys.isEmpty()) {
+                vectorModel.shadePaths(colorKeys.get(selectedPosition));
+
+                for(PositionListener positionListener : positionListeners){
+                    positionListener.positionChanged(selectedPosition);
+                }
+            }
+
+            if(colorKeys.isEmpty())
+                finishedColoringListener.finished();;
+
+        }
     }
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView colorView;
-        private int color = Color.WHITE;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -121,7 +138,7 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
                 public void onClick(View v) {
 
                     int position = ViewHolder.this.getLayoutPosition();
-                    positionListener.positionChanged(position);
+                    //positionListener.positionChanged(position);
 
 
                     if(viewHolder != null) {
@@ -143,10 +160,12 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
                     grow();
 
                     ColorPickerAdapter.this.viewHolder = ViewHolder.this;
-                    selectedPosition = position;
                     vectorModel.unShadePaths();
                     vectorModel.shadePaths(colorKeys.get(position));
-                    imageUpdater.updateImage();
+                    selectedPosition = position;
+
+                    for(PositionListener positionListener : positionListeners)
+                        positionListener.positionChanged(position);
 
 
                 }

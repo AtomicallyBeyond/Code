@@ -3,7 +3,6 @@ package com.example.kidzcolor.models;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -11,7 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 
-import com.example.kidzcolor.ShadedPathsDepletedListener;
+import com.example.kidzcolor.interfaces.ColorDepletedListener;
 import com.example.kidzcolor.utils.DefaultValues;
 import com.example.kidzcolor.utils.Utils;
 import org.xmlpull.v1.XmlPullParser;
@@ -23,7 +22,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Queue;
+import java.util.Stack;
 import java.util.TreeMap;
 
 public class VectorModel {
@@ -35,13 +35,16 @@ public class VectorModel {
     private boolean useLegacyParser = true;
     Bitmap patternMap;
     private Paint strokePaint;
-    private List<PathModel> shadedModels = null;
-    private ShadedPathsDepletedListener shadedPathsDepletedListener = null;
+    private List<PathModel> shadedModels = new ArrayList<>();
+    private ColorDepletedListener colorDepletedListener = null;
     float xC;
     float yC;
     boolean yCircle = false;
     RectF testRect;
     boolean drawRect = false;
+    private List<PathModel> colorPathsHistory = new ArrayList<>();
+
+    public List<PathModel> getColorPathsHistory() {return colorPathsHistory;}
 
     public void setRectDraw(RectF rectf) {
         testRect = rectf;
@@ -151,12 +154,10 @@ public class VectorModel {
                         if (name.equals("path")) {
                             if (pathModel != null)
                                 addPathModel(pathModel);
-                            fullpath.addPath(pathModel.getPath());
                         }
                         break;
                 }
                 event = xpp.next();
-
             } //end while loop
 
         } catch (XmlPullParserException | IOException e) {
@@ -187,7 +188,6 @@ public class VectorModel {
         border.setStrokeWidth(20f);
         border.setColor(Color.GREEN);
         canvas.drawRect(0, 0, width, height, border);
-        int a = 1;
 
     }
 
@@ -214,7 +214,7 @@ public class VectorModel {
 
     public boolean paintShadedPath(int pixelPatternColor) {
 
-        if(shadedModels != null) {
+        if(!shadedModels.isEmpty()) {
             int i = 0;
             int actualColor = shadedModels.get(0).getFillColor();
             int patternColor;
@@ -223,11 +223,12 @@ public class VectorModel {
 
                 if(patternColor == pixelPatternColor) {
                     pathModel.setFillColorStatus(PathModel.YES_FILL_COLOR);
+                    colorPathsHistory.add(pathModel);
                     shadedModels.remove(i);
 
                     if(shadedModels.isEmpty()) {
                         shadeAndColorMap.remove(actualColor);
-                        shadedPathsDepletedListener.notifyShadedPathsDepleted();
+                        colorDepletedListener.notifyColorDepleted();
                     }
                     return true;
                 }
@@ -237,8 +238,8 @@ public class VectorModel {
         return false;
     }
 
-    public void setShadedPathDepletedListener(ShadedPathsDepletedListener shadedPathDepletedListener) {
-        this.shadedPathsDepletedListener = shadedPathDepletedListener;
+    public void setShadedPathDepletedListener(ColorDepletedListener shadedPathDepletedListener) {
+        this.colorDepletedListener = shadedPathDepletedListener;
     }
 
 
@@ -297,7 +298,7 @@ public class VectorModel {
     }
 
     public RectF getNextShadedPathBounds() {
-        if(shadedModels != null){
+        if(!shadedModels.isEmpty()){
             RectF rectF = new RectF();
             Path path = shadedModels.get(0).getPath();
             path.computeBounds(rectF, true);
@@ -305,8 +306,6 @@ public class VectorModel {
         }
         return null;
     }
-
-
 
 
     public void scaleAllPaths(Matrix scaleMatrix) {
@@ -323,23 +322,51 @@ public class VectorModel {
 
     public void addPathModel(PathModel pathModel) {
 
-        pathModels.add(pathModel);
+/*        if(calculateArea(pathModel.getPath()) > 0) */
 
-        int fillColor = pathModel.getFillColor();
+            fullpath.addPath(pathModel.getPath());
+            pathModels.add(pathModel);
 
-        if(fillPathsMap.containsKey(fillColor)) {
-            fillPathsMap.get(fillColor).add(pathModel);
-            shadeAndColorMap.get(fillColor).add(pathModel);
-            int a = 1;
-        } else {
-            List<PathModel> newList = new ArrayList<>();
-            List<PathModel> newList2 = new ArrayList<>();
-            newList.add(pathModel);
-            newList2.add(pathModel);
-            fillPathsMap.put(fillColor, newList);
-            shadeAndColorMap.put(fillColor, newList2);
-        }
+            int fillColor = pathModel.getFillColor();
+
+            if (fillPathsMap.containsKey(fillColor)) {
+                fillPathsMap.get(fillColor).add(pathModel);
+                shadeAndColorMap.get(fillColor).add(pathModel);
+                int a = 1;
+            } else {
+                List<PathModel> newList = new ArrayList<>();
+                List<PathModel> newList2 = new ArrayList<>();
+                newList.add(pathModel);
+                newList2.add(pathModel);
+                fillPathsMap.put(fillColor, newList);
+                shadeAndColorMap.put(fillColor, newList2);
+            }
+
+
+
     }
+
+/*    private float calculateArea(Path path) {
+        Region region = new Region();
+        RectF rectF = new RectF();
+        path.computeBounds(rectF, true);
+        region.setPath(path, new Region((int) rectF.left, (int) rectF.top, (int) rectF.right, (int) rectF.bottom));
+
+
+        RegionIterator regionIterator = new RegionIterator(region);
+
+        int size = 0; // amount of Rects
+        float area = 0; // units of area
+
+        Rect tmpRect= new Rect();
+
+        while (regionIterator.next(tmpRect)) {
+            size++;
+            area += tmpRect.width() * tmpRect.height();
+        }
+
+        return area;
+    }*/
 
     public ArrayList<PathModel> getPathModels() {
         return pathModels;

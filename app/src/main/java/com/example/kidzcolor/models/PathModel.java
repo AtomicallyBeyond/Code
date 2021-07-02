@@ -7,7 +7,10 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Region;
+import android.graphics.RegionIterator;
 
 import com.example.kidzcolor.utils.DefaultValues;
 import com.example.kidzcolor.utils.ShadeMap;
@@ -105,9 +108,12 @@ public class PathModel {
     }
 
     public void buildPath() {
+
         originalPath = androidx.core.graphics.PathParser.createPathFromPathData(pathData);
         path = new Path(originalPath);
     }
+
+
 
     public void updatePaint() {
         pathPaint.setStrokeWidth(strokeWidth * strokeRatio);
