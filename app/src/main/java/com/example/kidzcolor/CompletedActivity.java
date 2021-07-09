@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.kidzcolor.models.ReplayDrawable;
 import com.example.kidzcolor.viewmodels.CompletedViewModel;
 
 public class CompletedActivity extends AppCompatActivity {
@@ -23,7 +24,7 @@ public class CompletedActivity extends AppCompatActivity {
 
         completedViewModel = new ViewModelProvider(this).get(CompletedViewModel.class);
         imageView = findViewById(R.id.replay_view);
-        ReplayDrawable replayDrawable = new ReplayDrawable(completedViewModel.getSelectedViewModel());
+        ReplayDrawable replayDrawable = new ReplayDrawable(completedViewModel.getSelectedViewModel().getValue());
         imageView.setImageDrawable(replayDrawable);
 
 

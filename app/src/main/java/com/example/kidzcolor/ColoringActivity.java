@@ -14,25 +14,28 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kidzcolor.adapters.ColorPickerAdapter;
+import com.example.kidzcolor.intefaces.FinishedColoringListener;
 import com.example.kidzcolor.interfaces.PositionListener;
 import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.models.VectorModel;
+import com.example.kidzcolor.models.VectorModelContainer;
 import com.example.kidzcolor.viewmodels.ColoringViewModel;
 import com.example.kidzcolor.zoomageview.ZoomageView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ColoringActivity extends AppCompatActivity implements PositionListener, FinishedColoringListener{
+public class ColoringActivity extends AppCompatActivity implements PositionListener, FinishedColoringListener {
 
     private ColoringViewModel coloringViewModel;
     private ZoomageView zoomageView;
-    private VectorModel vectorModel;
+    private VectorModelContainer vectorModel;
     private VectorMasterDrawable vectorMasterDrawable;
     private int displayHeight;
     private int displayWidth;
@@ -51,7 +54,18 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         displayWidth = displayMetrics.widthPixels;
 
         coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
-        vectorModel = coloringViewModel.getVectorModel();
+
+        coloringViewModel.getVectorModel().observe(this, new Observer<VectorModel>() {
+            @Override
+            public void onChanged(VectorModel localModel) {
+
+                vectorModel = coloringViewModel.getVectorModel().getValue();
+                init();
+            }
+        });
+    }
+
+    private void init() {
         vectorMasterDrawable = new VectorMasterDrawable(vectorModel);
 
         zoomageView = findViewById(R.id.zoomage_view);
@@ -79,7 +93,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
             colorsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         }
 
-        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(this, coloringViewModel.getVectorModel(), new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)), this);
+        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(this, coloringViewModel.getVectorModel().getValue(), new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)), this);
         colorsRecyclerView.setAdapter(colorPickerAdapter);
         colorsRecyclerView.post(new Runnable() {
             @Override

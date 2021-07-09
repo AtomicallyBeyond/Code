@@ -27,10 +27,7 @@ public class DefaultValues {
     public final static int PATH_PATTERN_COLOR = Color.TRANSPARENT;
     public final static int PATH_FILL_COLOR = Color.TRANSPARENT;
     public final static int PATH_STROKE_COLOR = Color.TRANSPARENT;
-    public final static float PATH_STROKE_WIDTH = 3.0f;
-    public final static Paint.Cap PATH_STROKE_LINE_CAP = Paint.Cap.BUTT;
-    public final static Paint.Join PATH_STROKE_LINE_JOIN = Paint.Join.MITER;
-    public final static float PATH_STROKE_MITER_LIMIT = 4.0f;
+    public final static float PATH_STROKE_WIDTH = 1.0f;
     public final static float PATH_STROKE_RATIO = 1.0f;
     // WINDING fill type is equivalent to NON_ZERO
     public final static Path.FillType PATH_FILL_TYPE = Path.FillType.WINDING;

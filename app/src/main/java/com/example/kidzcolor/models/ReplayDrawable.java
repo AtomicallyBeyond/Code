@@ -1,4 +1,4 @@
-package com.example.kidzcolor;
+package com.example.kidzcolor.models;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,11 +9,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.kidzcolor.models.PathModel;
-import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.utils.Utils;
 
 import java.util.List;
@@ -36,9 +33,9 @@ public class ReplayDrawable extends Drawable {
     private float scaleRatio, strokeRatio;
     private Matrix scaleMatrix;
 
-    public ReplayDrawable(VectorModel vectorModel) {
+    public ReplayDrawable(VectorModelContainer vectorModel) {
         this.vectorModel = vectorModel;
-        pathsList = vectorModel.getColorPathsHistory();
+        pathsList = vectorModel.getColoredPathsHistory();
         listSize = pathsList.size();
         outlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         outlinePaint.setStyle(Paint.Style.STROKE);

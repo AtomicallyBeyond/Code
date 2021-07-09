@@ -1,8 +1,5 @@
 package com.example.kidzcolor.models;
 
-import android.content.Context;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -16,59 +13,31 @@ import com.example.kidzcolor.utils.Utils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Stack;
 import java.util.TreeMap;
 
 public class VectorModel {
 
-    //new variables
-    private Context context;
-    String assetVectorName;
+    private int modelID;
+    private File xmlFile;
     private XmlPullParser xpp;
-    private boolean useLegacyParser = true;
-    Bitmap patternMap;
-    private Paint strokePaint;
-    private List<PathModel> shadedModels = new ArrayList<>();
-    private ColorDepletedListener colorDepletedListener = null;
-    float xC;
-    float yC;
-    boolean yCircle = false;
-    RectF testRect;
-    boolean drawRect = false;
-    private List<PathModel> colorPathsHistory = new ArrayList<>();
-
-    public List<PathModel> getColorPathsHistory() {return colorPathsHistory;}
-
-    public void setRectDraw(RectF rectf) {
-        testRect = rectf;
-        drawRect = true;
-    }
-
-    public void setCircle (float x, float y, boolean yCircle) {
-        xC = x;
-        yC = y;
-        this.yCircle = yCircle;
-    }
-
-    //old variables
     private float width, height;
     private float viewportWidth, viewportHeight;
-    final private ArrayList<PathModel> pathModels = new ArrayList<>();
-    private Map<Integer, List<PathModel>> fillPathsMap = new TreeMap<>();
-    private Map<Integer, List<PathModel>> shadeAndColorMap = new TreeMap<>();
-    private Path fullpath = new Path();
+    private Paint strokePaint;
+    protected List<PathModel> pathModels = new ArrayList<>();
+    private RectF testRect;
+    private boolean drawRect = false;
 
-    public VectorModel(Context context, String assetVectorName) {
-        this.context = context;
-        this.assetVectorName = assetVectorName;
-        init();
+    public VectorModel(File xmlFile){
+            this.xmlFile = xmlFile;
+            init();
     }
 
     private void init() {
@@ -84,15 +53,12 @@ public class VectorModel {
         PathModel pathModel = null;
         int tempPosition;
 
-
-        InputStream inputStream = null;
         try {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             factory.setNamespaceAware(true);
             xpp = factory.newPullParser();
-            AssetManager assetManager = context.getAssets();
-            inputStream = assetManager.open(assetVectorName);
-            xpp.setInput(new InputStreamReader(inputStream));
+            FileInputStream fs = new FileInputStream(xmlFile);
+            xpp.setInput(new InputStreamReader(fs));
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -104,6 +70,7 @@ public class VectorModel {
         try {
 
             int event = xpp.getEventType();
+            int patternColor = 500;
 
             while (event != XmlPullParser.END_DOCUMENT) {
                 String name = xpp.getName();
@@ -124,9 +91,6 @@ public class VectorModel {
                         } else if (name.equals("path")) {
                             pathModel = new PathModel();
 
-                            tempPosition = getAttrPosition(xpp, "name");
-                            pathModel.setName((tempPosition != -1) ? xpp.getAttributeValue(tempPosition) : null);
-
                             tempPosition = getAttrPosition(xpp, "fillColor");
                             pathModel.setFillColor((tempPosition != -1) ? Utils.getColorFromString(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_FILL_COLOR);
 
@@ -143,10 +107,7 @@ public class VectorModel {
                             tempPosition = getAttrPosition(xpp, "strokeWidth");
                             pathModel.setStrokeWidth((tempPosition != -1) ? Float.parseFloat(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_STROKE_WIDTH);
 
-
-                            tempPosition = getAttrPosition(xpp, "patternColor");
-                            pathModel.setPatternColor((tempPosition != -1) ? Utils.getColorFromString(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_PATTERN_COLOR);
-
+                            pathModel.setPatternColor(patternColor);
                             pathModel.buildPath();
                         }
                         break;
@@ -157,115 +118,22 @@ public class VectorModel {
                         }
                         break;
                 }
+
+                patternColor += 10000;
                 event = xpp.next();
             } //end while loop
+
+            patternColor = 500;
 
         } catch (XmlPullParserException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void drawPatternMap() {
 
-        int width = Utils.dpToPx((int) getWidth());
-        int height = Utils.dpToPx((int) getHeight());
-        patternMap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(patternMap);
-
-        Paint paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-
-        for (PathModel aPathModel : pathModels) {
-
-            if (!aPathModel.getName().equals("outline")) {
-                paint.setColor(aPathModel.getPatternColor());
-                canvas.drawPath(aPathModel.getPath(), paint);
-            }
-        }
-
-        Paint border = new Paint();
-        border.setStyle(Paint.Style.STROKE);
-        border.setStrokeWidth(20f);
-        border.setColor(Color.GREEN);
-        canvas.drawRect(0, 0, width, height, border);
-
-    }
-
-    public Bitmap getPatternMap() {
-        return patternMap;
-    }
-
-    public boolean checkIfCordInPatternMap(int xCoord, int yCoord) {
-        int width = patternMap.getWidth();
-        int height = patternMap.getHeight();
-
-        if(xCoord < (width - 1) && yCoord < (height - 1)) {
-            if(xCoord > 0 && yCoord > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public int getPixelColorFromPatternMap(int xCoord, int yCoord) {
-        int pixel = patternMap.getPixel(xCoord,yCoord);
-        return pixel;
-    }
-
-    public boolean paintShadedPath(int pixelPatternColor) {
-
-        if(!shadedModels.isEmpty()) {
-            int i = 0;
-            int actualColor = shadedModels.get(0).getFillColor();
-            int patternColor;
-            for(PathModel pathModel : shadedModels){
-                patternColor = pathModel.getPatternColor();
-
-                if(patternColor == pixelPatternColor) {
-                    pathModel.setFillColorStatus(PathModel.YES_FILL_COLOR);
-                    colorPathsHistory.add(pathModel);
-                    shadedModels.remove(i);
-
-                    if(shadedModels.isEmpty()) {
-                        shadeAndColorMap.remove(actualColor);
-                        colorDepletedListener.notifyColorDepleted();
-                    }
-                    return true;
-                }
-                i++;
-            }
-        }
-        return false;
-    }
-
-    public void setShadedPathDepletedListener(ColorDepletedListener shadedPathDepletedListener) {
-        this.colorDepletedListener = shadedPathDepletedListener;
-    }
-
-
-    public List<Integer> getColorKeys() {
-        return new ArrayList<>(shadeAndColorMap.keySet());
-    }
-
-
-
-    public void shadePaths(int colorKey) {
-        shadedModels = shadeAndColorMap.get(colorKey);
-
-        if(shadedModels != null) {
-            for(PathModel pathModel : shadedModels)
-                pathModel.setFillColorStatus(PathModel.SHADE_FILL_COLOR);
-        }
-
-    }
-
-    public void unShadePaths(){
-
-        if(shadedModels != null) {
-            for(PathModel pathModel : shadedModels)
-                pathModel.resetPaint();
-            shadedModels = null;
-        }
+    public void setRectDraw(RectF rectf) {
+        testRect = rectf;
+        drawRect = true;
     }
 
     public void drawPaths(Canvas canvas, float offsetX, float offsetY, float scaleX, float scaleY) {
@@ -281,13 +149,6 @@ public class VectorModel {
             }
         }
 
-        if(yCircle) {
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setColor(Color.BLACK);
-            canvas.drawCircle(xC, yC, 40f, paint);
-        }
-
         if(drawRect) {
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setStyle(Paint.Style.STROKE);
@@ -297,15 +158,7 @@ public class VectorModel {
         }
     }
 
-    public RectF getNextShadedPathBounds() {
-        if(!shadedModels.isEmpty()){
-            RectF rectF = new RectF();
-            Path path = shadedModels.get(0).getPath();
-            path.computeBounds(rectF, true);
-            return rectF;
-        }
-        return null;
-    }
+
 
 
     public void scaleAllPaths(Matrix scaleMatrix) {
@@ -322,53 +175,10 @@ public class VectorModel {
 
     public void addPathModel(PathModel pathModel) {
 
-/*        if(calculateArea(pathModel.getPath()) > 0) */
-
-            fullpath.addPath(pathModel.getPath());
             pathModels.add(pathModel);
-
-            int fillColor = pathModel.getFillColor();
-
-            if (fillPathsMap.containsKey(fillColor)) {
-                fillPathsMap.get(fillColor).add(pathModel);
-                shadeAndColorMap.get(fillColor).add(pathModel);
-                int a = 1;
-            } else {
-                List<PathModel> newList = new ArrayList<>();
-                List<PathModel> newList2 = new ArrayList<>();
-                newList.add(pathModel);
-                newList2.add(pathModel);
-                fillPathsMap.put(fillColor, newList);
-                shadeAndColorMap.put(fillColor, newList2);
-            }
-
-
-
     }
 
-/*    private float calculateArea(Path path) {
-        Region region = new Region();
-        RectF rectF = new RectF();
-        path.computeBounds(rectF, true);
-        region.setPath(path, new Region((int) rectF.left, (int) rectF.top, (int) rectF.right, (int) rectF.bottom));
-
-
-        RegionIterator regionIterator = new RegionIterator(region);
-
-        int size = 0; // amount of Rects
-        float area = 0; // units of area
-
-        Rect tmpRect= new Rect();
-
-        while (regionIterator.next(tmpRect)) {
-            size++;
-            area += tmpRect.width() * tmpRect.height();
-        }
-
-        return area;
-    }*/
-
-    public ArrayList<PathModel> getPathModels() {
+    public List<PathModel> getPathModels() {
         return pathModels;
     }
 
