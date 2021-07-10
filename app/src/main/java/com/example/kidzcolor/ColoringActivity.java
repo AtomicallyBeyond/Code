@@ -198,7 +198,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                     zoomScale = (vectorMasterDrawable.getIntrinsicHeight() / rectF.height()) * (zoomageView.getDefaultScale() / 2);
                     return getScaleInRange(zoomScale);
                 } else {
-                    zoomScale = (vectorMasterDrawable.getIntrinsicWidth() / rectF.width()) * (zoomageView.getDefaultScale() / 2);
+                    zoomScale = (vectorMasterDrawable.getIntrinsicWidth() / rectF.width()) * (zoomageView.getDefaultScale() / 3);
                     return getScaleInRange(zoomScale);
                 }
 

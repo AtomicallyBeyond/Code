@@ -7,6 +7,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.kidzcolor.viewmodels.CompletedViewModel;
@@ -27,10 +28,17 @@ public class CompletedActivity extends AppCompatActivity {
         imageView.setImageDrawable(replayDrawable);
 
 
-        ((Button)findViewById(R.id.replay_button)).setOnClickListener(new View.OnClickListener() {
+        ((AppCompatImageButton)findViewById(R.id.replay_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 replayDrawable.startReplay();
+            }
+        });
+
+        ((AppCompatImageButton)findViewById(R.id.back_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
     }

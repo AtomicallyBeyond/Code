@@ -75,7 +75,7 @@ public class VectorModel {
         strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         strokePaint.setStyle(Paint.Style.STROKE);
         strokePaint.setColor(Color.BLACK);
-        strokePaint.setStrokeWidth(2.0f);
+        strokePaint.setStrokeWidth(1.0f);
         buildVectorModel();
     }
 

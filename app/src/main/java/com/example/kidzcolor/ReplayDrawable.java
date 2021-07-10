@@ -68,7 +68,7 @@ public class ReplayDrawable extends Drawable {
                 if(drawIndex < listSize && drawIndex >= 0)
                     ReplayDrawable.this.invalidateSelf();
             }
-        }, 0, 500);
+        }, 0, 50);
     }
 
 

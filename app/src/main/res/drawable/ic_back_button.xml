@@ -1,36 +1,5 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="80dp"
-    android:height="80dp"
-    android:viewportWidth="399.01"
-    android:viewportHeight="399.01">
-  <path
-      android:pathData="M192.05,192.05m-183.64,0a183.64,183.64 0,1 1,367.28 0a183.64,183.64 0,1 1,-367.28 0">
-    <aapt:attr name="android:fillColor">
-      <gradient 
-          android:startY="192.05"
-          android:startX="8.41"
-          android:endY="192.05"
-          android:endX="375.69"
-          android:type="linear">
-        <item android:offset="0" android:color="#FFEBEBEB"/>
-        <item android:offset="0.06" android:color="#FFF6F6F6"/>
-        <item android:offset="0.15" android:color="#FFFDFDFD"/>
-        <item android:offset="0.41" android:color="#FFFFFFFF"/>
-        <item android:offset="0.69" android:color="#FFFDFDFD"/>
-        <item android:offset="0.79" android:color="#FFF6F6F6"/>
-        <item android:offset="0.86" android:color="#FFEBEBEB"/>
-        <item android:offset="0.92" android:color="#FFDADADA"/>
-        <item android:offset="0.97" android:color="#FFC4C4C4"/>
-        <item android:offset="1" android:color="#FFB3B3B3"/>
-      </gradient>
-    </aapt:attr>
-  </path>
-  <path
-      android:pathData="M192.05,192.05m-155.27,0a155.27,155.27 0,1 1,310.54 0a155.27,155.27 0,1 1,-310.54 0"
-      android:fillColor="#90278e"/>
-  <path
-      android:pathData="M230.32,179.32L186.05,179.32l0.25,-1.65 14.18,-14.31c4.44,-4.5 5.53,-11.7 1.87,-16.89a12.56,12.56 0,0 0,-19.22 -1.61l-38.25,38.62a12.69,12.69 0,0 0,-3.73 9,12.89 12.89,0 0,0 3.7,9L183,239.23a12.55,12.55 0,0 0,17.85 0,12.83 12.83,0 0,0 0,-18l-16.73,-16.46h46.19a12.56,12.56 0,0 0,12.57 -12.57v-0.25a12.59,12.59 0,0 0,-12.57 -12.6ZM192,90.32A101.73,101.73 0,1 0,293.77 192,101.71 101.71,0 0,0 192,90.32ZM192,268.32A76.28,76.28 0,1 1,268.31 192,76.37 76.37,0 0,1 192,268.31ZM192,268.32"
-      android:fillColor="#fff"
-      android:fillType="evenOdd"/>
+<vector android:height="60dp" android:viewportHeight="282.81"
+    android:viewportWidth="282.81" android:width="60dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#d765a7" android:pathData="M141.41,141.41m-141.41,0a141.41,141.41 0,1 1,282.82 0a141.41,141.41 0,1 1,-282.82 0"/>
+    <path android:fillColor="#fff" android:pathData="M133.6,77.69l-86.62,63.72l86.62,63.71l0,-30.27l102.23,0l0,-66.88l-102.23,0l0,-30.28z"/>
 </vector>
