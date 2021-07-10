@@ -11,12 +11,13 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.kidzcolor.FinishedColoringListener;
+import com.example.kidzcolor.intefaces.FinishedColoringListener;
 import com.example.kidzcolor.interfaces.PositionListener;
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.interfaces.ColorDepletedListener;
 import com.example.kidzcolor.models.CircleColorDrawable;
 import com.example.kidzcolor.models.VectorModel;
+import com.example.kidzcolor.models.VectorModelContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +27,13 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
 
     private Context context;
     private List<Integer> colorKeys;
-    private VectorModel vectorModel;
+    private VectorModelContainer vectorModel;
     private ArrayList<PositionListener> positionListeners;
     private FinishedColoringListener finishedColoringListener;
     private ViewHolder viewHolder = null;
     private int selectedPosition = 0;
 
-    public ColorPickerAdapter (Context context, VectorModel vectorModel, ArrayList<PositionListener> positionListeners, FinishedColoringListener finishedColoringListener){
+    public ColorPickerAdapter (Context context, VectorModelContainer vectorModel, ArrayList<PositionListener> positionListeners, FinishedColoringListener finishedColoringListener){
         this.context = context;
         this.vectorModel = vectorModel;
         colorKeys = vectorModel.getColorKeys();
