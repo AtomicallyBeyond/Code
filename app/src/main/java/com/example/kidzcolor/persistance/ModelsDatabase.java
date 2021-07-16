@@ -9,12 +9,11 @@ import androidx.room.RoomDatabase;
 @Database(entities = {VectorEntity.class}, version = 1)
 public abstract class ModelsDatabase extends RoomDatabase {
 
+    private static ModelsDatabase instance;
     public static final String DATABASE_NAME = "models_db";
 
-    private static ModelsDatabase instance;
-
-    public static ModelsDatabase getInstance(final Context context) {
-        if(instance == null){
+    public static ModelsDatabase getInstance(Context context) {
+        if(instance == null) {
             instance = Room.databaseBuilder(
                     context.getApplicationContext(),
                     ModelsDatabase.class,
@@ -24,6 +23,5 @@ public abstract class ModelsDatabase extends RoomDatabase {
         return instance;
     }
 
-    public abstract ModelDAO getModelDAO();
-
+    public abstract ModelDao getModelsDao();
 }

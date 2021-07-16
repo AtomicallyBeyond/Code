@@ -7,7 +7,8 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "models")
 public class VectorEntity {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
+    @ColumnInfo(name = "id")
     public int id;
 
     @ColumnInfo(name = "model")

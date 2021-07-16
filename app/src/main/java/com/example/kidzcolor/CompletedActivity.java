@@ -1,8 +1,8 @@
+/*
 package com.example.kidzcolor;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
@@ -11,7 +11,7 @@ import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.kidzcolor.models.ReplayDrawable;
-import com.example.kidzcolor.viewmodels.CompletedViewModel;
+import com.example.kidzcolor.mvvm.viewmodels.CompletedViewModel;
 
 public class CompletedActivity extends AppCompatActivity {
 
@@ -44,3 +44,4 @@ public class CompletedActivity extends AppCompatActivity {
         });
     }
 }
+*/

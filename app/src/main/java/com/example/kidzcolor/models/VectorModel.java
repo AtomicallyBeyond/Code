@@ -14,10 +14,13 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +28,7 @@ import java.util.TreeMap;
 
 public class VectorModel {
 
-    private int modelID;
-    private File xmlFile;
+    private String model;
     private XmlPullParser xpp;
     private float width, height;
     private float viewportWidth, viewportHeight;
@@ -35,8 +37,8 @@ public class VectorModel {
     private RectF testRect;
     private boolean drawRect = false;
 
-    public VectorModel(File xmlFile){
-            this.xmlFile = xmlFile;
+    public VectorModel(String model){
+            this.model = model;
             init();
     }
 
@@ -57,11 +59,8 @@ public class VectorModel {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             factory.setNamespaceAware(true);
             xpp = factory.newPullParser();
-            FileInputStream fs = new FileInputStream(xmlFile);
-            xpp.setInput(new InputStreamReader(fs));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
+            InputStream inputStream = new ByteArrayInputStream(model.getBytes(StandardCharsets.UTF_8));
+            xpp.setInput(new InputStreamReader(inputStream));
         } catch (XmlPullParserException e) {
             return;
         }

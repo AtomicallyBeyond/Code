@@ -22,8 +22,8 @@ public class VectorModelContainer extends VectorModel {
     private List<PathModel> shadedModels = new ArrayList<>();
     private Map<Integer, List<PathModel>> shadeAndColorMap = new TreeMap<>();
 
-    public VectorModelContainer(File xmlFile) {
-        super(xmlFile);
+    public VectorModelContainer(String model) {
+        super(model);
         init();
     }
 

@@ -1,4 +1,4 @@
-package com.example.kidzcolor.viewmodels;
+package com.example.kidzcolor.mvvm.viewmodels;
 
 import android.app.Application;
 
@@ -7,28 +7,26 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import com.example.kidzcolor.interfaces.PositionListener;
-import com.example.kidzcolor.models.PathModel;
-import com.example.kidzcolor.models.VectorMasterDrawable;
-import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.models.VectorModelContainer;
-import com.example.kidzcolor.repository.DrawableRepository;
-
-import java.util.List;
+import com.example.kidzcolor.mvvm.repository.Repository;
+import com.example.kidzcolor.persistance.VectorEntity;
 
 public class ColoringViewModel extends AndroidViewModel implements PositionListener {
 
-    private DrawableRepository drawableRepository;
+    private Repository repository;
+    private VectorModelContainer vectorModelContainer;
     private int position = 0;
 
     public ColoringViewModel(@NonNull Application application) {
         super(application);
-        drawableRepository = DrawableRepository.getInstance();
+        repository = Repository.getInstance(application);
+        vectorModelContainer = new VectorModelContainer(repository.getCurrentVectorModel().model);
         //VectorModelContainer vectorModel = new VectorModel(application.getApplicationContext(), "shapes.xml");
         //drawableRepository.setModel(vectorModel);
     }
 
-    public LiveData<VectorModelContainer> getVectorModel() {
-        return drawableRepository.getModel();
+    public VectorModelContainer getVectorModelContainer() {
+        return vectorModelContainer;
     }
 
     public int getPosition() {return position;}

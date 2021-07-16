@@ -14,18 +14,17 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kidzcolor.adapters.ColorPickerAdapter;
-import com.example.kidzcolor.intefaces.FinishedColoringListener;
+import com.example.kidzcolor.interfaces.FinishedColoringListener;
 import com.example.kidzcolor.interfaces.PositionListener;
 import com.example.kidzcolor.models.VectorMasterDrawable;
-import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.models.VectorModelContainer;
-import com.example.kidzcolor.viewmodels.ColoringViewModel;
+import com.example.kidzcolor.mvvm.viewmodels.ColoringViewModel;
+import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.zoomageview.ZoomageView;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     private ColoringViewModel coloringViewModel;
     private ZoomageView zoomageView;
-    private VectorModelContainer vectorModel;
+    private VectorModelContainer vectorModelContainer;
     private VectorMasterDrawable vectorMasterDrawable;
     private int displayHeight;
     private int displayWidth;
@@ -54,26 +53,19 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         displayWidth = displayMetrics.widthPixels;
 
         coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
-
-        coloringViewModel.getVectorModel().observe(this, new Observer<VectorModel>() {
-            @Override
-            public void onChanged(VectorModel localModel) {
-
-                vectorModel = coloringViewModel.getVectorModel().getValue();
-                init();
-            }
-        });
+        vectorModelContainer = coloringViewModel.getVectorModelContainer();
+        init();
     }
 
     private void init() {
-        vectorMasterDrawable = new VectorMasterDrawable(vectorModel);
+        vectorMasterDrawable = new VectorMasterDrawable(vectorModelContainer);
 
         zoomageView = findViewById(R.id.zoomage_view);
         zoomageView.setImageDrawable(vectorMasterDrawable);
         zoomageView.post(new Runnable() {
             @Override
             public void run() {
-                vectorModel.drawPatternMap();
+                vectorModelContainer.drawPatternMap();
                 zoomageView.setScaleType(ImageView.ScaleType.MATRIX);
                 zoomageView.setStartValues();
                 minScale = zoomageView.getDefaultScale();
@@ -88,12 +80,19 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         RecyclerView colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            colorsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            colorsRecyclerView.setLayoutManager(
+                    new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         } else {
-            colorsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+            colorsRecyclerView.setLayoutManager(
+                    new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         }
 
-        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(this, coloringViewModel.getVectorModel().getValue(), new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)), this);
+        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(
+                this,
+                coloringViewModel.getVectorModelContainer(),
+                new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)),
+                this);
+
         colorsRecyclerView.setAdapter(colorPickerAdapter);
         colorsRecyclerView.post(new Runnable() {
             @Override
@@ -106,7 +105,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                 }
             }
         });
-        vectorModel.setShadedPathDepletedListener(colorPickerAdapter);
+        vectorModelContainer.setShadedPathDepletedListener(colorPickerAdapter);
     }
 
     private void setZoomageViewListener(ZoomageView zoomageview) {
@@ -162,11 +161,11 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     private void paintSelectedCord(int xCoord, int yCoord) {
 
-        boolean check = vectorModel.checkIfCordInPatternMap(xCoord, yCoord);
+        boolean check = vectorModelContainer.checkIfCordInPatternMap(xCoord, yCoord);
         if(check){
-            int pixelColor = vectorModel.getPixelColorFromPatternMap(xCoord, yCoord);
+            int pixelColor = vectorModelContainer.getPixelColorFromPatternMap(xCoord, yCoord);
 
-            if(vectorModel.paintShadedPath(pixelColor))
+            if(vectorModelContainer.paintShadedPath(pixelColor))
                 vectorMasterDrawable.invalidateSelf();
         }
     }
@@ -184,7 +183,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
             @Override
             public void onClick(View v) {
 
-                rectF = vectorModel.getNextShadedPathBounds();
+                rectF = vectorModelContainer.getNextShadedPathBounds();
                 if(rectF == null)
                     return;
 
@@ -200,7 +199,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                 inverse.postTranslate(-x, -y);
 
                 zoomageView.animateScaleAndTranslationToMatrix(inverse, 500);;
-                vectorModel.setRectDraw(rectF);
+                vectorModelContainer.setRectDraw(rectF);
 
             }
 
@@ -209,10 +208,12 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                 float zoomScale;
 
                 if(rectF.height() > rectF.width()){
-                    zoomScale = (vectorMasterDrawable.getIntrinsicHeight() / rectF.height()) * (zoomageView.getDefaultScale() / 2);
+                    zoomScale =
+                            (vectorMasterDrawable.getIntrinsicHeight() / rectF.height()) * (zoomageView.getDefaultScale() / 2);
                     return getScaleInRange(zoomScale);
                 } else {
-                    zoomScale = (vectorMasterDrawable.getIntrinsicWidth() / rectF.width()) * (zoomageView.getDefaultScale() / 3);
+                    zoomScale =
+                            (vectorMasterDrawable.getIntrinsicWidth() / rectF.width()) * (zoomageView.getDefaultScale() / 3);
                     return getScaleInRange(zoomScale);
                 }
 
@@ -237,8 +238,8 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     @Override
     public void finished() {
-        Intent coloringIntent = new Intent(this, CompletedActivity.class);
-        startActivity(coloringIntent);
+/*        Intent coloringIntent = new Intent(this, CompletedActivity.class);
+        startActivity(coloringIntent);*/
     }
 }
 

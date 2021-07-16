@@ -1,10 +1,9 @@
-package com.example.kidzcolor.utils;
+package com.example.kidzcolor.mvvm;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class Resource<T> {
-
     @NonNull
     public final Status status;
 
@@ -28,9 +27,5 @@ public class Resource<T> {
         return new Resource<>(Status.ERROR, data, msg);
     }
 
-    public static <T> Resource<T> loading(@Nullable T data) {
-        return new Resource<>(Status.LOADING, data, null);
-    }
-
-    public enum Status { SUCCESS, ERROR, LOADING}
+    public enum Status { SUCCESS, ERROR}
 }

@@ -1,4 +1,5 @@
-package com.example.kidzcolor.viewmodels;
+/*
+package com.example.kidzcolor.mvvm.viewmodels;
 
 import android.app.Application;
 
@@ -6,14 +7,10 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import com.example.kidzcolor.models.PathModel;
-import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.models.VectorModelContainer;
-import com.example.kidzcolor.repository.DrawableRepository;
+import com.example.kidzcolor.mvvm.repository.DrawableRepository;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class CompletedViewModel extends AndroidViewModel {
 
@@ -22,9 +19,10 @@ public class CompletedViewModel extends AndroidViewModel {
     public CompletedViewModel(@NonNull @NotNull Application application) {
         super(application);
 
-        drawableRepository = DrawableRepository.getInstance();
+        drawableRepository = DrawableRepository.getInstance(application);
     }
 
     public LiveData<VectorModelContainer> getSelectedViewModel(){return drawableRepository.getModel();}
 
 }
+*/

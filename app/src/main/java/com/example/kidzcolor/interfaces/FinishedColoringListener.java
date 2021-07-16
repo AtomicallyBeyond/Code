@@ -1,4 +1,4 @@
-package com.example.kidzcolor.intefaces;
+package com.example.kidzcolor.interfaces;
 
 public interface FinishedColoringListener {
     public void finished();
