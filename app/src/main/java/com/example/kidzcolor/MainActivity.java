@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.PathParser;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements VectorModelChosen
     private MainActivityViewModel mainActivityViewModel;
     private ModelsAdapter modelsAdapter;
     private LinearLayoutManager linearLayoutManager;
+    private GridLayoutManager gridLayoutManager;
     private boolean shouldFetch = true;
     private SharedPrefs sharedPrefs;
 
@@ -53,12 +55,13 @@ public class MainActivity extends AppCompatActivity implements VectorModelChosen
     private void initRecyclerView() {
         recyclerView = findViewById(R.id.main_recylerview);
         linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        gridLayoutManager = new GridLayoutManager(this, 2);
+        recyclerView.setLayoutManager(gridLayoutManager);
         modelsAdapter = new ModelsAdapter(sharedPrefs, this);
         recyclerView.setAdapter(modelsAdapter);
     }
 
-    private void subscribeObservers() {
+    private void observeRecyclerView() {
         RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
 
             @Override
@@ -66,9 +69,9 @@ public class MainActivity extends AppCompatActivity implements VectorModelChosen
                 super.onScrolled(recyclerView, dx, dy);
 
                 if(!sharedPrefs.getEndReached()) {
-                    int firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
-                    int visibleItemCount = linearLayoutManager.getChildCount();
-                    int totalItemCount = linearLayoutManager.getItemCount();
+                    int firstVisibleItem = gridLayoutManager.findFirstVisibleItemPosition();
+                    int visibleItemCount = gridLayoutManager.getChildCount();
+                    int totalItemCount = gridLayoutManager.getItemCount();
 
                     if((shouldFetch && (firstVisibleItem + visibleItemCount) > (totalItemCount - 4))) {
                         shouldFetch = false;
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements VectorModelChosen
             recyclerView.addOnScrollListener(onScrollListener);
     }
 
-    private void observeRecyclerView() {
+    private void subscribeObservers() {
         mainActivityViewModel
                 .getModelsList().observe(this, new Observer<Resource<List<VectorEntity>>>() {
             @Override

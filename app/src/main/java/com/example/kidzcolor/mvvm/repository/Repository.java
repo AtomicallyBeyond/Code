@@ -78,6 +78,8 @@ public class Repository {
             @NotNull
             @Override
             protected FirestoreQueryLiveData createCall() {
+
+                int a = sharedPrefs.getLastModified();
                 Query query  = modelsFirestoreRef
                         .orderBy("id", Query.Direction.DESCENDING)
                         .whereGreaterThan("id", sharedPrefs.getLastModified())

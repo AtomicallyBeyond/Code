@@ -1,3 +1,4 @@
+/*
 package com.example.kidzcolor.models;
 
 import android.graphics.Canvas;
@@ -44,10 +45,12 @@ public class ReplayDrawable extends Drawable {
 
 
 
+*/
 /*    public void setPathsList(List<PathModel> pathsList) {
         this.pathsList = pathsList;
         listSize = pathsList.size();
-    }*/
+    }*//*
+
 
     public void startReplay() {
         new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -205,3 +208,4 @@ public class ReplayDrawable extends Drawable {
         return PixelFormat.TRANSPARENT;
     }
 }
+*/

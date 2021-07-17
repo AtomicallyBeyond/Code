@@ -58,7 +58,8 @@ public class VectorModelContainer extends VectorModel {
 
         for (PathModel aPathModel : getPathModels()) {
 
-                paint.setColor(aPathModel.getPatternColor());
+                int color = aPathModel.getPatternColor();
+                paint.setColor(color);
                 canvas.drawPath(aPathModel.getPath(), paint);
         }
 
@@ -67,10 +68,6 @@ public class VectorModelContainer extends VectorModel {
         border.setStrokeWidth(20f);
         border.setColor(Color.GREEN);
         canvas.drawRect(0, 0, width, height, border);
-    }
-
-    public Bitmap getPatternMap() {
-        return patternMap;
     }
 
     public boolean checkIfCordInPatternMap(int xCoord, int yCoord) {

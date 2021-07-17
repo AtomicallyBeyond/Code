@@ -8,6 +8,7 @@ import androidx.room.Query;
 import androidx.room.Update;
 
 import com.example.kidzcolor.models.VectorModel;
+import com.example.kidzcolor.persistance.VectorEntity;
 
 import java.util.List;
 
@@ -19,9 +20,6 @@ public interface ModelDao {
 
     @Query("SELECT * FROM models ORDER BY id DESC")
     LiveData<List<VectorEntity>> getModels();
-
-    @Query("SELECT * FROM models WHERE id = :id")
-    VectorModel getModelWithID(int id);
 
     @Update
     void update(VectorEntity vectorEntity);

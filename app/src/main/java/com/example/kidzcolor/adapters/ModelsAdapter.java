@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kidzcolor.R;
@@ -16,6 +18,7 @@ import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.SharedPrefs;
+import com.example.kidzcolor.utils.Utils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,8 +40,17 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
     @NotNull
     @Override
     public ModelsAdapter.ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.vector_model_item, parent, false);
+
+        int width = (parent.getMeasuredWidth() / 2) - Utils.dpToPx(20);
+
+        GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
+        params.height = width;
+        params.width = width;
+        view.setLayoutParams(params);
+
         return new ViewHolder(view);
     }
 
@@ -60,7 +72,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
         if(modelsList != null && modelsList.size() != 0){
             int lastValue = modelsList.get(modelsList.size() - 1).id;
 
-            if(lastValue == 0)
+            if(lastValue == 1)
                 sharedPrefs.setEndReached(true);
             sharedPrefs
                     .setLastVisible(lastValue);
@@ -77,7 +89,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
 
         public ViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.main_recylerview);
+            imageView = itemView.findViewById(R.id.main_imageview);
 
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override

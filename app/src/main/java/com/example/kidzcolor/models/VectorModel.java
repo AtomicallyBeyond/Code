@@ -4,10 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.RectF;
-
-import com.example.kidzcolor.interfaces.ColorDepletedListener;
 import com.example.kidzcolor.utils.DefaultValues;
 import com.example.kidzcolor.utils.Utils;
 import org.xmlpull.v1.XmlPullParser;
@@ -23,8 +20,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class VectorModel {
 
@@ -46,7 +41,7 @@ public class VectorModel {
         strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         strokePaint.setStyle(Paint.Style.STROKE);
         strokePaint.setColor(Color.BLACK);
-        strokePaint.setStrokeWidth(1.0f);
+        strokePaint.setStrokeWidth(3.0f);
         buildVectorModel();
     }
 
@@ -106,7 +101,7 @@ public class VectorModel {
                             tempPosition = getAttrPosition(xpp, "strokeWidth");
                             pathModel.setStrokeWidth((tempPosition != -1) ? Float.parseFloat(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_STROKE_WIDTH);
 
-                            pathModel.setPatternColor(patternColor);
+                            pathModel.setPatternColor(Utils.getColorFromInt(patternColor));
                             pathModel.buildPath();
                         }
                         break;
@@ -122,7 +117,6 @@ public class VectorModel {
                 event = xpp.next();
             } //end while loop
 
-            patternColor = 500;
 
         } catch (XmlPullParserException | IOException e) {
             e.printStackTrace();

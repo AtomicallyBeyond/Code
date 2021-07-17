@@ -14,6 +14,10 @@ public class Utils {
             return Float.parseFloat(value.substring(0, value.length() - 2));
     }
 
+    public static int getColorFromInt(int randomInteger) {
+        return getColorFromString(String.format("#%06x", randomInteger));
+    }
+
     public static int getColorFromString(String value) {
         int color = Color.TRANSPARENT;
 
@@ -64,5 +68,9 @@ public class Utils {
 
     public static int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int pxToDP(int px){
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
 }
