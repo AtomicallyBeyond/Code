@@ -38,30 +38,28 @@ public class LibraryFragment extends Fragment implements VectorModelChosen {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private Context context;
+    private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-
+    private String mParam1;
+    private String mParam2;
 
     public LibraryFragment() {
         // Required empty public constructor
-    }
-
-    public LibraryFragment(Context context){
-        this.context = context;
     }
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param2 Parameter 2.
+     *
      * @return A new instance of fragment LibraryFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static LibraryFragment newInstance(Context context, String param2) {
-        LibraryFragment fragment = new LibraryFragment(context);
+    public static LibraryFragment newInstance(String param1, String param2) {
+        LibraryFragment fragment = new LibraryFragment();
         Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
@@ -71,28 +69,32 @@ public class LibraryFragment extends Fragment implements VectorModelChosen {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+
         sharedPrefs = SharedPrefs.getInstance(getContext());
         libraryViewModel = new ViewModelProvider(getActivity())
                 .get(LibraryViewModel.class);
-
-        initRecyclerView();
-        subscribeObservers();
-        observeRecyclerView();
-        libraryViewModel.fetchUpdates();
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_library, container, false);
+        View view = inflater.inflate(R.layout.fragment_library, container, false);
+        initRecyclerView(view);
+        subscribeObservers();
+        observeRecyclerView();
+        libraryViewModel.fetchUpdates();
+
+        return view;
     }
 
-    private void initRecyclerView() {
-        recyclerView = getActivity().findViewById(R.id.main_recylerview);
-        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        gridLayoutManager = new GridLayoutManager(this, 2);
+    private void initRecyclerView(View view) {
+        recyclerView = view.findViewById(R.id.main_recylerview);
+        gridLayoutManager = new GridLayoutManager(getContext(), 2);
         recyclerView.setLayoutManager(gridLayoutManager);
         modelsAdapter = new ModelsAdapter(sharedPrefs, this);
         recyclerView.setAdapter(modelsAdapter);
@@ -100,7 +102,7 @@ public class LibraryFragment extends Fragment implements VectorModelChosen {
 
     private void subscribeObservers() {
         libraryViewModel
-                .getModelsList().observe(this, new Observer<Resource<List<VectorEntity>>>() {
+                .getModelsList().observe(getViewLifecycleOwner(), new Observer<Resource<List<VectorEntity>>>() {
             @Override
             public void onChanged(Resource<List<VectorEntity>> listResource) {
                 shouldFetch = true;

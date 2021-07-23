@@ -2,11 +2,13 @@ package com.example.kidzcolor;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.PathParser;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -24,98 +26,61 @@ import com.example.kidzcolor.mvvm.Resource;
 import com.example.kidzcolor.mvvm.viewmodels.MainActivityViewModel;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.SharedPrefs;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements VectorModelChosen {
+public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
-    private MainActivityViewModel mainActivityViewModel;
-    private ModelsAdapter modelsAdapter;
-    private LinearLayoutManager linearLayoutManager;
-    private GridLayoutManager gridLayoutManager;
-    private boolean shouldFetch = true;
-    private SharedPrefs sharedPrefs;
+    private TabLayout tabLayout;
+    private ViewPager2 pager2;
+    private FragmentAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        sharedPrefs = SharedPrefs.getInstance(MainActivity.this);
-        mainActivityViewModel = new ViewModelProvider(this)
-                .get(MainActivityViewModel.class);
 
-        initRecyclerView();
-        subscribeObservers();
-        observeRecyclerView();
-        mainActivityViewModel.fetchUpdates();
+        tabLayout = findViewById(R.id.tab_layout);
+        pager2 = findViewById(R.id.view_pager2);
 
-    }
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        adapter = new FragmentAdapter(fragmentManager, getLifecycle());
+        pager2.setAdapter(adapter);
+        pager2.setUserInputEnabled(false);
 
-    private void initRecyclerView() {
-        recyclerView = findViewById(R.id.main_recylerview);
-        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        gridLayoutManager = new GridLayoutManager(this, 2);
-        recyclerView.setLayoutManager(gridLayoutManager);
-        modelsAdapter = new ModelsAdapter(sharedPrefs, this);
-        recyclerView.setAdapter(modelsAdapter);
-    }
+        tabLayout.addTab(tabLayout.newTab().setText("First"));
 
-    private void observeRecyclerView() {
-        RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
-
+        listenToTabLayout(tabLayout);
+        pager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                if(!sharedPrefs.getEndReached()) {
-                    int firstVisibleItem = gridLayoutManager.findFirstVisibleItemPosition();
-                    int visibleItemCount = gridLayoutManager.getChildCount();
-                    int totalItemCount = gridLayoutManager.getItemCount();
-
-                    if((shouldFetch && (firstVisibleItem + visibleItemCount) > (totalItemCount - 4))) {
-                        shouldFetch = false;
-                        mainActivityViewModel.fetchMore();
-                    }
-                }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                tabLayout.selectTab(tabLayout.getTabAt(position));
             }
-        };
-
-        if(!sharedPrefs.getEndReached())
-            recyclerView.addOnScrollListener(onScrollListener);
+        });
     }
 
-    private void subscribeObservers() {
-        mainActivityViewModel
-                .getModelsList().observe(this, new Observer<Resource<List<VectorEntity>>>() {
+    private void listenToTabLayout(TabLayout tabLayout) {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onChanged(Resource<List<VectorEntity>> listResource) {
-                shouldFetch = true;
+            public void onTabSelected(TabLayout.Tab tab) {
+                pager2.setCurrentItem(tab.getPosition());
+            }
 
-                if(listResource.data != null) {
-                    switch (listResource.status){
-                        case SUCCESS:
-                            modelsAdapter.setNumList(listResource.data);
-                            break;
-                        case ERROR:
-                            modelsAdapter.setNumList(listResource.data);
-                            Toast.makeText(MainActivity.this, listResource.message, Toast.LENGTH_LONG).show();
-                            break;
-                    }
-                }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
             }
         });
 
     }
 
-    @Override
-    public void chosenVectorModel(VectorEntity vectorEntity) {
-        mainActivityViewModel.setCurrentVectorModel(vectorEntity);
-        Intent coloringIntent = new Intent(this, ColoringActivity.class);
-        startActivity(coloringIntent);
-    }
 }
-
 
 
 
