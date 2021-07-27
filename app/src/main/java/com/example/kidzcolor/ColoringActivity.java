@@ -14,6 +14,9 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +43,8 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private int displayWidth;
     private float minScale;
     private float maxScale;
+    private enum ViewState {INPROGRESS, COMPLETED}
+    private MutableLiveData<ViewState> viewState;
 
 
     @Override
@@ -52,14 +57,58 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         displayHeight = displayMetrics.heightPixels;
         displayWidth = displayMetrics.widthPixels;
 
-        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
-        vectorModelContainer = coloringViewModel.getVectorModelContainer();
         init();
     }
 
-    private void init() {
-        vectorMasterDrawable = new VectorMasterDrawable(vectorModelContainer);
+/*    private void showCompletedState() {
+        CoordinatorLayout coordinatorLayout = findViewById(R.id.coloring_coord_layout);
+        coordinatorLayout.setVisibility(View.VISIBLE);
+    }*/
 
+    public VectorModelContainer getVectorModelContainer() {
+        return vectorModelContainer;
+    }
+
+
+    private void init() {
+
+        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
+        vectorModelContainer = coloringViewModel.getVectorModelContainer().getValue();
+
+        subscribeViewStateObserver();
+        initZoomageView();
+        setZoomageViewListener(zoomageView);
+        setHintButtonListener(findViewById(R.id.coloring_hint_button));
+        setBackButtonListener(findViewById(R.id.coloring_back_button));
+        setResetButtonListener(findViewById(R.id.coloring_reset_button));
+        initRecylerView();
+        subscribeSelectedModelObserver();
+    }
+
+    private void subscribeViewStateObserver() {
+        viewState = new MutableLiveData<>();
+        viewState.observe(this, new Observer<ViewState>() {
+            @Override
+            public void onChanged(ViewState viewState) {
+                CoordinatorLayout coordinatorLayout = findViewById(R.id.coloring_coord_layout);
+
+                if(viewState == ViewState.INPROGRESS){
+                    coordinatorLayout.setVisibility(View.GONE);
+                } else if (viewState == ViewState.COMPLETED) {
+                    coordinatorLayout.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        if(vectorModelContainer.isCompleted()){
+            viewState.setValue(ViewState.COMPLETED);
+            //showCompletedState();
+        }
+    }
+
+
+    private void initZoomageView() {
+        vectorMasterDrawable = new VectorMasterDrawable(vectorModelContainer);
         zoomageView = findViewById(R.id.zoomage_view);
         zoomageView.setImageDrawable(vectorMasterDrawable);
         zoomageView.post(new Runnable() {
@@ -73,10 +122,9 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
             }
         });
 
+    }
 
-        setZoomageViewListener(zoomageView);
-        setHintButtonListener(findViewById(R.id.hint_button));
-
+    private void initRecylerView() {
         RecyclerView colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -89,7 +137,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
         ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(
                 this,
-                coloringViewModel.getVectorModelContainer(),
+                coloringViewModel.getVectorModelContainer().getValue(),
                 new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)),
                 this);
 
@@ -107,6 +155,8 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         });
         vectorModelContainer.setShadedPathDepletedListener(colorPickerAdapter);
     }
+
+
 
     private void setZoomageViewListener(ZoomageView zoomageview) {
 
@@ -230,6 +280,39 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         });
     }
 
+    private void setBackButtonListener(ImageButton imageButton){
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+    }
+
+    private void setResetButtonListener(ImageButton imageButton){
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                resetVectorModel();
+            }
+        });
+    }
+
+    public void resetVectorModel() {
+        coloringViewModel.resetVectorModel();
+    }
+
+    private void subscribeSelectedModelObserver() {
+        coloringViewModel
+                .getVectorModelContainer()
+                .observe(this, new Observer<VectorModelContainer>() {
+                    @Override
+                    public void onChanged(VectorModelContainer vectorModelContainer) {
+                        zoomageView.setImageDrawable(new VectorMasterDrawable(vectorModelContainer));
+                    }
+                });
+    }
+
     @Override
     public void positionChanged(int newPosition) {
         vectorMasterDrawable.invalidateSelf();
@@ -238,9 +321,22 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     @Override
     public void finished() {
+
+        if(viewState.getValue() != ViewState.COMPLETED)
+            viewState.setValue(ViewState.COMPLETED);
 /*        Intent coloringIntent = new Intent(this, CompletedActivity.class);
         startActivity(coloringIntent);*/
     }
+
+/*    @Override
+    protected void onDestroy() {
+        Intent data = new Intent();
+        data.putExtra(
+                LibraryFragment.COLORING_ACTIVITY_RESULT,
+                vectorModelContainer.getId());
+        setResult(RESULT_OK, data);
+        super.onDestroy();
+    }*/
 }
 
 

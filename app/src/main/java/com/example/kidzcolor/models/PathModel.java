@@ -22,6 +22,7 @@ public class PathModel {
     public static final int SHADE_FILL_COLOR = 2;
 
     private String pathData;
+    private String fillColorString;
     private int fillColor;
     private int strokeColor;
     private int fillColorStatus;
@@ -62,6 +63,8 @@ public class PathModel {
     public void updatePaint() {
         pathPaint.setStrokeWidth(strokeWidth * strokeRatio);
 
+        //need to check what this function is doing while coloring in the game
+
         if (fillColor != Color.TRANSPARENT && strokeColor != Color.TRANSPARENT) {
             isFillAndStroke = true;
         } else if (fillColor != Color.TRANSPARENT) {
@@ -75,12 +78,6 @@ public class PathModel {
         } else {
             pathPaint.setColor(Color.TRANSPARENT);
         }
-    }
-
-    public void makeStrokePaint() {
-        pathPaint.setShader(null);
-        pathPaint.setColor(strokeColor);
-        pathPaint.setStyle(Paint.Style.STROKE);
     }
 
     public void makeFillPaint() {
@@ -164,6 +161,14 @@ public class PathModel {
         pathPaint.setColor(fillColor);
     }
 
+    public void setFillColorString(String fillColorString){
+        this.fillColorString = fillColorString;
+    }
+
+    public String getFillColorString(){
+        return fillColorString;
+    }
+
     public void setFillType(Path.FillType fillType) {
         this.fillType = fillType;
         if (originalPath != null)
@@ -176,16 +181,6 @@ public class PathModel {
 
     public void setPathData(String pathData) {
         this.pathData = pathData;
-    }
-
-
-    public int getStrokeColor() {
-        return strokeColor;
-    }
-
-    public void setStrokeColor(int strokeColor) {
-        this.strokeColor = strokeColor;
-        updatePaint();
     }
 
     public void setStrokeWidth(float strokeWidth) {
@@ -208,4 +203,9 @@ public class PathModel {
             pathPaint.setShader(null);
         fillColorStatus = status;
     }
+
+    public int getFillColorStatus() {
+        return fillColorStatus;
+    }
+
 }

@@ -85,21 +85,18 @@ public class VectorModel {
                         } else if (name.equals("path")) {
                             pathModel = new PathModel();
 
+                            pathModel.setFillType(DefaultValues.PATH_FILL_TYPE);
+
                             tempPosition = getAttrPosition(xpp, "fillColor");
                             pathModel.setFillColor((tempPosition != -1) ? Utils.getColorFromString(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_FILL_COLOR);
 
-                            tempPosition = getAttrPosition(xpp, "fillType");
-                            pathModel.setFillType((tempPosition != -1) ? Utils.getFillTypeFromString(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_FILL_TYPE);
+                            pathModel.setFillColorString((tempPosition != -1) ? xpp.getAttributeValue(tempPosition) : "");
 
                             tempPosition = getAttrPosition(xpp, "pathData");
                             pathModel.setPathData((tempPosition != -1) ? xpp.getAttributeValue(tempPosition) : null);
 
-                            tempPosition = getAttrPosition(xpp, "strokeColor");
-                            pathModel.setStrokeColor((tempPosition != -1) ? Utils.getColorFromString(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_STROKE_COLOR);
-
-
-                            tempPosition = getAttrPosition(xpp, "strokeWidth");
-                            pathModel.setStrokeWidth((tempPosition != -1) ? Float.parseFloat(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_STROKE_WIDTH);
+                            tempPosition = getAttrPosition(xpp, "isFilled");
+                            pathModel.setFillColorStatus((tempPosition != -1) ? Integer.parseInt(xpp.getAttributeValue(tempPosition)) : 0);
 
                             pathModel.setPatternColor(Utils.getColorFromInt(patternColor));
                             pathModel.buildPath();
@@ -123,7 +120,6 @@ public class VectorModel {
         }
     }
 
-
     public void setRectDraw(RectF rectf) {
         testRect = rectf;
         drawRect = true;
@@ -133,9 +129,12 @@ public class VectorModel {
 
         for (PathModel pathModel : pathModels) {
             if (pathModel.isFillAndStroke()) {
+                /*
+                need to fix updatePaint in Pathmodel so that it will have the paint set to fillandstroke
+                when it's isFillAndStroke, or do I really need to?
+                */
                 pathModel.makeFillPaint();
                 canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), pathModel.getPathPaint());
-                //pathModel.makeStrokePaint();
                 canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), strokePaint);
             } else {
                 canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), pathModel.getPathPaint());

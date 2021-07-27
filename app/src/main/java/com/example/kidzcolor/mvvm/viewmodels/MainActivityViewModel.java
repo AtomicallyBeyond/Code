@@ -58,6 +58,6 @@ public class MainActivityViewModel extends AndroidViewModel {
     public LiveData<Resource<List<VectorEntity>>> getModelsList() { return  liveModelsList;}
 
     public void setCurrentVectorModel(VectorEntity vectorEntity){
-        repository.setCurrentVectorModel(vectorEntity);
+        repository.setSelectedVectorModel(vectorEntity);
     }
 }

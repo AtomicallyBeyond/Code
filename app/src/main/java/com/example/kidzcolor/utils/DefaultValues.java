@@ -26,7 +26,7 @@ public class DefaultValues {
 
     public final static int PATH_PATTERN_COLOR = Color.TRANSPARENT;
     public final static int PATH_FILL_COLOR = Color.TRANSPARENT;
-    public final static int PATH_STROKE_COLOR = Color.TRANSPARENT;
+    public final static int PATH_STROKE_COLOR = Color.BLACK;
     public final static float PATH_STROKE_WIDTH = 1.0f;
     public final static float PATH_STROKE_RATIO = 1.0f;
     // WINDING fill type is equivalent to NON_ZERO

@@ -1,19 +1,16 @@
 package com.example.kidzcolor.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kidzcolor.R;
-import com.example.kidzcolor.interfaces.PositionListener;
-import com.example.kidzcolor.interfaces.VectorModelChosen;
+import com.example.kidzcolor.interfaces.StartColoringActivity;
 import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.persistance.VectorEntity;
@@ -29,11 +26,11 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
 
     private List<VectorEntity> modelsList = new ArrayList<>();
     private SharedPrefs sharedPrefs;
-    private VectorModelChosen vectorModelChosen;
+    private StartColoringActivity startColoringActivity;
 
-    public ModelsAdapter(SharedPrefs sharedPrefs, VectorModelChosen vectorModelChosen) {
+    public ModelsAdapter(SharedPrefs sharedPrefs, StartColoringActivity startColoringActivity) {
         this.sharedPrefs = sharedPrefs;
-        this.vectorModelChosen = vectorModelChosen;
+        this.startColoringActivity = startColoringActivity;
     }
 
     @NonNull
@@ -57,7 +54,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull @NotNull ModelsAdapter.ViewHolder holder, int position) {
         holder.imageView.setImageDrawable(
-                new VectorMasterDrawable(new VectorModel(modelsList.get(position).model))
+                new VectorMasterDrawable(new VectorModel(modelsList.get(position).getModel()))
         );
     }
 
@@ -66,18 +63,18 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
         return modelsList.size();
     }
 
-    public void setNumList(List<VectorEntity> modelsList) {
+    public void setModelsList(List<VectorEntity> modelsList) {
         this.modelsList = modelsList;
 
         if(modelsList != null && modelsList.size() != 0){
-            int lastValue = modelsList.get(modelsList.size() - 1).id;
+            int lastValue = modelsList.get(modelsList.size() - 1).getId();
 
             if(lastValue == 1)
                 sharedPrefs.setEndReached(true);
             sharedPrefs
                     .setLastVisible(lastValue);
             sharedPrefs
-                    .setLastModified(modelsList.get(0).id);
+                    .setLastModified(modelsList.get(0).getId());
             notifyDataSetChanged();
         }
 
@@ -94,7 +91,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    vectorModelChosen.chosenVectorModel(
+                    startColoringActivity.startActivity(
                             modelsList.get(getLayoutPosition()));
                 }
             });

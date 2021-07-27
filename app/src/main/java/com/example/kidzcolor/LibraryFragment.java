@@ -1,14 +1,16 @@
 package com.example.kidzcolor;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -17,21 +19,21 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.kidzcolor.adapters.ModelsAdapter;
-import com.example.kidzcolor.interfaces.VectorModelChosen;
+import com.example.kidzcolor.interfaces.StartColoringActivity;
+import com.example.kidzcolor.models.VectorModelContainer;
 import com.example.kidzcolor.mvvm.Resource;
 import com.example.kidzcolor.mvvm.viewmodels.LibraryViewModel;
-import com.example.kidzcolor.mvvm.viewmodels.MainActivityViewModel;
+import com.example.kidzcolor.persistance.ModelsDatabase;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.SharedPrefs;
 
 import java.util.List;
 
-public class LibraryFragment extends Fragment implements VectorModelChosen {
+public class LibraryFragment extends Fragment implements StartColoringActivity {
 
     private RecyclerView recyclerView;
     private LibraryViewModel libraryViewModel;
     private ModelsAdapter modelsAdapter;
-    private LinearLayoutManager linearLayoutManager;
     private GridLayoutManager gridLayoutManager;
     private boolean shouldFetch = true;
     private SharedPrefs sharedPrefs;
@@ -110,10 +112,10 @@ public class LibraryFragment extends Fragment implements VectorModelChosen {
                 if(listResource.data != null) {
                     switch (listResource.status){
                         case SUCCESS:
-                            modelsAdapter.setNumList(listResource.data);
+                            modelsAdapter.setModelsList(listResource.data);
                             break;
                         case ERROR:
-                            modelsAdapter.setNumList(listResource.data);
+                            modelsAdapter.setModelsList(listResource.data);
                             Toast.makeText(getActivity(), listResource.message, Toast.LENGTH_LONG).show();
                             break;
                     }
@@ -149,9 +151,20 @@ public class LibraryFragment extends Fragment implements VectorModelChosen {
 
 
     @Override
-    public void chosenVectorModel(VectorEntity vectorEntity) {
+    public void startActivity(VectorEntity vectorEntity) {
+
         libraryViewModel.setCurrentVectorModel(vectorEntity);
         Intent coloringIntent = new Intent(getActivity(), ColoringActivity.class);
         startActivity(coloringIntent);
+
+        libraryViewModel.getCurrentVectorModel().observe(getViewLifecycleOwner(), new Observer<VectorModelContainer>() {
+            @Override
+            public void onChanged(VectorModelContainer vectorModelContainer) {
+                modelsAdapter.notifyDataSetChanged();
+            }
+        });
+
     }
+
+
 }

@@ -7,8 +7,20 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import com.example.kidzcolor.interfaces.ColorDepletedListener;
+import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.Utils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +28,16 @@ import java.util.TreeMap;
 
 public class VectorModelContainer extends VectorModel {
 
+    private VectorEntity vectorEntity;
     private Bitmap patternMap;
     private ColorDepletedListener colorDepletedListener = null;
     private List<PathModel> coloredPathsHistory = new ArrayList<>();
     private List<PathModel> shadedModels = new ArrayList<>();
     private Map<Integer, List<PathModel>> shadeAndColorMap = new TreeMap<>();
 
-    public VectorModelContainer(String model) {
-        super(model);
+    public VectorModelContainer(VectorEntity vectorEntity) {
+        super(vectorEntity.getModel());
+        this.vectorEntity = vectorEntity;
         init();
     }
 
@@ -35,14 +49,69 @@ public class VectorModelContainer extends VectorModel {
 
              fillColor = pathModel.getFillColor();
 
-            if (shadeAndColorMap.containsKey(fillColor)) {
-                shadeAndColorMap.get(fillColor).add(pathModel);
-            } else {
-                List<PathModel> newList = new ArrayList<>();
-                newList.add(pathModel);
-                shadeAndColorMap.put(fillColor, newList);
+             if(pathModel.getFillColorStatus() == PathModel.NO_FILL_COLOR) {
+                 if (shadeAndColorMap.containsKey(fillColor)) {
+                     shadeAndColorMap.get(fillColor).add(pathModel);
+                 } else {
+                     List<PathModel> newList = new ArrayList<>();
+                     newList.add(pathModel);
+                     shadeAndColorMap.put(fillColor, newList);
+                 }
+             } else if(pathModel.getFillColorStatus() == PathModel.YES_FILL_COLOR){
+                 coloredPathsHistory.add(pathModel);
+             }
+
+
+        }
+    }
+
+    public VectorEntity getVectorEntity(){return vectorEntity;}
+
+    public int getId() {
+        return vectorEntity.getId();
+    }
+
+    public boolean isInProgress(){
+        if(coloredPathsHistory.size() > 0)
+            return true;
+        return false;
+    }
+
+    public boolean isCompleted(){
+        if(coloredPathsHistory.size() > 0 && shadeAndColorMap.isEmpty())
+            return true;
+        return false;
+    }
+
+
+
+    public String saveModel(){
+        String model = "";
+
+        model += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+                "<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n"
+                + "android:height=\"" + (int)getHeight() + "dp\"\n"
+                + "android:width=\"" + (int)getWidth() + "dp\"\n"
+                + "android:viewportHeight=\"" + (int)getViewportHeight() + "\"\n"
+                + "android:viewportWidth=\"" + (int)getViewportWidth() + "\">\n";
+
+        for(PathModel pathModel : coloredPathsHistory) {
+            model += "<path android:fillColor=\"" + pathModel.getFillColorString() + "\" "
+                    + "android:isFilled=\"" + ((pathModel.getFillColorStatus() == 1) ? 1 : 0) + "\" "
+                    + "android:pathData=\"" + pathModel.getPathData()  + "\"/>\n";
+        }
+
+        for(Integer integer : shadeAndColorMap.keySet()){
+            for(PathModel pathModel : shadeAndColorMap.get(integer)){
+                model += "<path android:fillColor=\"" + pathModel.getFillColorString() + "\" "
+                        + "android:isFilled=\"" + ((pathModel.getFillColorStatus() == 1) ? 1 : 0) + "\" "
+                        + "android:pathData=\"" + pathModel.getPathData()  + "\"/>\n";
             }
         }
+
+        model += "</vector>";
+
+        return model;
     }
 
 

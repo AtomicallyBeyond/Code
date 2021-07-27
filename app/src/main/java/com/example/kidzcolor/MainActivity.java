@@ -1,34 +1,12 @@
 package com.example.kidzcolor;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.PathParser;
 import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.example.kidzcolor.adapters.ModelsAdapter;
-import com.example.kidzcolor.interfaces.PositionListener;
-import com.example.kidzcolor.interfaces.VectorModelChosen;
-import com.example.kidzcolor.models.VectorMasterDrawable;
-import com.example.kidzcolor.models.VectorModel;
-import com.example.kidzcolor.mvvm.Resource;
-import com.example.kidzcolor.mvvm.viewmodels.MainActivityViewModel;
-import com.example.kidzcolor.persistance.VectorEntity;
-import com.example.kidzcolor.utils.SharedPrefs;
 import com.google.android.material.tabs.TabLayout;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
