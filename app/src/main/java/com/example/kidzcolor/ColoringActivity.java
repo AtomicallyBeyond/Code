@@ -1,6 +1,5 @@
 package com.example.kidzcolor;
 
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.RectF;
@@ -15,6 +14,7 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -27,7 +27,6 @@ import com.example.kidzcolor.interfaces.PositionListener;
 import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.models.VectorModelContainer;
 import com.example.kidzcolor.mvvm.viewmodels.ColoringViewModel;
-import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.zoomageview.ZoomageView;
 
 import java.util.ArrayList;
@@ -44,7 +43,9 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private float minScale;
     private float maxScale;
     private enum ViewState {INPROGRESS, COMPLETED}
+    //this can't be here needs to be in coloringviewmodel to save state on reconfiguration
     private MutableLiveData<ViewState> viewState;
+    private ColorPickerAdapter colorPickerAdapter;
 
 
     @Override
@@ -82,7 +83,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         setBackButtonListener(findViewById(R.id.coloring_back_button));
         setResetButtonListener(findViewById(R.id.coloring_reset_button));
         initRecylerView();
-        subscribeSelectedModelObserver();
     }
 
     private void subscribeViewStateObserver() {
@@ -135,9 +135,9 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                     new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         }
 
-        ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(
+        colorPickerAdapter = new ColorPickerAdapter(
                 this,
-                coloringViewModel.getVectorModelContainer().getValue(),
+                vectorModelContainer,
                 new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)),
                 this);
 
@@ -284,6 +284,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                coloringViewModel.saveVectorModel();
                 finish();
             }
         });
@@ -300,15 +301,19 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     public void resetVectorModel() {
         coloringViewModel.resetVectorModel();
+        observeModelFromRepository();
     }
 
-    private void subscribeSelectedModelObserver() {
-        coloringViewModel
-                .getVectorModelContainer()
-                .observe(this, new Observer<VectorModelContainer>() {
+    private void observeModelFromRepository() {
+
+        LiveData<VectorModelContainer> liveData = coloringViewModel.getVectorModelContainer();
+        liveData.observe(this, new Observer<VectorModelContainer>() {
                     @Override
                     public void onChanged(VectorModelContainer vectorModelContainer) {
-                        zoomageView.setImageDrawable(new VectorMasterDrawable(vectorModelContainer));
+                        vectorMasterDrawable = new VectorMasterDrawable(vectorModelContainer);
+                        zoomageView.setImageDrawable(vectorMasterDrawable);
+                        colorPickerAdapter.resetAdapter(vectorModelContainer);
+                        liveData.removeObserver(this);
                     }
                 });
     }

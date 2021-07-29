@@ -149,6 +149,7 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
             recyclerView.addOnScrollListener(onScrollListener);
     }
 
+    int a = 0;
 
     @Override
     public void startActivity(VectorEntity vectorEntity) {
@@ -160,7 +161,9 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
         libraryViewModel.getCurrentVectorModel().observe(getViewLifecycleOwner(), new Observer<VectorModelContainer>() {
             @Override
             public void onChanged(VectorModelContainer vectorModelContainer) {
+                //do I need notifyItemChanged here?
                 modelsAdapter.notifyDataSetChanged();
+                a++;
             }
         });
 

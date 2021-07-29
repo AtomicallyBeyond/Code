@@ -1,3 +1,4 @@
+/*
 package com.example.kidzcolor;
 
 import android.os.Bundle;
@@ -73,3 +74,4 @@ public class ColoringUIFragment extends DialogFragment {
         return view;
     }
 }
+*/

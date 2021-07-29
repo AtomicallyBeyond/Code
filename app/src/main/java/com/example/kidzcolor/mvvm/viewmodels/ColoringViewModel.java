@@ -50,6 +50,8 @@ public class ColoringViewModel extends AndroidViewModel implements PositionListe
         repository.resetSelectedVectorModel();
     }
 
+    public void saveVectorModel(){repository.saveSelectedVectorModel();}
+
     @Override
     protected void onCleared() {
         super.onCleared();

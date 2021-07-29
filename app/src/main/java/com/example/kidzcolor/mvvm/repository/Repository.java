@@ -51,7 +51,7 @@ public class Repository {
         });*/
     }
 
-    public MutableLiveData<VectorModelContainer> getSelectedVectorModel() {
+    public LiveData<VectorModelContainer> getSelectedVectorModel() {
         return selectedVectorContainer;
     }
 
@@ -74,16 +74,13 @@ public class Repository {
     }
 
     public void saveSelectedVectorModel() {
+
+        VectorEntity entity = selectedVectorContainer.getValue().getVectorEntity();
+        //selectedVectorContainer.setValue(selectedVectorContainer.getValue());
+
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                VectorEntity entity = selectedVectorContainer.getValue().getVectorEntity();
-                AppExecutors.getInstance().mainThread().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        selectedVectorContainer.setValue(selectedVectorContainer.getValue());
-                    }
-                });
                 modelDao.insertVector(entity);
             }
         });

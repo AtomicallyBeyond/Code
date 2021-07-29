@@ -113,6 +113,12 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
         }
     }
 
+    public void resetAdapter(VectorModelContainer vectorModelContainer) {
+        this.vectorModelContainer = vectorModelContainer;
+        colorKeys = vectorModelContainer.getColorKeys();
+        notifyDataSetChanged();
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
