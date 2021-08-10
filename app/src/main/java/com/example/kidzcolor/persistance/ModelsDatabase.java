@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {VectorEntity.class, SavedVector.class}, version = 1, exportSchema = false)
+@Database(entities = {VectorEntity.class, BackupVector.class}, version = 1, exportSchema = false)
 public abstract class ModelsDatabase extends RoomDatabase {
 
     private static ModelsDatabase instance;
@@ -24,5 +24,5 @@ public abstract class ModelsDatabase extends RoomDatabase {
     }
 
     public abstract ModelDao getModelsDao();
-    public abstract OriginalModelDao getOriginalModelsDao();
+    public abstract BackupModelDao getBackupModelsDao();
 }

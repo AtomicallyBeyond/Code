@@ -5,6 +5,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -13,17 +14,21 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.Slide;
+import androidx.transition.Transition;
+import androidx.transition.TransitionManager;
 
 import com.example.kidzcolor.adapters.ColorPickerAdapter;
 import com.example.kidzcolor.interfaces.FinishedColoringListener;
 import com.example.kidzcolor.interfaces.PositionListener;
+import com.example.kidzcolor.models.ReplayDrawable;
 import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.models.VectorModelContainer;
 import com.example.kidzcolor.mvvm.viewmodels.ColoringViewModel;
@@ -42,9 +47,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private int displayWidth;
     private float minScale;
     private float maxScale;
-    private enum ViewState {INPROGRESS, COMPLETED}
-    //this can't be here needs to be in coloringviewmodel to save state on reconfiguration
-    private MutableLiveData<ViewState> viewState;
     private ColorPickerAdapter colorPickerAdapter;
 
 
@@ -53,57 +55,44 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coloring);
 
+        //need to use layout measurment because getMetrics is deprecated
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         displayHeight = displayMetrics.heightPixels;
         displayWidth = displayMetrics.widthPixels;
 
-        init();
+        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
+        observeModelFromRepository();
     }
 
-/*    private void showCompletedState() {
-        CoordinatorLayout coordinatorLayout = findViewById(R.id.coloring_coord_layout);
-        coordinatorLayout.setVisibility(View.VISIBLE);
-    }*/
+    private void observeModelFromRepository() {
 
-    public VectorModelContainer getVectorModelContainer() {
-        return vectorModelContainer;
+        LiveData<VectorModelContainer> liveData = coloringViewModel.getVectorModelContainer();
+        liveData.observe(this, new Observer<VectorModelContainer>() {
+            @Override
+            public void onChanged(VectorModelContainer vectorModelContainer) {
+                ColoringActivity.this.vectorModelContainer = vectorModelContainer;
+                init();
+                if(vectorModelContainer.isCompleted()) {
+                    revealView(findViewById(R.id.coloring_toolbar));
+                }
+            }
+        });
     }
-
 
     private void init() {
-
-        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
-        vectorModelContainer = coloringViewModel.getVectorModelContainer().getValue();
-
-        subscribeViewStateObserver();
         initZoomageView();
         setZoomageViewListener(zoomageView);
         setHintButtonListener(findViewById(R.id.coloring_hint_button));
         setBackButtonListener(findViewById(R.id.coloring_back_button));
+        setPlayButtonListener(findViewById(R.id.coloring_play_button));
         setResetButtonListener(findViewById(R.id.coloring_reset_button));
         initRecylerView();
+        subscribeViewStateObserver();
     }
 
-    private void subscribeViewStateObserver() {
-        viewState = new MutableLiveData<>();
-        viewState.observe(this, new Observer<ViewState>() {
-            @Override
-            public void onChanged(ViewState viewState) {
-                CoordinatorLayout coordinatorLayout = findViewById(R.id.coloring_coord_layout);
+    private void resetActivity() {
 
-                if(viewState == ViewState.INPROGRESS){
-                    coordinatorLayout.setVisibility(View.GONE);
-                } else if (viewState == ViewState.COMPLETED) {
-                    coordinatorLayout.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
-        if(vectorModelContainer.isCompleted()){
-            viewState.setValue(ViewState.COMPLETED);
-            //showCompletedState();
-        }
     }
 
 
@@ -123,40 +112,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         });
 
     }
-
-    private void initRecylerView() {
-        RecyclerView colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
-
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            colorsRecyclerView.setLayoutManager(
-                    new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        } else {
-            colorsRecyclerView.setLayoutManager(
-                    new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        }
-
-        colorPickerAdapter = new ColorPickerAdapter(
-                this,
-                vectorModelContainer,
-                new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)),
-                this);
-
-        colorsRecyclerView.setAdapter(colorPickerAdapter);
-        colorsRecyclerView.post(new Runnable() {
-            @Override
-            public void run() {
-                int position = coloringViewModel.getPosition();
-                colorsRecyclerView.scrollToPosition(position);
-                View view  = colorsRecyclerView.getLayoutManager().findViewByPosition(position);
-                if(view != null) {
-                    view.callOnClick();
-                }
-            }
-        });
-        vectorModelContainer.setShadedPathDepletedListener(colorPickerAdapter);
-    }
-
-
 
     private void setZoomageViewListener(ZoomageView zoomageview) {
 
@@ -284,8 +239,17 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                coloringViewModel.saveVectorModel();
+//                coloringViewModel.saveVectorModel();
                 finish();
+            }
+        });
+    }
+
+    private void setPlayButtonListener(ImageButton imageButton){
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startReplay();
             }
         });
     }
@@ -299,24 +263,43 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         });
     }
 
+    private void initRecylerView() {
+        RecyclerView colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            colorsRecyclerView.setLayoutManager(
+                    new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        } else {
+            colorsRecyclerView.setLayoutManager(
+                    new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        }
+
+        colorPickerAdapter = new ColorPickerAdapter(
+                this,
+                vectorModelContainer,
+                new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)),
+                this);
+
+        colorsRecyclerView.setAdapter(colorPickerAdapter);
+        colorsRecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                int position = coloringViewModel.getPosition();
+                colorsRecyclerView.scrollToPosition(position);
+                View view  = colorsRecyclerView.getLayoutManager().findViewByPosition(position);
+                if(view != null) {
+                    view.callOnClick();
+                }
+            }
+        });
+        vectorModelContainer.setShadedPathDepletedListener(colorPickerAdapter);
+    }
+
     public void resetVectorModel() {
         coloringViewModel.resetVectorModel();
-        observeModelFromRepository();
     }
 
-    private void observeModelFromRepository() {
 
-        LiveData<VectorModelContainer> liveData = coloringViewModel.getVectorModelContainer();
-        liveData.observe(this, new Observer<VectorModelContainer>() {
-                    @Override
-                    public void onChanged(VectorModelContainer vectorModelContainer) {
-                        vectorMasterDrawable = new VectorMasterDrawable(vectorModelContainer);
-                        zoomageView.setImageDrawable(vectorMasterDrawable);
-                        colorPickerAdapter.resetAdapter(vectorModelContainer);
-                        liveData.removeObserver(this);
-                    }
-                });
-    }
 
     @Override
     public void positionChanged(int newPosition) {
@@ -326,33 +309,53 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     @Override
     public void finished() {
-
-        if(viewState.getValue() != ViewState.COMPLETED)
-            viewState.setValue(ViewState.COMPLETED);
-/*        Intent coloringIntent = new Intent(this, CompletedActivity.class);
-        startActivity(coloringIntent);*/
+        ConstraintLayout constraintLayout = findViewById(R.id.coloring_toolbar);
+        revealView(constraintLayout);
+        startReplay();
     }
 
-/*    @Override
-    protected void onDestroy() {
-        Intent data = new Intent();
-        data.putExtra(
-                LibraryFragment.COLORING_ACTIVITY_RESULT,
-                vectorModelContainer.getId());
-        setResult(RESULT_OK, data);
-        super.onDestroy();
-    }*/
+
+    private void subscribeViewStateObserver() {
+
+        coloringViewModel.getIsCompleted().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                ConstraintLayout constraintLayout = findViewById(R.id.coloring_toolbar);
+                if(aBoolean) {
+                    //startReplay();
+                    revealView(constraintLayout);
+                } else {
+                    hideReset(constraintLayout);
+                }
+            }
+        });
+    }
+
+    private void revealView(View view) {
+
+        Transition transition;
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            transition = new Slide(Gravity.TOP);
+        } else {
+            transition = new Slide(Gravity.LEFT);
+        }
+        transition.setDuration(500);
+        transition.addTarget(view);
+        TransitionManager.beginDelayedTransition(findViewById(R.id.coloring_parent), transition);
+        view.setVisibility(View.VISIBLE);
+    }
+
+    private void hideReset(View view) {
+        findViewById(R.id.coloring_imageview).setVisibility(View.GONE);
+        view.setVisibility(View.GONE);
+
+    }
+
+    private void startReplay(){
+        zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 100);
+        ReplayDrawable replayDrawable = new ReplayDrawable(vectorModelContainer);
+        zoomageView.setImageDrawable(replayDrawable);
+        replayDrawable.startReplay();
+    }
 }
-
-
-
-/*                zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 1000);
-
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        zoomageView.animateScaleAndTranslationToMatrix(inverse, 2000);
-                    }
-                }, 1200);*/
-

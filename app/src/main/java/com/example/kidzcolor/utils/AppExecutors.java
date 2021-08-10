@@ -1,4 +1,4 @@
-package com.example.kidzcolor;
+package com.example.kidzcolor.utils;
 
 import android.os.Handler;
 import android.os.Looper;

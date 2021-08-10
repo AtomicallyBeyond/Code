@@ -3,19 +3,20 @@ package com.example.kidzcolor.mvvm.repository;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.kidzcolor.AppExecutors;
+import com.example.kidzcolor.utils.AppExecutors;
+import com.example.kidzcolor.mvvm.SingleLiveEvent;
 import com.example.kidzcolor.firestore.FirestoreQueryLiveData;
 import com.example.kidzcolor.firestore.FirestoreService;
-import com.example.kidzcolor.models.VectorModelContainer;
 import com.example.kidzcolor.mvvm.DataFetcher;
 import com.example.kidzcolor.mvvm.Resource;
+import com.example.kidzcolor.persistance.BackupModelDao;
+import com.example.kidzcolor.persistance.BackupVector;
 import com.example.kidzcolor.persistance.ModelDao;
 import com.example.kidzcolor.persistance.ModelsDatabase;
-import com.example.kidzcolor.persistance.OriginalModelDao;
-import com.example.kidzcolor.persistance.SavedVector;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.SharedPrefs;
 import com.google.firebase.firestore.CollectionReference;
@@ -27,63 +28,86 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class Repository {
 
     private static Repository instance;
     private ModelDao modelDao;
-    private OriginalModelDao originalModelDao;
+    private BackupModelDao backupModelDao;
     private SharedPrefs sharedPrefs;
     private CollectionReference modelsFirestoreRef;
-    private MutableLiveData<VectorModelContainer> selectedVectorContainer = new MutableLiveData<>();
+    private VectorEntity selectedVectorEntity;
+    private MutableLiveData<Boolean> vectorModelChanged = new MutableLiveData<>();
+
+    public MutableLiveData<Boolean> getVectorModelChanged() {
+        return vectorModelChanged;
+    }
 
     public void setSelectedVectorModel(VectorEntity entity) {
-        this.selectedVectorContainer.setValue(
-                new VectorModelContainer(entity));
-
-/*        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                originalModelDao.insertVectorModels(
-                        new SavedVector(currentVectorModel.getId(), currentVectorModel.getModel()));
-            }
-        });*/
+        selectedVectorEntity = entity;
     }
 
-    public LiveData<VectorModelContainer> getSelectedVectorModel() {
-        return selectedVectorContainer;
+    public VectorEntity getSelectedVectorModel() {
+        return selectedVectorEntity;
     }
 
-    public void resetSelectedVectorModel(){
+    public LiveData<VectorEntity> resetSelectedVectorModel(){
+
+        MutableLiveData<VectorEntity> liveData = new MutableLiveData<>();
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                VectorEntity vectorEntity = new VectorEntity(
-                        originalModelDao.getModelByID(selectedVectorContainer.getValue().getId()));
+
+                VectorEntity entity = selectedVectorEntity;
+                BackupVector backupVector = backupModelDao
+                                .getModelByID(entity.getId());
+
+                entity.setModel(backupVector.getModel());
+                entity.setInProgress(false);
+                modelDao.insertVector(entity);
 
                 AppExecutors.getInstance().mainThread().execute(new Runnable() {
                     @Override
                     public void run() {
-                        selectedVectorContainer.setValue(new VectorModelContainer(vectorEntity));
+                        liveData.setValue(entity);
                     }
                 });
-                modelDao.insertVector(vectorEntity);
+
+            }
+        });
+
+        return liveData;
+    }
+
+    public void saveSelectedVectorModel() {
+        vectorModelChanged.setValue(true);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                modelDao.insertVector(selectedVectorEntity);
             }
         });
     }
 
-    public void saveSelectedVectorModel() {
+    public LiveData<List<VectorEntity>> getMyColorModels(){
 
-        VectorEntity entity = selectedVectorContainer.getValue().getVectorEntity();
-        //selectedVectorContainer.setValue(selectedVectorContainer.getValue());
+        MutableLiveData<List<VectorEntity>> liveData = new MutableLiveData<>();
 
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                modelDao.insertVector(entity);
+                List<VectorEntity> list = modelDao.getModelsInProgress();
+
+                AppExecutors.getInstance().mainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        liveData.setValue(list);
+                    }
+                });
             }
         });
+
+        return liveData;
     }
 
     public static Repository getInstance(Context context){
@@ -95,7 +119,7 @@ public class Repository {
 
     private Repository(Context context){
         modelDao = ModelsDatabase.getInstance(context).getModelsDao();
-        originalModelDao = ModelsDatabase.getInstance(context).getOriginalModelsDao();
+        backupModelDao = ModelsDatabase.getInstance(context).getBackupModelsDao();
         sharedPrefs = SharedPrefs.getInstance(context);
         modelsFirestoreRef = FirestoreService.getInstance().getFilesRef();
     }
@@ -176,18 +200,18 @@ public class Repository {
     private void saveToCache(QuerySnapshot queryDocumentSnapshots) {
         int querySize = queryDocumentSnapshots.size();
         List<VectorEntity> list = new ArrayList<>(querySize);
-        List<SavedVector> backUpList = new ArrayList<>(querySize);
+        List<BackupVector> backUpList = new ArrayList<>(querySize);
 
         VectorEntity tempEntity;
         for(DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
             tempEntity = documentSnapshot.toObject(VectorEntity.class);
             list.add(tempEntity);
-            backUpList.add(new SavedVector(tempEntity));
+            backUpList.add(new BackupVector(tempEntity));
         }
         modelDao.insertVectorModels(
                 list.toArray(new VectorEntity[querySize]));
 
-        originalModelDao.insertVectorModels(
-                backUpList.toArray(new SavedVector[querySize]));
+        backupModelDao.insertVectorModels(
+                backUpList.toArray(new BackupVector[querySize]));
     }
 }

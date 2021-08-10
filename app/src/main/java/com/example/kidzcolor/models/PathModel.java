@@ -47,6 +47,24 @@ public class PathModel {
         strokeColor = DefaultValues.PATH_STROKE_COLOR;
         strokeWidth = DefaultValues.PATH_STROKE_WIDTH;
         strokeRatio = DefaultValues.PATH_STROKE_RATIO;
+        initPathPaint();
+    }
+
+    public PathModel(PathModel pathModel){
+        originalPath = pathModel.originalPath;
+        path = pathModel.path;
+        fillColorStatus = pathModel.fillColorStatus;
+        fillColor = pathModel.fillColor;
+        trimPathStart = pathModel.trimPathStart;
+        trimPathEnd = pathModel.trimPathEnd;
+        trimPathOffset = pathModel.trimPathOffset;
+        strokeColor = pathModel.strokeColor;
+        strokeWidth = pathModel.strokeWidth;
+        strokeRatio = pathModel.strokeRatio;
+        initPathPaint();
+    }
+
+    private void initPathPaint() {
         pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         pathPaint.setAntiAlias(true);
         pathPaint.setStyle(Paint.Style.FILL);

@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
 
-import com.example.kidzcolor.AppExecutors;
+import com.example.kidzcolor.utils.AppExecutors;
 import com.example.kidzcolor.firestore.FirestoreQueryLiveData;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.google.firebase.firestore.QuerySnapshot;

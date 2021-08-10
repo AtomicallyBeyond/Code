@@ -1,6 +1,8 @@
 package com.example.kidzcolor;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -70,7 +72,6 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -96,9 +97,16 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
 
     private void initRecyclerView(View view) {
         recyclerView = view.findViewById(R.id.main_recylerview);
-        gridLayoutManager = new GridLayoutManager(getContext(), 2);
+
+        int orientation = getResources().getConfiguration().orientation;
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT)
+            gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        else
+            gridLayoutManager = new GridLayoutManager(getContext(), 3);
+
         recyclerView.setLayoutManager(gridLayoutManager);
-        modelsAdapter = new ModelsAdapter(sharedPrefs, this);
+        modelsAdapter = new ModelsAdapter(sharedPrefs, this, orientation);
         recyclerView.setAdapter(modelsAdapter);
     }
 
@@ -123,6 +131,14 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
             }
         });
 
+        libraryViewModel.getVectorModelChanged().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if(true)
+                    modelsAdapter.notifyDataSetChanged();
+            }
+        });
+
     }
 
     private void observeRecyclerView() {
@@ -137,6 +153,7 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
                     int visibleItemCount = gridLayoutManager.getChildCount();
                     int totalItemCount = gridLayoutManager.getItemCount();
 
+                    //should i put shouldFetch in first if statement?
                     if((shouldFetch && (firstVisibleItem + visibleItemCount) > (totalItemCount - 4))) {
                         shouldFetch = false;
                         libraryViewModel.fetchMore();
@@ -149,23 +166,12 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
             recyclerView.addOnScrollListener(onScrollListener);
     }
 
-    int a = 0;
-
     @Override
     public void startActivity(VectorEntity vectorEntity) {
 
         libraryViewModel.setCurrentVectorModel(vectorEntity);
         Intent coloringIntent = new Intent(getActivity(), ColoringActivity.class);
         startActivity(coloringIntent);
-
-        libraryViewModel.getCurrentVectorModel().observe(getViewLifecycleOwner(), new Observer<VectorModelContainer>() {
-            @Override
-            public void onChanged(VectorModelContainer vectorModelContainer) {
-                //do I need notifyItemChanged here?
-                modelsAdapter.notifyDataSetChanged();
-                a++;
-            }
-        });
 
     }
 

@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
 
-import com.example.kidzcolor.models.VectorModelContainer;
+import com.example.kidzcolor.mvvm.SingleLiveEvent;
 import com.example.kidzcolor.mvvm.Resource;
 import com.example.kidzcolor.mvvm.repository.Repository;
 import com.example.kidzcolor.persistance.VectorEntity;
@@ -62,7 +62,7 @@ public class LibraryViewModel extends AndroidViewModel {
         repository.setSelectedVectorModel(vectorEntity);
     }
 
-    public LiveData<VectorModelContainer> getCurrentVectorModel(){
-        return repository.getSelectedVectorModel();
+    public LiveData<Boolean> getVectorModelChanged() {
+        return repository.getVectorModelChanged();
     }
 }

@@ -6,11 +6,12 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 @Dao
-public interface OriginalModelDao {
+public interface BackupModelDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insertVectorModels(SavedVector... vectorEntities);
+    void insertVectorModels(BackupVector... vectorEntities);
 
-    @Query("SELECT * FROM models WHERE id=:id ")
-    SavedVector getModelByID(int id);
+    @Query("SELECT * FROM backup_vectors WHERE savedID=:id ")
+    BackupVector getModelByID(int id);
+
 }

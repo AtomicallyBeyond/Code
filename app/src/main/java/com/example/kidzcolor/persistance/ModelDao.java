@@ -25,6 +25,9 @@ public interface ModelDao {
     @Query("SELECT * FROM models ORDER BY id DESC")
     LiveData<List<VectorEntity>> getModels();
 
+    @Query("SELECT * FROM models WHERE in_progress=1 ORDER BY id DESC")
+    List<VectorEntity> getModelsInProgress();
+
     @Query("SELECT * FROM models WHERE id=:id ")
     VectorEntity getModelByID(int id);
 

@@ -2,8 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coloring_parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/white">
 
     <com.example.kidzcolor.zoomageview.ZoomageView
         android:id="@+id/zoomage_view"
@@ -17,6 +20,24 @@
         app:zoomage_autoCenter="false"
         app:zoomage_maxScale="40"/>
 
+    <ImageView
+        android:id="@+id/coloring_imageview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toTopOf="@id/coloring_recyclerView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:background="@drawable/ic_square_gradient"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/coloring_recyclerView"
         android:layout_width="match_parent"
@@ -26,11 +47,49 @@
         app:layout_constraintRight_toRightOf="parent"
         />
 
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/coloring_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/coloring_play_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginRight="100dp"
+                android:backgroundTint="#00FFFFFF"
+                android:src="@drawable/ic_playbutton"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"/>
+
+            <ImageButton
+                android:id="@+id/coloring_reset_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="100dp"
+                android:src="@drawable/ic_replay_button"
+                android:backgroundTint="#00FFFFFF"
+                android:layout_gravity="center_horizontal"
+                android:visibility="visible"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <ImageButton
         android:id="@+id/coloring_hint_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="4dp"
         android:layout_marginRight="10dp"
         android:src="@drawable/ic_lightening"
         android:backgroundTint="#00FFFFFF"
@@ -41,7 +100,7 @@
         android:id="@+id/coloring_back_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="4dp"
         android:layout_marginLeft="10dp"
         android:src="@drawable/ic_back_button"
         android:backgroundTint="#00FFFFFF"
@@ -49,34 +108,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/coloring_coord_layout"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:visibility="gone">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/coloring_appBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-
-            <ImageButton
-                android:id="@+id/coloring_reset_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:src="@drawable/ic_replay_button"
-                android:backgroundTint="#00FFFFFF"
-                android:layout_gravity="center_horizontal"
-                android:visibility="visible"/>
-
-        </com.google.android.material.appbar.AppBarLayout>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

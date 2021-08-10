@@ -94,9 +94,9 @@ public class VectorMasterDrawable extends Drawable {
         Paint border = new Paint();
         border.setStyle(Paint.Style.STROKE);
         border.setStrokeWidth(5f);
-        border.setColor(Color.BLUE);
+        border.setColor(Color.GRAY);
 
-        canvas.drawRect(0, 0, getIntrinsicWidth(), getIntrinsicHeight(), border);
+        //canvas.drawRect(0, 0, getIntrinsicWidth(), getIntrinsicHeight(), border);
     }
 
     @Override

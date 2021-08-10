@@ -14,12 +14,15 @@ public class VectorEntity {
     @ColumnInfo(name = "model")
     private String model;
 
+    @ColumnInfo(name = "in_progress")
+    private boolean isInProgress = false;
+
     public VectorEntity() {
 
     }
 
-    public VectorEntity(SavedVector savedVector) {
-        id = savedVector.getId();
+    public VectorEntity(BackupVector savedVector) {
+        id = savedVector.getSavedID();
         model = savedVector.getModel();
     }
 
@@ -37,5 +40,13 @@ public class VectorEntity {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+    public boolean isInProgress() {
+        return isInProgress;
+    }
+
+    public void setInProgress(boolean inProgress) {
+        isInProgress = inProgress;
     }
 }

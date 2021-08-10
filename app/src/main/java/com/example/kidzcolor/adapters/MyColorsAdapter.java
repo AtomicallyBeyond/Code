@@ -15,7 +15,6 @@ import com.example.kidzcolor.interfaces.StartColoringActivity;
 import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.persistance.VectorEntity;
-import com.example.kidzcolor.utils.SharedPrefs;
 import com.example.kidzcolor.utils.Utils;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,15 +22,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder> {
+public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColorsViewHolder> {
 
-    private List<VectorEntity> modelsList = new ArrayList<>();
-    private SharedPrefs sharedPrefs;
     private StartColoringActivity startColoringActivity;
+    private List<VectorEntity> modelsList = new ArrayList<>();
     private int orientation;
 
-    public ModelsAdapter(SharedPrefs sharedPrefs, StartColoringActivity startColoringActivity, int orientation) {
-        this.sharedPrefs = sharedPrefs;
+    public MyColorsAdapter(StartColoringActivity startColoringActivity, int orientation) {
         this.startColoringActivity = startColoringActivity;
         this.orientation = orientation;
     }
@@ -39,11 +36,9 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
     @NonNull
     @NotNull
     @Override
-    public ModelsAdapter.ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
-
+    public MyColorsAdapter.MyColorsViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.vector_model_item, parent, false);
-
 
         int width;
         if(orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -56,11 +51,12 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
         params.width = width;
         view.setLayoutParams(params);
 
-        return new ViewHolder(view);
+        return new MyColorsAdapter.MyColorsViewHolder(view);
+
     }
 
     @Override
-    public void onBindViewHolder(@NonNull @NotNull ModelsAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull @NotNull MyColorsAdapter.MyColorsViewHolder holder, int position) {
         holder.imageView.setImageDrawable(
                 new VectorMasterDrawable(new VectorModel(modelsList.get(position).getModel()))
         );
@@ -73,26 +69,14 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
 
     public void setModelsList(List<VectorEntity> modelsList) {
         this.modelsList = modelsList;
-
-        if(modelsList != null && modelsList.size() != 0){
-            int lastValue = modelsList.get(modelsList.size() - 1).getId();
-
-            if(lastValue == 1)
-                sharedPrefs.setEndReached(true);
-            sharedPrefs
-                    .setLastVisible(lastValue);
-            sharedPrefs
-                    .setLastModified(modelsList.get(0).getId());
-            notifyDataSetChanged();
-        }
-
+        notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    protected class MyColorsViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imageView;
 
-        public ViewHolder(@NonNull @NotNull View itemView) {
+        public MyColorsViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.main_imageview);
 

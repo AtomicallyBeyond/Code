@@ -85,7 +85,10 @@ public class VectorModelContainer extends VectorModel {
 
 
 
-    public String saveModel(){
+    public void saveModel(){
+        if(isInProgress())
+            vectorEntity.setInProgress(true);
+
         String model = "";
 
         model += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -111,7 +114,7 @@ public class VectorModelContainer extends VectorModel {
 
         model += "</vector>";
 
-        return model;
+        vectorEntity.setModel(model);
     }
 
 
