@@ -28,7 +28,7 @@ public class MainActivityViewModel extends AndroidViewModel {
         repository = Repository.getInstance(application);
     }
 
-    public void fetchUpdates() {
+/*    public void fetchUpdates() {
         if(!isUpdated) {
             LiveData<Resource<List<VectorEntity>>> liveUpdates = repository.fetchUpdates();
             liveModelsList.addSource(liveUpdates, new Observer<Resource<List<VectorEntity>>>() {
@@ -53,11 +53,11 @@ public class MainActivityViewModel extends AndroidViewModel {
                 liveModelsList.setValue(listResource);
             }
         });
-    }
+    }*/
 
-    public LiveData<Resource<List<VectorEntity>>> getModelsList() { return  liveModelsList;}
+/*    public LiveData<Resource<List<VectorEntity>>> getModelsList() { return  liveModelsList;}
 
     public void setCurrentVectorModel(VectorEntity vectorEntity){
         repository.setSelectedVectorModel(vectorEntity);
-    }
+    }*/
 }

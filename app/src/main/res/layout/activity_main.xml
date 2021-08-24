@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager_2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bottom_bar_layout"
-        android:background="@color/gray_off"/>
+        android:background="@color/white"/>
 
 
     <LinearLayout
         android:id="@+id/bottom_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:background="@color/purple_700"
         android:orientation="horizontal" />
@@ -28,14 +27,15 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="2"
+        android:layout_marginBottom="10dp"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:id="@+id/library_button_custom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:clickable="true"
             android:focusable="true"
@@ -46,18 +46,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="6dp"
                 android:src="@drawable/ic_books" />
 
             <TextView
                 android:id="@+id/library_button_textview"
-                android:layout_width="wrap_content"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/armata"
                 android:includeFontPadding="true"
                 android:text="LIBRARY"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:textStyle="bold"
+                android:gravity="center_horizontal"
+                android:textColor="@color/purple_700"
+                android:textSize="16sp"
+                android:background="@drawable/rounded_square"/>
 
         </LinearLayout>
 
@@ -67,9 +71,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:clickable="true"
+            android:focusable="true"
             android:orientation="vertical">
 
             <ImageView
@@ -77,22 +81,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/ic_easel" />
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/ic_pallete"/>
 
             <TextView
                 android:id="@+id/gallery_button_textview"
-                android:layout_width="wrap_content"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/armata"
                 android:includeFontPadding="true"
-                android:text="GALLERY"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:text="MY ARTWORK"
+                android:textStyle="bold"
+                android:gravity="center_horizontal"
+                android:textColor="@color/purple_700"
+                android:textSize="16sp"
+                android:background="@drawable/rounded_square"/>
 
         </LinearLayout>
 
     </LinearLayout>
-
 
 </RelativeLayout>

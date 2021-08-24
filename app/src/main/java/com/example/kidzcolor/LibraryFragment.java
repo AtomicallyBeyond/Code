@@ -90,7 +90,6 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
         initRecyclerView(view);
         subscribeObservers();
         observeRecyclerView();
-        libraryViewModel.fetchUpdates();
 
         return view;
     }
@@ -134,8 +133,7 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
         libraryViewModel.getVectorModelChanged().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                if(true)
-                    modelsAdapter.notifyDataSetChanged();
+                modelsAdapter.notifyDataSetChanged();
             }
         });
 
@@ -167,9 +165,9 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
     }
 
     @Override
-    public void startActivity(VectorEntity vectorEntity) {
+    public void startActivity(VectorEntity selectedVectorEntity) {
 
-        libraryViewModel.setCurrentVectorModel(vectorEntity);
+        libraryViewModel.setCurrentVectorModel(selectedVectorEntity);
         Intent coloringIntent = new Intent(getActivity(), ColoringActivity.class);
         startActivity(coloringIntent);
 

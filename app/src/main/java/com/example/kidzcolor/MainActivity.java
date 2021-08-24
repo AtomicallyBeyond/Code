@@ -1,30 +1,26 @@
 package com.example.kidzcolor;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.kidzcolor.adapters.FragmentAdapter;
-import com.example.kidzcolor.utils.Utils;
-import com.google.android.material.tabs.TabLayout;
+import com.example.kidzcolor.adapters.ViewPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TabLayout tabLayout;
-    private ViewPager2 pager2;
-    private FragmentAdapter adapter;
-
-    private LibraryFragment libraryFragment;
-    private MyColorsFragment galleryFragment;
+    private ViewPager2 viewPager2;
     private LinearLayout libraryButton;
     private LinearLayout galleryButton;
     private ImageView libraryImage;
@@ -32,12 +28,16 @@ public class MainActivity extends AppCompatActivity {
     private TextView libraryTextview;
     private TextView galleryTextview;
     private boolean isLibraryCurrent = true;
+    private int textColor;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        viewPager2 = findViewById(R.id.view_pager_2);
         libraryButton = findViewById(R.id.library_button_custom);
         libraryImage = findViewById(R.id.library_button_imageview);
         libraryTextview = findViewById(R.id.library_button_textview);
@@ -47,48 +47,28 @@ public class MainActivity extends AppCompatActivity {
         galleryTextview = findViewById(R.id.gallery_button_textview);
         galleryButton.setOnClickListener(galleryOnClickListener);
 
-        libraryFragment = new LibraryFragment();
-        galleryFragment = new MyColorsFragment();
+        viewPager2.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+        viewPager2.setAdapter(new ViewPagerAdapter(getSupportFragmentManager(), getLifecycle()));
+        viewPager2.setCurrentItem(0);
+        viewPager2.setUserInputEnabled(false);
 
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, libraryFragment)
-                .commit();
+        galleryImage.setScaleX(0.9f);
+        galleryImage.setScaleY(0.9f);
+        libraryTextview.setTextColor(Color.GRAY);
+        textColor = getResources().getColor(R.color.purple_700);
 
-        galleryImage.setScaleX(0.7f);
-        galleryImage.setScaleY(0.7f);
-        libraryTextview.setTextColor(Color.WHITE);
-
-
-/*        tabLayout = findViewById(R.id.tab_layout);
-        pager2 = findViewById(R.id.view_pager2);
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        adapter = new FragmentAdapter(fragmentManager, getLifecycle());
-        pager2.setAdapter(adapter);
-        //pager2.setUserInputEnabled(false);
-
-        tabLayout.addTab(tabLayout.newTab().setText("Library") );
-        tabLayout.addTab(tabLayout.newTab().setText("My Colors"));
-
-        listenToTabLayout(tabLayout);*/
     }
 
     private View.OnClickListener libraryOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(!isLibraryCurrent) {
+            if (!isLibraryCurrent) {
                 isLibraryCurrent = true;
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, libraryFragment)
-                        .commit();
-
-                libraryTextview.setTextColor(Color.WHITE);
-                galleryTextview.setTextColor(Color.BLACK);
+                viewPager2.setCurrentItem(0, true);
+                libraryTextview.setTextColor(Color.GRAY);
+                galleryTextview.setTextColor(textColor);
                 animateGrowButton(libraryImage);
                 animateShrinkButton(galleryImage);
-
             }
         }
     };
@@ -96,15 +76,12 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener galleryOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(isLibraryCurrent) {
+            if (isLibraryCurrent) {
                 isLibraryCurrent = false;
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, galleryFragment)
-                        .commit();
 
-                galleryTextview.setTextColor(Color.WHITE);
-                libraryTextview.setTextColor(Color.BLACK);
+                viewPager2.setCurrentItem(1, true);
+                galleryTextview.setTextColor(Color.GRAY);
+                libraryTextview.setTextColor(textColor);
                 animateGrowButton(galleryImage);
                 animateShrinkButton(libraryImage);
             }
@@ -116,44 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void animateShrinkButton(View view) {
-        view.animate().scaleX(0.8f).scaleY(0.8f);
+        view.animate().scaleX(0.9f).scaleY(0.9f);
     }
-
-/*    ObjectAnimator objectAnimator = ObjectAnimator.ofPropertyValuesHolder(
-            view,
-            PropertyValuesHolder.ofFloat("scaleX", 1.1f),
-            PropertyValuesHolder.ofFloat("scaleY", 1.1f)
-    );
-
-        objectAnimator.start();
-        objectAnimator.end();*/
-
-/*    private void listenToTabLayout(TabLayout tabLayout) {
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                int position = tab.getPosition();
-                pager2.setCurrentItem(position);
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-
-        pager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                tabLayout.selectTab(tabLayout.getTabAt(position));
-            }
-        });
-
-    }*/
 
 }

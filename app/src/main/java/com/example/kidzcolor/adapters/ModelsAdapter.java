@@ -28,6 +28,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
     private List<VectorEntity> modelsList = new ArrayList<>();
     private SharedPrefs sharedPrefs;
     private StartColoringActivity startColoringActivity;
+    private VectorEntity tempEntity;
     private int orientation;
 
     public ModelsAdapter(SharedPrefs sharedPrefs, StartColoringActivity startColoringActivity, int orientation) {
@@ -61,9 +62,13 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull ModelsAdapter.ViewHolder holder, int position) {
-        holder.imageView.setImageDrawable(
-                new VectorMasterDrawable(new VectorModel(modelsList.get(position).getModel()))
-        );
+
+        tempEntity = modelsList.get(position);
+
+        if(!tempEntity.isModelAvailable())
+            tempEntity.loadModel();
+
+        holder.imageView.setImageDrawable(new VectorMasterDrawable(tempEntity.getVectorModel()));
     }
 
     @Override
@@ -99,8 +104,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startColoringActivity.startActivity(
-                            modelsList.get(getLayoutPosition()));
+                    startColoringActivity.startActivity(modelsList.get(getLayoutPosition()));
                 }
             });
         }

@@ -21,10 +21,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.kidzcolor.adapters.MyColorsAdapter;
+import com.example.kidzcolor.interfaces.ResetModelListener;
 import com.example.kidzcolor.interfaces.StartColoringActivity;
 import com.example.kidzcolor.mvvm.viewmodels.MyColorsViewModel;
 import com.example.kidzcolor.persistance.VectorEntity;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,7 +35,7 @@ import java.util.List;
  * Use the {@link MyColorsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MyColorsFragment extends Fragment implements StartColoringActivity {
+public class MyColorsFragment extends Fragment implements StartColoringActivity, ResetModelListener {
 
     private MyColorsViewModel myColorsViewModel;
     private RecyclerView recyclerView;
@@ -104,24 +107,24 @@ public class MyColorsFragment extends Fragment implements StartColoringActivity 
             gridLayoutManager = new GridLayoutManager(getContext(), 3);
 
         recyclerView.setLayoutManager(gridLayoutManager);
-        myColorsAdapter = new MyColorsAdapter(this, orientation);
+        myColorsAdapter = new MyColorsAdapter(this, this, orientation);
         recyclerView.setAdapter(myColorsAdapter);
     }
 
     private void subscribeObserver() {
-        myColorsViewModel.getModelsList().observe(getViewLifecycleOwner(), new Observer<List<VectorEntity>>() {
-            @Override
-            public void onChanged(List<VectorEntity> vectorEntities) {
-                myColorsAdapter.setModelsList(vectorEntities);
-            }
-        });
+        myColorsViewModel.getModelsList().observe(getViewLifecycleOwner(), new Observer<HashMap<Integer, VectorEntity>>() {
+                    @Override
+                    public void onChanged(HashMap<Integer, VectorEntity> entityHashMap) {
+                        myColorsAdapter.setModelsList(entityHashMap.values());
+                    }
+                });
 
-        myColorsViewModel.getVectorModelChanged().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                myColorsAdapter.notifyDataSetChanged();
-            }
-        });
+                myColorsViewModel.getVectorModelChanged().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+                    @Override
+                    public void onChanged(Boolean aBoolean) {
+                        myColorsAdapter.notifyDataSetChanged();
+                    }
+                });
     }
 
     @Override
@@ -133,8 +136,13 @@ public class MyColorsFragment extends Fragment implements StartColoringActivity 
     }
 
     @Override
+    public void resetModel(VectorEntity vectorEntity) {
+        myColorsViewModel.resetVectorModel(vectorEntity);
+    }
+
+/*    @Override
     public void onResume() {
         super.onResume();
         myColorsViewModel.observeUpdates();
-    }
+    }*/
 }

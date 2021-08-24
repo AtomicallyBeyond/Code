@@ -37,6 +37,11 @@ public class VectorModel {
             init();
     }
 
+    public void resetModel(String model){
+        this.model = model;
+        init();
+    }
+
     private void init() {
         strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         strokePaint.setStyle(Paint.Style.STROKE);

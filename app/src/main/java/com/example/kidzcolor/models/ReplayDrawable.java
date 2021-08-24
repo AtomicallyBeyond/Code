@@ -89,6 +89,7 @@ public class ReplayDrawable extends Drawable {
 
         for(PathModel pathModel : drawingList) {
             canvas.drawPath(pathModel.getPath(), pathModel.getPathPaint());
+            canvas.drawPath(pathModel.getPath(), outlinePaint);
         }
     }
 

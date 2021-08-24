@@ -36,60 +36,10 @@ public class Repository {
     private BackupModelDao backupModelDao;
     private SharedPrefs sharedPrefs;
     private CollectionReference modelsFirestoreRef;
-    private VectorEntity selectedVectorEntity;
-    private MutableLiveData<Boolean> vectorModelChanged = new MutableLiveData<>();
 
-    public MutableLiveData<Boolean> getVectorModelChanged() {
-        return vectorModelChanged;
-    }
 
-    public void setSelectedVectorModel(VectorEntity entity) {
-        selectedVectorEntity = entity;
-    }
 
-    public VectorEntity getSelectedVectorModel() {
-        return selectedVectorEntity;
-    }
-
-    public LiveData<VectorEntity> resetSelectedVectorModel(){
-
-        MutableLiveData<VectorEntity> liveData = new MutableLiveData<>();
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                VectorEntity entity = selectedVectorEntity;
-                BackupVector backupVector = backupModelDao
-                                .getModelByID(entity.getId());
-
-                entity.setModel(backupVector.getModel());
-                entity.setInProgress(false);
-                modelDao.insertVector(entity);
-
-                AppExecutors.getInstance().mainThread().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        liveData.setValue(entity);
-                    }
-                });
-
-            }
-        });
-
-        return liveData;
-    }
-
-    public void saveSelectedVectorModel() {
-        vectorModelChanged.setValue(true);
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                modelDao.insertVector(selectedVectorEntity);
-            }
-        });
-    }
-
-    public LiveData<List<VectorEntity>> getMyColorModels(){
+/*    public LiveData<List<VectorEntity>> getMyColorModels(){
 
         MutableLiveData<List<VectorEntity>> liveData = new MutableLiveData<>();
 
@@ -108,7 +58,7 @@ public class Repository {
         });
 
         return liveData;
-    }
+    }*/
 
     public static Repository getInstance(Context context){
         if(instance == null){

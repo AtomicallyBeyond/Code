@@ -8,6 +8,14 @@
     android:animateLayoutChanges="true"
     android:background="@color/white">
 
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:background="@drawable/ic_square_gradient_vertical"/>
+
     <com.example.kidzcolor.zoomageview.ZoomageView
         android:id="@+id/zoomage_view"
         android:layout_width="wrap_content"
@@ -19,16 +27,6 @@
         app:zoomage_restrictBounds="false"
         app:zoomage_autoCenter="false"
         app:zoomage_maxScale="40"/>
-
-    <ImageView
-        android:id="@+id/coloring_imageview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="@+id/coloring_recyclerView"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/coloring_recyclerView"

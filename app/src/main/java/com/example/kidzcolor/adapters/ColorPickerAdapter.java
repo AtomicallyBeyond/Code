@@ -108,7 +108,7 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
             }
 
             if(colorKeys.isEmpty())
-                finishedColoringListener.finished();;
+                finishedColoringListener.finished();
 
         }
     }

@@ -1,9 +1,12 @@
 package com.example.kidzcolor;
 
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -15,7 +18,6 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -37,6 +39,10 @@ import com.example.kidzcolor.zoomageview.ZoomageView;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import nl.dionsegijn.konfetti.KonfettiView;
+import nl.dionsegijn.konfetti.models.Shape;
+import nl.dionsegijn.konfetti.models.Size;
+
 public class ColoringActivity extends AppCompatActivity implements PositionListener, FinishedColoringListener {
 
     private ColoringViewModel coloringViewModel;
@@ -45,9 +51,10 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private VectorMasterDrawable vectorMasterDrawable;
     private int displayHeight;
     private int displayWidth;
-    private float minScale;
-    private float maxScale;
     private ColorPickerAdapter colorPickerAdapter;
+    private KonfettiView konfettiView;
+    private float xScale;
+    private float yScale;
 
 
     @Override
@@ -63,6 +70,8 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
         coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
         observeModelFromRepository();
+
+        konfettiView  = findViewById(R.id.konfetti);
     }
 
     private void observeModelFromRepository() {
@@ -91,10 +100,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         subscribeViewStateObserver();
     }
 
-    private void resetActivity() {
-
-    }
-
 
     private void initZoomageView() {
         vectorMasterDrawable = new VectorMasterDrawable(vectorModelContainer);
@@ -106,10 +111,10 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                 vectorModelContainer.drawPatternMap();
                 zoomageView.setScaleType(ImageView.ScaleType.MATRIX);
                 zoomageView.setStartValues();
-                minScale = zoomageView.getDefaultScale();
-                maxScale = zoomageView.getCalculatedMaxScale();
             }
         });
+        xScale = (float)displayWidth / (float)vectorMasterDrawable.getIntrinsicWidth();
+        yScale = (float)displayHeight / (float)vectorMasterDrawable.getIntrinsicHeight();
 
     }
 
@@ -179,7 +184,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private void setHintButtonListener(ImageButton imageButton) {
         imageButton.setOnClickListener(new View.OnClickListener() {
 
-            private RectF rectF;
+            private RectF shadedPathBounds;
             private float xCenter;
             private float yCenter;
             private float scaleFactor;
@@ -188,12 +193,12 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
             @Override
             public void onClick(View v) {
 
-                rectF = vectorModelContainer.getNextShadedPathBounds();
-                if(rectF == null)
+                shadedPathBounds = vectorModelContainer.getNextShadedPathBounds();
+                if(shadedPathBounds == null)
                     return;
 
-                xCenter = rectF.centerX();
-                yCenter = rectF.centerY();
+                xCenter = shadedPathBounds.centerX();
+                yCenter = shadedPathBounds.centerY();
 
                 ZoomageView zoom = zoomageView;
                 float scaleFactor = getZoomScaleFactor();
@@ -204,33 +209,84 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                 inverse.postTranslate(-x, -y);
 
                 zoomageView.animateScaleAndTranslationToMatrix(inverse, 500);;
-                vectorModelContainer.setRectDraw(rectF);
+                vectorModelContainer.setRectDraw(shadedPathBounds);
 
             }
 
             private float getZoomScaleFactor() {
 
                 float zoomScale;
+                float scaleDivider;
+                float pathHeight = shadedPathBounds.height();
+                float pathWidth = shadedPathBounds.width();
 
-                if(rectF.height() > rectF.width()){
-                    zoomScale =
-                            (vectorMasterDrawable.getIntrinsicHeight() / rectF.height()) * (zoomageView.getDefaultScale() / 2);
-                    return getScaleInRange(zoomScale);
+
+
+
+                if(pathHeight > pathWidth) {
+
+                    float a = displayHeight / pathHeight;
+
+                    zoomScale = a * 0.4f;
+
+                    if(zoomScale > 5f)
+                        zoomScale = 5f;
+                    else if(zoomScale < yScale)
+                        zoomScale = yScale;
+
+                    return zoomScale;
+
                 } else {
-                    zoomScale =
-                            (vectorMasterDrawable.getIntrinsicWidth() / rectF.width()) * (zoomageView.getDefaultScale() / 3);
-                    return getScaleInRange(zoomScale);
+
+                    float a = displayWidth / pathWidth;
+
+                    zoomScale = a * 0.5f;
+
+                    if(zoomScale > 5f)
+                        zoomScale = 5f;
+                    else if(zoomScale < xScale)
+                        zoomScale = xScale;
+
+                    return zoomScale;
+
                 }
 
-            }
 
-            private float getScaleInRange(float zoomScale){
-                if(zoomScale <= minScale)
-                    return minScale;
-                else if(zoomScale >= maxScale)
-                    return maxScale;
+/*                if(pathHeight > pathWidth){
 
-                return  zoomScale;
+                    if(pathHeight > (float)displayHeight / 8f)
+                        scaleDivider = 2f;
+                    else
+                        scaleDivider = 6f;
+
+                    zoomScale =
+                            (vectorMasterDrawable.getIntrinsicHeight() / pathHeight) * (yScale / scaleDivider);
+
+                    if(zoomScale > 5)
+                        zoomScale = 5;
+                    else if(zoomScale < yScale)
+                        zoomScale = yScale;
+
+                    return zoomScale;
+
+                } else {
+
+                    if(pathWidth > (float)displayWidth / 8f)
+                        scaleDivider = 2f;
+                    else
+                        scaleDivider = 6f;
+
+                    zoomScale =
+                            (vectorMasterDrawable.getIntrinsicWidth() / pathWidth) * (xScale / scaleDivider);
+
+                    if(zoomScale > 5)
+                        zoomScale = 5;
+                    else if(zoomScale < xScale)
+                        zoomScale = xScale;
+
+                    return zoomScale;
+                }*/
+
             }
         });
     }
@@ -249,6 +305,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                zoomageView.reset(false);
                 startReplay();
             }
         });
@@ -258,6 +315,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                zoomageView.reset(false);
                 resetVectorModel();
             }
         });
@@ -296,6 +354,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     }
 
     public void resetVectorModel() {
+        //zoomageView.reset(false);
         coloringViewModel.resetVectorModel();
     }
 
@@ -304,14 +363,37 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     @Override
     public void positionChanged(int newPosition) {
         vectorMasterDrawable.invalidateSelf();
-        zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 500);
+        //zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 500);
     }
 
     @Override
     public void finished() {
-        ConstraintLayout constraintLayout = findViewById(R.id.coloring_toolbar);
-        revealView(constraintLayout);
-        startReplay();
+        zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 400);
+        startKonfetti();
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.coloring_toolbar);
+                revealView(constraintLayout);
+                zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 10);
+                startReplay();
+            }
+        }, 4000);
+
+    }
+
+    private void startKonfetti() {
+        konfettiView.build()
+                .addColors(Color.YELLOW, Color.GREEN, Color.MAGENTA)
+                .setDirection(0.0, 359.0)
+                .setSpeed(1f, 5f)
+                .setFadeOutEnabled(true)
+                .setTimeToLive(2000L)
+                .addShapes(Shape.Square.INSTANCE, Shape.Circle.INSTANCE)
+                .addSizes(new Size(12, 5f))
+                .setPosition(-50f, konfettiView.getWidth() + 50f, -50f, -50f)
+                .streamFor(300, 1000L);
     }
 
 
@@ -353,7 +435,8 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     }
 
     private void startReplay(){
-        zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 100);
+
+        //zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 0);
         ReplayDrawable replayDrawable = new ReplayDrawable(vectorModelContainer);
         zoomageView.setImageDrawable(replayDrawable);
         replayDrawable.startReplay();

@@ -64,26 +64,17 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
     private float doubleTapToZoomScaleFactor;
     @AutoResetMode
     private int autoResetMode;
-
     private PointF last = new PointF(0, 0);
     private float startScale = 1f;
     private float scaleBy = 1f;
     private float currentScaleFactor = 1f;
     private int previousPointerCount = 1;
     private int currentPointerCount = 0;
-
     private ScaleGestureDetector scaleDetector;
     private ValueAnimator resetAnimator;
-
     private GestureDetector gestureDetector;
     private boolean doubleTapDetected = false;
     private boolean singleTapDetected = false;
-
-    public float getDefaultScale() {return startValues[Matrix.MSCALE_X];}
-
-    public float getCalculatedMaxScale() {return calculatedMaxScale;}
-
-    public Matrix getStartMatrix() { return startMatrix; }
 
     public ZoomageView(Context context) {
         super(context);
@@ -123,6 +114,8 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
 
         values.recycle();
     }
+
+    public Matrix getStartMatrix() { return startMatrix; }
 
     private void verifyScaleRange() {
         if (minScale >= maxScale) {
@@ -440,26 +433,8 @@ public class ZoomageView extends AppCompatImageView implements OnScaleGestureLis
         calculatedMaxScale = maxScale * startValues[Matrix.MSCALE_X];
     }
 
-/*    long mLastClickTime = 0;
-    int tapCount = 0;*/
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-/*        if(event.getPointerCount() < 2) {
-            if(SystemClock.elapsedRealtime() - mLastClickTime > 1000) {
-                mLastClickTime = SystemClock.elapsedRealtime();
-                tapCount = 0;
-            } else if(tapCount > 10) {
-                tapCount = 0;
-                return false;
-            } else if(((SystemClock.elapsedRealtime() - mLastClickTime) < 1000) && (tapCount < 10)) {
-                tapCount++;
-            }
-
-        }*/
-
-
 
         if (!isClickable() && isEnabled() && (zoomable || translatable)) {
             if (getScaleType() != ScaleType.MATRIX) {

@@ -68,35 +68,7 @@ public class VectorMasterDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
 
-        if (vectorModel == null) {
-            return;
-        }
-
-        if (scaleMatrix == null) {
-            int temp1 = Utils.dpToPx((int) vectorModel.getWidth());
-            int temp2 = Utils.dpToPx((int) vectorModel.getHeight());
-
-            setBounds(0, 0, temp1, temp2);
-        }
-
-
-        if (left != 0 || top != 0) {
-            tempSaveCount = canvas.save();
-            canvas.translate(left, top);
-            vectorModel.drawPaths(canvas, offsetX, offsetY, scaleX, scaleY);
-            canvas.restoreToCount(tempSaveCount);
-        } else {
-
-            vectorModel.drawPaths(canvas, offsetX, offsetY, scaleX, scaleY);
-        }
-
-        //need to take Paint border out of draw
-        Paint border = new Paint();
-        border.setStyle(Paint.Style.STROKE);
-        border.setStrokeWidth(5f);
-        border.setColor(Color.GRAY);
-
-        //canvas.drawRect(0, 0, getIntrinsicWidth(), getIntrinsicHeight(), border);
+        vectorModel.drawPaths(canvas, offsetX, offsetY, scaleX, scaleY);
     }
 
     @Override
