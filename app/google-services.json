@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "456259075074",
+    "project_id": "kidz-color",
+    "storage_bucket": "kidz-color.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456259075074:android:0086b4d6a2b1fc33133b1b",
+        "android_client_info": {
+          "package_name": "com.example.kidzcolor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "456259075074-o99m0k8j5l9fgt4g3jbe0kqqaker7nir.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7dg12tA7CZJdsCVhySWtG1pGnIzohw6o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "456259075074-o99m0k8j5l9fgt4g3jbe0kqqaker7nir.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
