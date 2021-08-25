@@ -52,10 +52,10 @@ public class MainActivity extends AppCompatActivity {
         viewPager2.setCurrentItem(0);
         viewPager2.setUserInputEnabled(false);
 
-        galleryImage.setScaleX(0.9f);
-        galleryImage.setScaleY(0.9f);
-        libraryTextview.setTextColor(Color.GRAY);
+        libraryImage.setScaleX(1.2f);
+        libraryImage.setScaleY(1.2f);
         textColor = getResources().getColor(R.color.purple_700);
+        libraryTextview.setTextColor(textColor);
 
     }
 
@@ -65,8 +65,8 @@ public class MainActivity extends AppCompatActivity {
             if (!isLibraryCurrent) {
                 isLibraryCurrent = true;
                 viewPager2.setCurrentItem(0, true);
-                libraryTextview.setTextColor(Color.GRAY);
-                galleryTextview.setTextColor(textColor);
+                libraryTextview.setTextColor(textColor);
+                galleryTextview.setTextColor(Color.GRAY);
                 animateGrowButton(libraryImage);
                 animateShrinkButton(galleryImage);
             }
@@ -80,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
                 isLibraryCurrent = false;
 
                 viewPager2.setCurrentItem(1, true);
-                galleryTextview.setTextColor(Color.GRAY);
-                libraryTextview.setTextColor(textColor);
+                galleryTextview.setTextColor(textColor);
+                libraryTextview.setTextColor(Color.GRAY);
                 animateGrowButton(galleryImage);
                 animateShrinkButton(libraryImage);
             }
@@ -89,11 +89,11 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void animateGrowButton(View view) {
-        view.animate().scaleX(1.0f).scaleY(1.0f);
+        view.animate().scaleX(1.2f).scaleY(1.2f);
     }
 
     private void animateShrinkButton(View view) {
-        view.animate().scaleX(0.9f).scaleY(0.9f);
+        view.animate().scaleX(1.0f).scaleY(1.0f);
     }
 
 }

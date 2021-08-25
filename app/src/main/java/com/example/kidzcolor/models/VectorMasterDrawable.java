@@ -37,8 +37,6 @@ public class VectorMasterDrawable extends Drawable {
     private float offsetX = 0.0f, offsetY = 0.0f;
     private float scaleX = 1.0f, scaleY = 1.0f;
     private float scaleRatio, strokeRatio;
-    private boolean useLegacyParser = true;
-    private XmlPullParser xpp;
     private Matrix scaleMatrix;
 
 
@@ -67,7 +65,6 @@ public class VectorMasterDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-
         vectorModel.drawPaths(canvas, offsetX, offsetY, scaleX, scaleY);
     }
 

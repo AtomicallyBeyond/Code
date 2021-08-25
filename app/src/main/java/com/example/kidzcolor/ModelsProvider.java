@@ -69,7 +69,6 @@ public class ModelsProvider {
                         .getModelByID(selectedVectorEntity.getId());
 
                 selectedVectorEntity.setModel(backupVector.getModel());
-                selectedVectorEntity.refreshVectorModel();
                 selectedVectorEntity.setInProgress(false);
                 modelDao.insertVector(selectedVectorEntity);
 
@@ -98,7 +97,6 @@ public class ModelsProvider {
                         .getModelByID(vectorEntity.getId());
 
                 vectorEntity.setModel(backupVector.getModel());
-                vectorEntity.refreshVectorModel();
                 vectorEntity.setInProgress(false);
                 modelDao.insertVector(vectorEntity);
             }
@@ -114,8 +112,6 @@ public class ModelsProvider {
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-
-                selectedVectorEntity.refreshVectorModel();
 
                 HashMap<Integer, VectorEntity> temp = artworkLivedata.getValue();
                 int id = selectedVectorEntity.getId();

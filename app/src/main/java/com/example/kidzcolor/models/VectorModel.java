@@ -37,11 +37,6 @@ public class VectorModel {
             init();
     }
 
-    public void resetModel(String model){
-        this.model = model;
-        init();
-    }
-
     private void init() {
         strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         strokePaint.setStyle(Paint.Style.STROKE);
@@ -131,27 +126,10 @@ public class VectorModel {
     }
 
     public void drawPaths(Canvas canvas, float offsetX, float offsetY, float scaleX, float scaleY) {
-
         for (PathModel pathModel : pathModels) {
-            if (pathModel.isFillAndStroke()) {
-                /*
-                need to fix updatePaint in Pathmodel so that it will have the paint set to fillandstroke
-                when it's isFillAndStroke, or do I really need to?
-                */
-                pathModel.makeFillPaint();
-                canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), pathModel.getPathPaint());
-                canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), strokePaint);
-            } else {
-                canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), pathModel.getPathPaint());
-            }
-        }
-
-        if(drawRect) {
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.RED);
-            paint.setStrokeWidth(1.0f);
-            canvas.drawRect(testRect, paint);
+            pathModel.makeFillPaint();
+            canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), pathModel.getPathPaint());
+            canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), strokePaint);
         }
     }
 
