@@ -36,7 +36,8 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:importantForAccessibility="no"/>
 
 
 
@@ -64,12 +65,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:layout_marginRight="100dp"
+                android:layout_marginEnd="100dp"
                 android:backgroundTint="#00FFFFFF"
                 android:src="@drawable/ic_playbutton"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"/>
+                app:layout_constraintRight_toRightOf="parent"
+                android:importantForAccessibility="no"/>
 
             <ImageButton
                 android:id="@+id/coloring_reset_button"
@@ -83,7 +85,8 @@
                 android:visibility="visible"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"/>
+                app:layout_constraintRight_toRightOf="parent"
+                android:importantForAccessibility="no"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -96,7 +99,8 @@
         android:src="@drawable/ic_lightening"
         android:backgroundTint="#00FFFFFF"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no"/>
 
     <ImageButton
         android:id="@+id/coloring_back_button"
@@ -107,7 +111,8 @@
         android:src="@drawable/ic_back_button"
         android:backgroundTint="#00FFFFFF"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no"/>
 
 
     <nl.dionsegijn.konfetti.KonfettiView

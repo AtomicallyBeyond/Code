@@ -6,21 +6,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.interfaces.ResetModelListener;
 import com.example.kidzcolor.interfaces.StartColoringActivity;
-import com.example.kidzcolor.models.VectorMasterDrawable;
-import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.Utils;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -64,9 +58,7 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull MyColorsAdapter.MyColorsViewHolder holder, int position) {
-        holder.imageView.setImageDrawable(
-                new VectorMasterDrawable(new VectorModel(modelsList.get(position).getModel()))
-        );
+        holder.imageView.setImageDrawable(modelsList.get(position).getDrawable());
     }
 
     @Override

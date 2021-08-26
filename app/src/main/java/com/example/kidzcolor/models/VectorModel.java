@@ -127,7 +127,6 @@ public class VectorModel {
 
     public void drawPaths(Canvas canvas, float offsetX, float offsetY, float scaleX, float scaleY) {
         for (PathModel pathModel : pathModels) {
-            pathModel.makeFillPaint();
             canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), pathModel.getPathPaint());
             canvas.drawPath(pathModel.getScaledAndOffsetPath(offsetX, offsetY, scaleX, scaleY), strokePaint);
         }

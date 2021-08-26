@@ -59,8 +59,7 @@
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="4dp"
                     android:src="@drawable/ic_books"
-                    android:layout_gravity="bottom"
-                    android:importantForAccessibility="no"/>
+                    android:layout_gravity="bottom"/>
 
             </LinearLayout>
 
@@ -73,7 +72,7 @@
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/armata"
                 android:includeFontPadding="true"
-                android:text="@string/library"
+                android:text="LIBRARY"
                 android:textStyle="bold"
                 android:gravity="center_horizontal"
                 android:textColor="@color/text_gray"
@@ -83,7 +82,7 @@
 
         </LinearLayout>
 
-
+v
         <LinearLayout
             android:id="@+id/gallery_button_custom"
             android:layout_width="wrap_content"
@@ -104,16 +103,16 @@
                 android:background="@drawable/shape"
                 android:layout_weight="1.5">
 
-
-                <ImageView
+                    <ImageView
                     android:id="@+id/gallery_button_imageview"
-                    android:layout_marginTop="20dp" android:layout_marginBottom="4dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="4dp"
                     android:layout_width="38dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_pallete"
-                    android:layout_gravity="bottom"
-                    android:importantForAccessibility="no"/>
-                </LinearLayout>
+                    android:layout_gravity="bottom"/>
+
+            </LinearLayout>
 
 
 
@@ -125,7 +124,7 @@
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/armata"
                 android:includeFontPadding="true"
-                android:text="@string/my_artwork"
+                android:text="MY ARTWORK"
                 android:textStyle="bold"
                 android:gravity="center_horizontal"
                 android:textColor="@color/text_gray"

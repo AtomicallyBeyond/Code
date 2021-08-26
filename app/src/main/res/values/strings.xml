@@ -1,4 +1,5 @@
 <resources>
-    <string name="app_name">KidzColor</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="app_name">TapNColor</string>
+    <string name="library">LIBRARY</string>
+    <string name="my_artwork">MY ARTWORK</string>
 </resources>

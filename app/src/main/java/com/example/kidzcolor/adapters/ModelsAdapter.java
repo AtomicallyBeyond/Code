@@ -5,30 +5,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.interfaces.StartColoringActivity;
-import com.example.kidzcolor.models.VectorMasterDrawable;
-import com.example.kidzcolor.models.VectorModel;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.SharedPrefs;
 import com.example.kidzcolor.utils.Utils;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder> {
 
     private List<VectorEntity> modelsList = new ArrayList<>();
-    private SharedPrefs sharedPrefs;
-    private StartColoringActivity startColoringActivity;
-    private int orientation;
+    private final SharedPrefs sharedPrefs;
+    private final StartColoringActivity startColoringActivity;
+    private final int orientation;
 
     public ModelsAdapter(SharedPrefs sharedPrefs, StartColoringActivity startColoringActivity, int orientation) {
         this.sharedPrefs = sharedPrefs;
@@ -61,9 +56,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull ModelsAdapter.ViewHolder holder, int position) {
-        holder.imageView.setImageDrawable(
-                new VectorMasterDrawable(new VectorModel(modelsList.get(position).getModel()))
-        );
+        holder.imageView.setImageDrawable(modelsList.get(position).getDrawable());
     }
 
     @Override
@@ -90,7 +83,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView imageView;
+        private final ImageView imageView;
 
         public ViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);

@@ -2,8 +2,10 @@ package com.example.kidzcolor.persistance;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.models.VectorModel;
 
 @Entity(tableName = "models")
@@ -18,6 +20,14 @@ public class VectorEntity {
 
     @ColumnInfo(name = "in_progress")
     private boolean isInProgress = false;
+
+    @Ignore
+    private VectorMasterDrawable vectorMasterDrawable;
+
+    @Ignore
+    public VectorMasterDrawable getDrawable() {
+        return vectorMasterDrawable;
+    }
 
     public VectorEntity() {
 
@@ -42,6 +52,7 @@ public class VectorEntity {
 
     public void setModel(String model) {
         this.model = model;
+        vectorMasterDrawable = new VectorMasterDrawable(new VectorModel(model));
     }
 
     public boolean isInProgress() {

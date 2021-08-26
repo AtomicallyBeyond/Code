@@ -168,8 +168,11 @@ public class VectorModelContainer extends VectorModel {
         shadedModels = shadeAndColorMap.get(colorKey);
 
         if(shadedModels != null) {
-            for(PathModel pathModel : shadedModels)
+            for(PathModel pathModel : shadedModels) {
                 pathModel.setFillColorStatus(PathModel.SHADE_FILL_COLOR);
+                pathModel.makeFillPaint();
+            }
+
         }
 
     }
@@ -177,8 +180,11 @@ public class VectorModelContainer extends VectorModel {
     public void unShadePaths(){
 
         if(shadedModels != null) {
-            for(PathModel pathModel : shadedModels)
+            for(PathModel pathModel : shadedModels){
                 pathModel.resetPaint();
+                pathModel.makeFillPaint();
+            }
+
             shadedModels = null;
         }
     }
@@ -204,6 +210,7 @@ public class VectorModelContainer extends VectorModel {
 
                 if(patternColor == pixelPatternColor) {
                     pathModel.setFillColorStatus(PathModel.YES_FILL_COLOR);
+                    pathModel.makeFillPaint();
                     coloredPathsHistory.add(pathModel);
                     shadedModels.remove(i);
 

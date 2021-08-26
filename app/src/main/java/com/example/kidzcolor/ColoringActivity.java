@@ -49,6 +49,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private ZoomageView zoomageView;
     private VectorModelContainer vectorModelContainer;
     private VectorMasterDrawable vectorMasterDrawable;
+    private RecyclerView colorsRecyclerView;
     private int displayHeight;
     private int displayWidth;
     private ColorPickerAdapter colorPickerAdapter;
@@ -322,7 +323,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     }
 
     private void initRecylerView() {
-        RecyclerView colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
+        colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             colorsRecyclerView.setLayoutManager(
@@ -363,6 +364,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     @Override
     public void positionChanged(int newPosition) {
         vectorMasterDrawable.invalidateSelf();
+        colorsRecyclerView.scrollToPosition(newPosition);
         //zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 500);
     }
 

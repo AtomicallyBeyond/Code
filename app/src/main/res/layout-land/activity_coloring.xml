@@ -52,14 +52,15 @@
             android:id="@+id/coloring_play_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft ="4dp"
+            android:layout_marginStart ="4dp"
             android:layout_marginBottom="100dp"
             android:src="@drawable/ic_playbutton"
             android:backgroundTint="#00FFFFFF"
             android:visibility="visible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:importantForAccessibility="no"/>
 
             <ImageButton
                 android:id="@+id/coloring_reset_button"
@@ -72,7 +73,8 @@
                 android:visibility="visible"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:importantForAccessibility="no"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -80,24 +82,30 @@
         android:id="@+id/coloring_back_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:layout_marginLeft="4dp"
         android:src="@drawable/ic_back_button"
         android:backgroundTint="#00FFFFFF"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:importantForAccessibility="no"/>
 
     <ImageButton
         android:id="@+id/coloring_hint_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+
         android:layout_marginLeft="4dp"
         android:src="@drawable/ic_lightening"
         android:backgroundTint="#00FFFFFF"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no"/>
 
-
+    <nl.dionsegijn.konfetti.KonfettiView
+        android:id="@+id/konfetti"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

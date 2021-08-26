@@ -96,6 +96,7 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
 
     private void initRecyclerView(View view) {
         recyclerView = view.findViewById(R.id.main_recylerview);
+        recyclerView.setHasFixedSize(true);
 
         int orientation = getResources().getConfiguration().orientation;
 

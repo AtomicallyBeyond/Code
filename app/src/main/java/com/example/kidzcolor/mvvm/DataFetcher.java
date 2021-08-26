@@ -37,7 +37,7 @@ public abstract class DataFetcher {
                     results.addSource(dbSource, new Observer<List<VectorEntity>>() {
                         @Override
                         public void onChanged(List<VectorEntity> vectorEntities) {
-
+                            setValue(Resource.success(vectorEntities));
                         }
                     });
                 }

@@ -62,7 +62,7 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
 
     @Override
     public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
-        if(holder.getPosition() == selectedPosition) {
+        if(holder.getLayoutPosition() == selectedPosition) {
             CircleColorDrawable currentDrawable = ((CircleColorDrawable)holder.colorView.getDrawable());
             currentDrawable.progressInvisible(false);
             currentDrawable.backgroundProgressInvisible(false);
@@ -75,7 +75,7 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
 
     @Override
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
-        if(holder.getPosition() == selectedPosition) {
+        if(holder.getLayoutPosition() == selectedPosition) {
             CircleColorDrawable currentDrawable = ((CircleColorDrawable)holder.colorView.getDrawable());
             currentDrawable.progressInvisible(true);
             currentDrawable.backgroundProgressInvisible(true);
@@ -91,7 +91,7 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
 
         if(!colorKeys.isEmpty()) {
             colorKeys.remove(selectedPosition);
-            onViewDetachedFromWindow(viewHolder);
+            //onViewDetachedFromWindow(viewHolder);
 
 
             if(selectedPosition > 0 || colorKeys.isEmpty())
@@ -113,16 +113,10 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
         }
     }
 
-    public void resetAdapter(VectorModelContainer vectorModelContainer) {
-        this.vectorModelContainer = vectorModelContainer;
-        colorKeys = vectorModelContainer.getColorKeys();
-        notifyDataSetChanged();
-    }
-
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView colorView;
+        private final ImageView colorView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -144,8 +138,6 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
                 public void onClick(View v) {
 
                     int position = ViewHolder.this.getLayoutPosition();
-                    //positionListener.positionChanged(position);
-
 
                     if(viewHolder != null) {
                         CircleColorDrawable previousDrawable = ((CircleColorDrawable)viewHolder.colorView.getDrawable());

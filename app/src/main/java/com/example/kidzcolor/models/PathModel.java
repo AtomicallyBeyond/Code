@@ -68,6 +68,7 @@ public class PathModel {
         pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         pathPaint.setAntiAlias(true);
         pathPaint.setStyle(Paint.Style.FILL);
+        pathPaint.setColor(Color.WHITE);
     }
 
     public void buildPath() {
@@ -176,7 +177,6 @@ public class PathModel {
 
     public void setFillColor(int fillColor) {
         this.fillColor = fillColor;
-        pathPaint.setColor(fillColor);
     }
 
     public void setFillColorString(String fillColorString){
@@ -220,6 +220,7 @@ public class PathModel {
         if(fillColorStatus == SHADE_FILL_COLOR)
             pathPaint.setShader(null);
         fillColorStatus = status;
+        makeFillPaint();
     }
 
     public int getFillColorStatus() {
