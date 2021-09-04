@@ -9,13 +9,15 @@ import android.graphics.Rect;
 public class ShadeMap {
 
     public static final ShadeMap instance = new ShadeMap();
-    private final int size = 10;
-    private final int colorOdd = 0xFFC2C2C2;
-    private final int colorEven = 0xFFF3F3F3;
-    private BitmapShader bitmapShader;
-    private Bitmap shadeMapBitmap;
+
+    private final BitmapShader bitmapShader;
 
     private ShadeMap () {
+        final int size = 10;
+        final int colorOdd = 0xFFC2C2C2;
+        final int colorEven = 0xFFF3F3F3;
+        final Bitmap shadeMapBitmap;
+
         Paint bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bitmapPaint.setStyle(Paint.Style.FILL);
 

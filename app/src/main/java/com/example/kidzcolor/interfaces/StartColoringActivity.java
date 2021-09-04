@@ -4,5 +4,5 @@ import com.example.kidzcolor.models.VectorModelContainer;
 import com.example.kidzcolor.persistance.VectorEntity;
 
 public interface StartColoringActivity {
-    public void startActivity(VectorEntity vectorEntity);
+    void startActivity(VectorEntity vectorEntity);
 }

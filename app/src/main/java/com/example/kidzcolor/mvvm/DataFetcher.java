@@ -15,8 +15,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.List;
 
 public abstract class DataFetcher {
-    private AppExecutors appExecutors;
-    private MediatorLiveData<Resource<List<VectorEntity>>> results = new MediatorLiveData<>();
+    private final AppExecutors appExecutors;
+    private final MediatorLiveData<Resource<List<VectorEntity>>> results = new MediatorLiveData<>();
 
     public DataFetcher(AppExecutors appExecutors){
         this.appExecutors = appExecutors;
@@ -124,7 +124,7 @@ public abstract class DataFetcher {
     // in the base class.
     public final LiveData<Resource<List<VectorEntity>>> getAsLiveData(){
         return results;
-    };
+    }
 
     private void setValue(Resource<List<VectorEntity>> newValue){
         if(results.getValue() != newValue){

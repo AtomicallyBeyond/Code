@@ -1,35 +1,32 @@
 package com.example.kidzcolor;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.transition.Fade;
+import androidx.transition.Transition;
+import androidx.transition.TransitionManager;
 import androidx.viewpager2.widget.ViewPager2;
-
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
-import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.example.kidzcolor.adapters.ViewPagerAdapter;
+import com.example.kidzcolor.mvvm.viewmodels.MainActivityViewModel;
+import com.example.kidzcolor.utils.PaintProvider;
 
 public class MainActivity extends AppCompatActivity {
 
+    private MainActivityViewModel mainViewModel;
     private ViewPager2 viewPager2;
-    private LinearLayout libraryButton;
-    private LinearLayout galleryButton;
-    private ImageView libraryImage;
-    private ImageView galleryImage;
+    private ImageView libraryImageView;
+    private ImageView artworkImageView;
     private TextView libraryTextview;
-    private TextView galleryTextview;
-    private boolean isLibraryCurrent = true;
+    private TextView artworkTextview;
+    private int highlightedTextColor;
     private int textColor;
-
 
 
     @Override
@@ -37,63 +34,109 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        viewPager2 = findViewById(R.id.view_pager_2);
-        libraryButton = findViewById(R.id.library_button_custom);
-        libraryImage = findViewById(R.id.library_button_imageview);
-        libraryTextview = findViewById(R.id.library_button_textview);
-        libraryButton.setOnClickListener(libraryOnClickListener);
-        galleryButton = findViewById(R.id.gallery_button_custom);
-        galleryImage = findViewById(R.id.gallery_button_imageview);
-        galleryTextview = findViewById(R.id.gallery_button_textview);
-        galleryButton.setOnClickListener(galleryOnClickListener);
+        init();
+    }
 
+    private void init() {
+        mainViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+
+        PaintProvider.createPaint();
+        PaintProvider.createHDPaint();
+
+        libraryImageView = findViewById(R.id.library_imageview);
+        libraryTextview = findViewById(R.id.library_button_textview);
+        artworkImageView = findViewById(R.id.artwork_imageview);
+        artworkTextview = findViewById(R.id.artwork_button_textview);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            textColor = getResources().getColor(R.color.text_gray, getTheme());
+            highlightedTextColor = getResources().getColor(R.color.highlighted_text, getTheme());
+        }else {
+            textColor = getResources().getColor(R.color.text_gray);
+            highlightedTextColor = getResources().getColor(R.color.highlighted_text);
+        }
+
+        libraryTextview.setOnClickListener(libraryOnClickListener);
+        artworkTextview.setOnClickListener(artworkOnClickListener);
+
+        viewPager2 = findViewById(R.id.view_pager_2);
         viewPager2.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         viewPager2.setAdapter(new ViewPagerAdapter(getSupportFragmentManager(), getLifecycle()));
-        viewPager2.setCurrentItem(0);
         viewPager2.setUserInputEnabled(false);
 
-        libraryImage.setScaleX(1.5f);
-        libraryImage.setScaleY(1.5f);
-        textColor = getResources().getColor(R.color.purple_700);
-        libraryTextview.setTextColor(textColor);
-
+        if(mainViewModel.isLibraryCurrent()) {
+            viewPager2.setCurrentItem(0);
+            libraryTextview.setTextColor(highlightedTextColor);
+        } else {
+            viewPager2.setCurrentItem(1);
+            artworkTextview.setTextColor(highlightedTextColor);
+        }
     }
 
-    private View.OnClickListener libraryOnClickListener = new View.OnClickListener() {
+    private final View.OnClickListener libraryOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (!isLibraryCurrent) {
-                isLibraryCurrent = true;
+            if (!mainViewModel.isLibraryCurrent()) {
+                mainViewModel.setLibraryCurrent(true);
                 viewPager2.setCurrentItem(0, true);
-                libraryTextview.setTextColor(textColor);
-                galleryTextview.setTextColor(Color.GRAY);
-                animateGrowButton(libraryImage);
-                animateShrinkButton(galleryImage);
+                artworkTextview.setTextColor(textColor);
+                libraryTextview.setTextColor(highlightedTextColor);
+                animateFromLeft();
             }
         }
     };
 
-    private View.OnClickListener galleryOnClickListener = new View.OnClickListener() {
+    private final View.OnClickListener artworkOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (isLibraryCurrent) {
-                isLibraryCurrent = false;
-
+            if (mainViewModel.isLibraryCurrent()) {
+                mainViewModel.setLibraryCurrent(false);
                 viewPager2.setCurrentItem(1, true);
-                galleryTextview.setTextColor(textColor);
-                libraryTextview.setTextColor(Color.GRAY);
-                animateGrowButton(galleryImage);
-                animateShrinkButton(libraryImage);
+                libraryTextview.setTextColor(textColor);
+                artworkTextview.setTextColor(highlightedTextColor);
+                animateFromRight();
             }
         }
     };
 
-    private void animateGrowButton(View view) {
-        view.animate().scaleX(1.5f).scaleY(1.5f);
+    private void animateFromLeft() {
+        Transition transition = new Fade();
+        transition.setDuration(50);
+        transition.addTarget(artworkImageView);
+        TransitionManager.beginDelayedTransition(findViewById(R.id.center_imageview_layout), transition);
+        artworkImageView.setVisibility(View.GONE);
+
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Transition transition = new Fade();
+                transition.setDuration(100);
+                transition.addTarget(libraryImageView);
+                TransitionManager.beginDelayedTransition(findViewById(R.id.center_imageview_layout), transition);
+                libraryImageView.setVisibility(View.VISIBLE);
+            }
+        }, 50);
+
     }
 
-    private void animateShrinkButton(View view) {
-        view.animate().scaleX(1.2f).scaleY(1.2f);
-    }
+    private void animateFromRight() {
+        Transition transition = new Fade();
+        transition.setDuration(50);
+        transition.addTarget(libraryImageView);
+        TransitionManager.beginDelayedTransition(findViewById(R.id.center_imageview_layout), transition);
+        libraryImageView.setVisibility(View.GONE);
 
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Transition transition = new Fade();
+                transition.setDuration(100);
+                transition.addTarget(artworkImageView);
+                TransitionManager.beginDelayedTransition(findViewById(R.id.center_imageview_layout), transition);
+                artworkImageView.setVisibility(View.VISIBLE);
+            }
+        }, 50);
+    }
 }

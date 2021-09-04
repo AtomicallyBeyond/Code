@@ -23,13 +23,13 @@ import java.util.List;
 public class ModelsProvider {
 
     private static ModelsProvider instance;
-    private Repository repository;
-    private ModelDao modelDao;
-    private BackupModelDao backupModelDao;
+    private final Repository repository;
+    private final ModelDao modelDao;
+    private final BackupModelDao backupModelDao;
     private VectorEntity selectedVectorEntity;
-    private SingleLiveEvent<Boolean> vectorModelChanged = new SingleLiveEvent<>();
-    private MediatorLiveData<Resource<List<VectorEntity>>> libraryLiveData = new MediatorLiveData<>();
-    private MediatorLiveData<HashMap<Integer, VectorEntity>> artworkLivedata = new MediatorLiveData<>();
+    private final SingleLiveEvent<Boolean> vectorModelChanged = new SingleLiveEvent<>();
+    private final MediatorLiveData<Resource<List<VectorEntity>>> libraryLiveData = new MediatorLiveData<>();
+    private final MediatorLiveData<HashMap<Integer, VectorEntity>> artworkLivedata = new MediatorLiveData<>();
 
 
     public static ModelsProvider getInstance(Context context){

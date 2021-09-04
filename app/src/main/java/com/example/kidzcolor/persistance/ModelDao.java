@@ -5,12 +5,6 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Transaction;
-import androidx.room.Update;
-
-import com.example.kidzcolor.models.VectorModel;
-import com.example.kidzcolor.persistance.VectorEntity;
-
 import java.util.List;
 
 @Dao
@@ -27,10 +21,4 @@ public interface ModelDao {
 
     @Query("SELECT * FROM models WHERE in_progress=1 ORDER BY id DESC")
     List<VectorEntity> getModelsInProgress();
-
-    @Query("SELECT * FROM models WHERE id=:id ")
-    VectorEntity getModelByID(int id);
-
-    @Update
-    void update(VectorEntity vectorEntity);
 }

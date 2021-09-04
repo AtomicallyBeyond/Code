@@ -11,7 +11,7 @@ import com.google.firebase.firestore.Source;
 
 public class FirestoreQueryLiveData extends LiveData<QuerySnapshot> {
 
-    private Query query;
+    private final Query query;
     public boolean success;
 
     public FirestoreQueryLiveData(Query query) {

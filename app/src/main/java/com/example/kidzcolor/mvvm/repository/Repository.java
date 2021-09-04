@@ -1,16 +1,10 @@
 package com.example.kidzcolor.mvvm.repository;
 
 import android.content.Context;
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatImageView;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import com.example.kidzcolor.utils.AppExecutors;
-import com.example.kidzcolor.mvvm.SingleLiveEvent;
 import com.example.kidzcolor.firestore.FirestoreQueryLiveData;
-import com.example.kidzcolor.firestore.FirestoreService;
 import com.example.kidzcolor.mvvm.DataFetcher;
 import com.example.kidzcolor.mvvm.Resource;
 import com.example.kidzcolor.persistance.BackupModelDao;
@@ -21,44 +15,22 @@ import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.SharedPrefs;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Repository {
 
+    public static final int FETCH_COUNT = 10;
+
     private static Repository instance;
-    private ModelDao modelDao;
-    private BackupModelDao backupModelDao;
-    private SharedPrefs sharedPrefs;
-    private CollectionReference modelsFirestoreRef;
-
-
-
-/*    public LiveData<List<VectorEntity>> getMyColorModels(){
-
-        MutableLiveData<List<VectorEntity>> liveData = new MutableLiveData<>();
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                List<VectorEntity> list = modelDao.getModelsInProgress();
-
-                AppExecutors.getInstance().mainThread().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        liveData.setValue(list);
-                    }
-                });
-            }
-        });
-
-        return liveData;
-    }*/
+    private final ModelDao modelDao;
+    private final BackupModelDao backupModelDao;
+    private final SharedPrefs sharedPrefs;
 
     public static Repository getInstance(Context context){
         if(instance == null){
@@ -71,8 +43,8 @@ public class Repository {
         modelDao = ModelsDatabase.getInstance(context).getModelsDao();
         backupModelDao = ModelsDatabase.getInstance(context).getBackupModelsDao();
         sharedPrefs = SharedPrefs.getInstance(context);
-        modelsFirestoreRef = FirestoreService.getInstance().getFilesRef();
     }
+
 
     public LiveData<Resource<List<VectorEntity>>> fetchUpdates() {
         return new DataFetcher(AppExecutors.getInstance()){
@@ -100,11 +72,10 @@ public class Repository {
             @Override
             protected FirestoreQueryLiveData createCall() {
 
-                int a = sharedPrefs.getLastModified();
-                Query query  = modelsFirestoreRef
+                Query query  = getFireCollectionReference()
                         .orderBy("id", Query.Direction.DESCENDING)
                         .whereGreaterThan("id", sharedPrefs.getLastModified())
-                        .limit(FirestoreService.FETCH_COUNT);
+                        .limit(FETCH_COUNT);
                 return new FirestoreQueryLiveData(query);
             }
         }.getAsLiveData();
@@ -137,10 +108,10 @@ public class Repository {
             @Override
             protected FirestoreQueryLiveData createCall() {
 
-                Query query = modelsFirestoreRef
+                Query query = getFireCollectionReference()
                         .orderBy("id", Query.Direction.DESCENDING)
                         .whereLessThan("id", sharedPrefs.getLastVisible())
-                        .limit(FirestoreService.FETCH_COUNT);
+                        .limit(FETCH_COUNT);
                 return new FirestoreQueryLiveData(query);
             }
 
@@ -154,9 +125,13 @@ public class Repository {
 
         VectorEntity tempEntity;
         for(DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-            tempEntity = documentSnapshot.toObject(VectorEntity.class);
-            list.add(tempEntity);
-            backUpList.add(new BackupVector(tempEntity));
+
+                tempEntity = documentSnapshot.toObject(VectorEntity.class);
+
+                if(tempEntity != null) {
+                    list.add(tempEntity);
+                    backUpList.add(new BackupVector(tempEntity));
+                }
         }
         modelDao.insertVectorModels(
                 list.toArray(new VectorEntity[querySize]));
@@ -164,4 +139,14 @@ public class Repository {
         backupModelDao.insertVectorModels(
                 backUpList.toArray(new BackupVector[querySize]));
     }
+
+    private CollectionReference getFireCollectionReference() {
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(false)
+                .build();
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        database.setFirestoreSettings(settings);
+        return database.collection("models");
+    }
+
 }

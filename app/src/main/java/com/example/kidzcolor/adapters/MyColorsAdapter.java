@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.interfaces.ResetModelListener;
 import com.example.kidzcolor.interfaces.StartColoringActivity;
+import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,7 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
     private ResetModelListener resetModelListener;
     private List<VectorEntity> modelsList = new ArrayList<>();
     private int orientation;
+    private VectorMasterDrawable tempVectorDrawable;
 
     public MyColorsAdapter(StartColoringActivity startColoringActivity, ResetModelListener resetModelListener, int orientation) {
         this.startColoringActivity = startColoringActivity;
@@ -37,7 +39,7 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
     @Override
     public MyColorsAdapter.MyColorsViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.vector_model_item, parent, false);
+                .inflate(R.layout.vector_model_inprogress_item, parent, false);
 
         int width;
         if(orientation == Configuration.ORIENTATION_PORTRAIT)

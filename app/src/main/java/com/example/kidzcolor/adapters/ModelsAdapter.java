@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.interfaces.StartColoringActivity;
+import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.SharedPrefs;
 import com.example.kidzcolor.utils.Utils;

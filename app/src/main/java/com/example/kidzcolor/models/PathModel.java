@@ -1,17 +1,13 @@
 package com.example.kidzcolor.models;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Region;
-import android.graphics.RegionIterator;
 
+import com.example.kidzcolor.utils.PaintProvider;
 import com.example.kidzcolor.utils.DefaultValues;
 import com.example.kidzcolor.utils.ShadeMap;
 
@@ -24,12 +20,12 @@ public class PathModel {
     private String pathData;
     private String fillColorString;
     private int fillColor;
-    private int strokeColor;
+    private final int strokeColor;
     private int fillColorStatus;
     private int patternColor;
     private float strokeWidth;
     private float strokeRatio;
-    private float trimPathStart, trimPathEnd, trimPathOffset;
+    private final float trimPathStart, trimPathEnd, trimPathOffset;
     private Path originalPath;
     private Path path;
     private Path trimmedPath;
@@ -37,6 +33,23 @@ public class PathModel {
     private Path.FillType fillType;
     private boolean isFillAndStroke = false;
     private Matrix scaleMatrix;
+
+
+    public void drawPath(Canvas canvas){
+
+        if(!(fillColorStatus == NO_FILL_COLOR))
+            canvas.drawPath(path, pathPaint);
+
+        canvas.drawPath(path, PaintProvider.strokePaint);
+    }
+
+    public void drawHDPath(Canvas canvas){
+
+        if(!(fillColorStatus == NO_FILL_COLOR))
+            canvas.drawPath(path, pathPaint);
+
+        canvas.drawPath(path, PaintProvider.hdStrokePaint);
+    }
 
     public PathModel() {
         fillColorStatus = NO_FILL_COLOR;
@@ -76,8 +89,6 @@ public class PathModel {
         originalPath = androidx.core.graphics.PathParser.createPathFromPathData(pathData);
         path = new Path(originalPath);
     }
-
-
 
     public void updatePaint() {
         pathPaint.setStrokeWidth(strokeWidth * strokeRatio);
@@ -144,21 +155,6 @@ public class PathModel {
         this.path = path;
     }
 
-    public Path getScaledAndOffsetPath(float offsetX, float offsetY, float scaleX, float scaleY) {
-        Path newPath = new Path(path);
-        newPath.offset(offsetX, offsetY);
-        newPath.transform(getScaleMatrix(newPath, scaleX, scaleY));
-        return newPath;
-    }
-
-    public Matrix getScaleMatrix(Path srcPath, float scaleX, float scaleY) {
-        Matrix scaleMatrix = new Matrix();
-        RectF rectF = new RectF();
-        srcPath.computeBounds(rectF, true);
-        scaleMatrix.setScale(scaleX, scaleY, rectF.left, rectF.top);
-        return scaleMatrix;
-    }
-
     public int getPatternColor() {
         return patternColor;
     }
@@ -201,19 +197,10 @@ public class PathModel {
         this.pathData = pathData;
     }
 
-    public void setStrokeWidth(float strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        updatePaint();
-    }
-
 
     public void setStrokeRatio(float strokeRatio) {
         this.strokeRatio = strokeRatio;
         updatePaint();
-    }
-
-    public boolean isFillAndStroke() {
-        return isFillAndStroke;
     }
 
     public void setFillColorStatus(int status){

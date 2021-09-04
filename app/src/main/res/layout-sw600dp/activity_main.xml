@@ -10,22 +10,22 @@
         android:id="@+id/view_pager_2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/bottom_bar_layout"
         android:background="@color/white"/>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_bar_layout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="10dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:paddingBottom="10dp"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:orientation="horizontal"
         android:weightSum="2"
-        android:background="@color/main_color">
+        android:background="@drawable/tablet_rounded_square">
 
             <TextView
                 android:id="@+id/library_button_textview"
@@ -34,7 +34,8 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginRight="240dp"
+                android:layout_marginRight="280dp"
+                android:layout_marginLeft="20dp"
                 android:text="@string/library"
                 android:textColor="@color/text_gray"
                 android:textSize="17sp"
@@ -52,7 +53,8 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginLeft="240dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="280dp"
                 android:text="@string/my_artwork"
                 android:textColor="@color/text_gray"
                 android:textSize="17sp"

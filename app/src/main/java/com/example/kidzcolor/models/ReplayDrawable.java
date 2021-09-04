@@ -10,38 +10,27 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
-
 import androidx.annotation.Nullable;
-
-import com.example.kidzcolor.R;
 import com.example.kidzcolor.utils.Utils;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ReplayDrawable extends Drawable {
 
+    private int listSize;
+    private final List<PathModel> drawingList;
+    private final Paint outlinePaint;
 
-    private int drawIndex = -1;
-    private int listSize = 0;
-    private List<PathModel> pathsList;
-    private List<PathModel> drawingList;
-    private Paint outlinePaint;
-
-    private VectorModel vectorModel;
+    private final VectorModel vectorModel;
     private int width = -1, height = -1;
-    private int left = 0, top = 0;
-    private float offsetX = 0.0f, offsetY = 0.0f;
-    private float scaleX = 1.0f, scaleY = 1.0f;
-    private float scaleRatio, strokeRatio;
     private Matrix scaleMatrix;
     private int index = 0;
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public ReplayDrawable(VectorModelContainer vectorModel) {
         this.vectorModel = vectorModel;
+
+        List<PathModel> pathsList;
         pathsList = vectorModel.getColoredPathsHistory();
         drawingList = new ArrayList<>(pathsList.size());
 
@@ -100,9 +89,6 @@ public class ReplayDrawable extends Drawable {
 
         if (bounds.width() != 0 && bounds.height() != 0) {
 
-            left = bounds.left;
-            top = bounds.top;
-
             width = bounds.width();
             height = bounds.height();
 
@@ -131,8 +117,6 @@ public class ReplayDrawable extends Drawable {
         float heightRatio = height / vectorModel.getViewportHeight();
         float ratio = Math.min(widthRatio, heightRatio);
 
-        scaleRatio = ratio;
-
         scaleMatrix.postScale(ratio, ratio, width / 2, height / 2);
     }
 
@@ -141,62 +125,10 @@ public class ReplayDrawable extends Drawable {
     }
 
     private void scaleAllStrokes() {
+        float strokeRatio;
         strokeRatio = Math.min(width / vectorModel.getWidth(), height / vectorModel.getHeight());
         vectorModel.scaleAllStrokeWidth(strokeRatio);
     }
-
-    public void update() {
-        invalidateSelf();
-    }
-
-    public float getScaleRatio() {
-        return scaleRatio;
-    }
-
-    public float getStrokeRatio() {
-        return strokeRatio;
-    }
-
-    public Matrix getScaleMatrix() {
-        return scaleMatrix;
-    }
-
-    public float getOffsetX() {
-        return offsetX;
-    }
-
-    public void setOffsetX(float offsetX) {
-        this.offsetX = offsetX;
-        invalidateSelf();
-    }
-
-    public float getOffsetY() {
-        return offsetY;
-    }
-
-    public void setOffsetY(float offsetY) {
-        this.offsetY = offsetY;
-        invalidateSelf();
-    }
-
-    public float getScaleX() {
-        return scaleX;
-    }
-
-    public void setScaleX(float scaleX) {
-        this.scaleX = scaleX;
-        invalidateSelf();
-    }
-
-    public float getScaleY() {
-        return scaleY;
-    }
-
-    public void setScaleY(float scaleY) {
-        this.scaleY = scaleY;
-        invalidateSelf();
-    }
-
 
     @Override
     public void setAlpha(int alpha) {
@@ -212,4 +144,6 @@ public class ReplayDrawable extends Drawable {
     public int getOpacity() {
         return PixelFormat.TRANSPARENT;
     }
+
+
 }

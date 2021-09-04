@@ -7,7 +7,6 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,8 +49,8 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private VectorModelContainer vectorModelContainer;
     private VectorMasterDrawable vectorMasterDrawable;
     private RecyclerView colorsRecyclerView;
-    private int displayHeight;
-    private int displayWidth;
+    private int drawingHeight;
+    private int drawingWidth;
     private ColorPickerAdapter colorPickerAdapter;
     private KonfettiView konfettiView;
     private float xScale;
@@ -63,16 +62,9 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coloring);
 
-        //need to use layout measurment because getMetrics is deprecated
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        displayHeight = displayMetrics.heightPixels;
-        displayWidth = displayMetrics.widthPixels;
-
+        konfettiView  = findViewById(R.id.konfetti);
         coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
         observeModelFromRepository();
-
-        konfettiView  = findViewById(R.id.konfetti);
     }
 
     private void observeModelFromRepository() {
@@ -104,18 +96,21 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     private void initZoomageView() {
         vectorMasterDrawable = new VectorMasterDrawable(vectorModelContainer);
+        vectorMasterDrawable.setDrawHD();
         zoomageView = findViewById(R.id.zoomage_view);
         zoomageView.setImageDrawable(vectorMasterDrawable);
         zoomageView.post(new Runnable() {
             @Override
             public void run() {
                 vectorModelContainer.drawPatternMap();
+                drawingHeight = zoomageView.getHeight();
+                drawingWidth = zoomageView.getWidth();
                 zoomageView.setScaleType(ImageView.ScaleType.MATRIX);
                 zoomageView.setStartValues();
             }
         });
-        xScale = (float)displayWidth / (float)vectorMasterDrawable.getIntrinsicWidth();
-        yScale = (float)displayHeight / (float)vectorMasterDrawable.getIntrinsicHeight();
+        xScale = (float) drawingWidth / (float)vectorMasterDrawable.getIntrinsicWidth();
+        yScale = (float) drawingHeight / (float)vectorMasterDrawable.getIntrinsicHeight();
 
     }
 
@@ -137,8 +132,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                         float endX = event.getX();
                         float endY = event.getY();
 
-                        if (isAClick(startX, endX, startY, endY)) {
-
                             Matrix inverse = new Matrix();
                             zoomageview.getImageMatrix().invert(inverse);
                             float[] touchPoint = new float[] {endX, endY};
@@ -150,7 +143,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                             //vectorModel.setCircle(xCoord, yCoord);
 
                             paintSelectedCord(xCoord, yCoord);
-                        }
                        break;
                 }// end switch;
 
@@ -159,15 +151,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
         });//end setOnTouchListener
     }
-
-    private boolean isAClick(float startX, float endX, float startY, float endY) {
-
-        float differenceX = Math.abs(startX - endX);
-        float differenceY = Math.abs(startY - endY);
-
-        return !(differenceX > ViewConfiguration.get(getBaseContext()).getScaledTouchSlop()
-                || differenceY > ViewConfiguration.get(getBaseContext()).getScaledTouchSlop());
-    } // end isAClick
 
 
     private void paintSelectedCord(int xCoord, int yCoord) {
@@ -203,14 +186,13 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
                 ZoomageView zoom = zoomageView;
                 float scaleFactor = getZoomScaleFactor();
-                float x = (float)((xCenter * scaleFactor) - (displayWidth * 0.5));
-                float y = (float)((yCenter * scaleFactor) - (displayHeight * 0.5));
+                float x = (float)((xCenter * scaleFactor) - (drawingWidth * 0.5));
+                float y = (float)((yCenter * scaleFactor) - (drawingHeight * 0.5));
 
                 inverse.setScale(scaleFactor, scaleFactor);
                 inverse.postTranslate(-x, -y);
 
                 zoomageView.animateScaleAndTranslationToMatrix(inverse, 500);;
-                vectorModelContainer.setRectDraw(shadedPathBounds);
 
             }
 
@@ -226,7 +208,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
                 if(pathHeight > pathWidth) {
 
-                    float a = displayHeight / pathHeight;
+                    float a = drawingHeight / pathHeight;
 
                     zoomScale = a * 0.4f;
 
@@ -239,7 +221,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
                 } else {
 
-                    float a = displayWidth / pathWidth;
+                    float a = drawingWidth / pathWidth;
 
                     zoomScale = a * 0.5f;
 
@@ -251,43 +233,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                     return zoomScale;
 
                 }
-
-
-/*                if(pathHeight > pathWidth){
-
-                    if(pathHeight > (float)displayHeight / 8f)
-                        scaleDivider = 2f;
-                    else
-                        scaleDivider = 6f;
-
-                    zoomScale =
-                            (vectorMasterDrawable.getIntrinsicHeight() / pathHeight) * (yScale / scaleDivider);
-
-                    if(zoomScale > 5)
-                        zoomScale = 5;
-                    else if(zoomScale < yScale)
-                        zoomScale = yScale;
-
-                    return zoomScale;
-
-                } else {
-
-                    if(pathWidth > (float)displayWidth / 8f)
-                        scaleDivider = 2f;
-                    else
-                        scaleDivider = 6f;
-
-                    zoomScale =
-                            (vectorMasterDrawable.getIntrinsicWidth() / pathWidth) * (xScale / scaleDivider);
-
-                    if(zoomScale > 5)
-                        zoomScale = 5;
-                    else if(zoomScale < xScale)
-                        zoomScale = xScale;
-
-                    return zoomScale;
-                }*/
-
             }
         });
     }
@@ -324,6 +269,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     private void initRecylerView() {
         colorsRecyclerView = findViewById(R.id.coloring_recyclerView);
+        colorsRecyclerView.setHasFixedSize(true);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             colorsRecyclerView.setLayoutManager(
@@ -364,7 +310,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     @Override
     public void positionChanged(int newPosition) {
         vectorMasterDrawable.invalidateSelf();
-        colorsRecyclerView.scrollToPosition(newPosition);
+        colorsRecyclerView.smoothScrollToPosition(newPosition);
         //zoomageView.animateScaleAndTranslationToMatrix(zoomageView.getStartMatrix(), 500);
     }
 

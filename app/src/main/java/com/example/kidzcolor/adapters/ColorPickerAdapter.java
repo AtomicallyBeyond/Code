@@ -91,7 +91,9 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
 
         if(!colorKeys.isEmpty()) {
             colorKeys.remove(selectedPosition);
-            //onViewDetachedFromWindow(viewHolder);
+
+            if(viewHolder != null)
+                onViewDetachedFromWindow(viewHolder);
 
 
             if(selectedPosition > 0 || colorKeys.isEmpty())
