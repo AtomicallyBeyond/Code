@@ -27,32 +27,8 @@ public class LibraryViewModel extends AndroidViewModel {
         modelsProvider = ModelsProvider.getInstance(application);
     }
 
-/*    public void fetchUpdates() {
-        if(!isUpdated) {
-            LiveData<Resource<List<VectorEntity>>> liveUpdates = repository.fetchUpdates();
-            liveModelsList.addSource(liveUpdates, new Observer<Resource<List<VectorEntity>>>() {
-                @Override
-                public void onChanged(Resource<List<VectorEntity>> listResource) {
-                    liveModelsList.removeSource(liveUpdates);
-                    isUpdated = true;
-                    liveModelsList.setValue(listResource);
-                }
-            });
-        }
-    }*/
-
-    public void fetchMore(){
-
-        modelsProvider.fetchMore();
-/*        LiveData<Resource<List<VectorEntity>>> liveData = repository.fetchMore();
-
-        liveModelsList.addSource(liveData, new Observer<Resource<List<VectorEntity>>>() {
-            @Override
-            public void onChanged(Resource<List<VectorEntity>> listResource) {
-                liveModelsList.removeSource(liveData);
-                liveModelsList.setValue(listResource);
-            }
-        });*/
+    public void fetchModel(int modelID){
+        modelsProvider.fetchModel(modelID);
     }
 
     public LiveData<Resource<List<VectorEntity>>> getModelsList() { return  modelsProvider.getLibraryLiveList();}

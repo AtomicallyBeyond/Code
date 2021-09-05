@@ -94,4 +94,13 @@
 
     </RelativeLayout>
 
+    <com.example.loadinganimation.LoadingAnimation
+        android:id="@+id/main_progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="10dp"
+        app:barType="@drawable/rollround"
+        app:enlarge="10"/>
+
+
 </RelativeLayout>

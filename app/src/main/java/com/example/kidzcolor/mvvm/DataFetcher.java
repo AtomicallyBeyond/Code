@@ -89,7 +89,7 @@ public abstract class DataFetcher {
                             }
                         });
                     }
-                } else if(!firestoreQueryLiveData.success) {
+                } else {
                     results.addSource(dbSource, new Observer<List<VectorEntity>>() {
                         @Override
                         public void onChanged(List<VectorEntity> vectorEntities) {

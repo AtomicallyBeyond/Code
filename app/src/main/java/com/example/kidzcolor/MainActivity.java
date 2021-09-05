@@ -1,6 +1,7 @@
 package com.example.kidzcolor;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.transition.Fade;
 import androidx.transition.Transition;
@@ -14,8 +15,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.kidzcolor.adapters.ViewPagerAdapter;
+import com.example.kidzcolor.mvvm.Resource;
 import com.example.kidzcolor.mvvm.viewmodels.MainActivityViewModel;
+import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.PaintProvider;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,12 +38,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        mainViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        subscribeObserver();
         init();
     }
 
+    private void subscribeObserver() {
+        mainViewModel.initializeLibrary().observe(this, new Observer<Resource<List<VectorEntity>>>() {
+            @Override
+            public void onChanged(Resource<List<VectorEntity>> listResource) {
+                findViewById(R.id.main_progressbar).setVisibility(View.GONE);
+                libraryTextview.setOnClickListener(libraryOnClickListener);
+                artworkTextview.setOnClickListener(artworkOnClickListener);
+            }
+        });
+    }
+
     private void init() {
-        mainViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
         PaintProvider.createPaint();
         PaintProvider.createHDPaint();
@@ -55,9 +71,6 @@ public class MainActivity extends AppCompatActivity {
             textColor = getResources().getColor(R.color.text_gray);
             highlightedTextColor = getResources().getColor(R.color.highlighted_text);
         }
-
-        libraryTextview.setOnClickListener(libraryOnClickListener);
-        artworkTextview.setOnClickListener(artworkOnClickListener);
 
         viewPager2 = findViewById(R.id.view_pager_2);
         viewPager2.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);

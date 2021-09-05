@@ -11,6 +11,9 @@ import java.util.List;
 public interface ModelDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertSingleModel(VectorEntity vectorEntity);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertVectorModels(VectorEntity... vectorEntities);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -8,6 +8,9 @@ import androidx.room.Query;
 @Dao
 public interface BackupModelDao {
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertSingleModel(VectorEntity vectorEntity);
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertVectorModels(BackupVector... vectorEntities);
 

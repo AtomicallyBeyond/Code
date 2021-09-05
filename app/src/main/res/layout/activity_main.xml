@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager_2"
         android:layout_width="match_parent"
@@ -92,5 +93,13 @@
             android:importantForAccessibility="no"/>
 
 </RelativeLayout>
+
+    <com.example.loadinganimation.LoadingAnimation
+        android:id="@+id/main_progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="10dp"
+        app:barType="@drawable/rollround"
+        app:enlarge="10"/>
 
 </RelativeLayout>

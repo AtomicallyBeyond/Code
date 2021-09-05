@@ -3,6 +3,9 @@ package com.example.kidzcolor.mvvm.repository;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
+
+import com.example.kidzcolor.mvvm.ModelFetcher;
+import com.example.kidzcolor.mvvm.SingleResource;
 import com.example.kidzcolor.utils.AppExecutors;
 import com.example.kidzcolor.firestore.FirestoreQueryLiveData;
 import com.example.kidzcolor.mvvm.DataFetcher;
@@ -81,40 +84,23 @@ public class Repository {
         }.getAsLiveData();
     }
 
-    public LiveData<Resource<List<VectorEntity>>> fetchMore() {
-        return new DataFetcher(AppExecutors.getInstance()){
+    public LiveData<SingleResource> fetchModel(int modelID) {
+        return new ModelFetcher(modelID, AppExecutors.getInstance()) {
 
             @Override
-            protected void saveCallResult(QuerySnapshot queryDocumentSnapshots) {
-                saveToCache(queryDocumentSnapshots);
-            }
-
-            @Override
-            protected boolean shouldFetch() {
-                if(!sharedPrefs.getEndReached())
-                    return true;
-                return false;
+            protected void saveCallResult(VectorEntity vectorEntity) {
+                modelDao.insertSingleModel(vectorEntity);
+                backupModelDao.insertSingleModel(vectorEntity);
             }
 
             @NonNull
             @NotNull
             @Override
-            protected LiveData<List<VectorEntity>> loadFromDb() {
-                return modelDao.getModels();
-            }
-
-            @NonNull
-            @NotNull
-            @Override
-            protected FirestoreQueryLiveData createCall() {
-
+            protected FirestoreQueryLiveData createCall(int modelID) {
                 Query query = getFireCollectionReference()
-                        .orderBy("id", Query.Direction.DESCENDING)
-                        .whereLessThan("id", sharedPrefs.getLastVisible())
-                        .limit(FETCH_COUNT);
+                        .whereEqualTo("id", modelID);
                 return new FirestoreQueryLiveData(query);
             }
-
         }.getAsLiveData();
     }
 

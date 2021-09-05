@@ -1,14 +1,13 @@
 package com.example.kidzcolor;
 
 import android.content.Context;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
-
 import com.example.kidzcolor.mvvm.Resource;
 import com.example.kidzcolor.mvvm.SingleLiveEvent;
+import com.example.kidzcolor.mvvm.SingleResource;
 import com.example.kidzcolor.mvvm.repository.Repository;
 import com.example.kidzcolor.persistance.BackupModelDao;
 import com.example.kidzcolor.persistance.BackupVector;
@@ -16,13 +15,14 @@ import com.example.kidzcolor.persistance.ModelDao;
 import com.example.kidzcolor.persistance.ModelsDatabase;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.AppExecutors;
-
+import com.example.kidzcolor.utils.SharedPrefs;
 import java.util.HashMap;
 import java.util.List;
 
 public class ModelsProvider {
 
     private static ModelsProvider instance;
+    private final SharedPrefs sharedPrefs;
     private final Repository repository;
     private final ModelDao modelDao;
     private final BackupModelDao backupModelDao;
@@ -40,6 +40,7 @@ public class ModelsProvider {
     }
 
     public ModelsProvider(Context context){
+        sharedPrefs = SharedPrefs.getInstance(context);
         repository = Repository.getInstance(context);
         modelDao = ModelsDatabase.getInstance(context).getModelsDao();
         backupModelDao = ModelsDatabase.getInstance(context).getBackupModelsDao();
@@ -156,17 +157,32 @@ public class ModelsProvider {
             });
     }
 
-    public void fetchMore(){
 
-        LiveData<Resource<List<VectorEntity>>> liveData = repository.fetchMore();
+    public void fetchModel(int modelID) {
 
-        libraryLiveData.addSource(liveData, new Observer<Resource<List<VectorEntity>>>() {
+        LiveData<SingleResource> liveData = repository.fetchModel(modelID);
+
+        libraryLiveData.addSource(liveData, new Observer<SingleResource>() {
             @Override
-            public void onChanged(Resource<List<VectorEntity>> listResource) {
-                libraryLiveData.removeSource(liveData);
-                libraryLiveData.setValue(listResource);
+            public void onChanged(SingleResource singleResource) {
+                if(singleResource.status == SingleResource.Status.LOADING) {
+
+                    libraryLiveData.getValue().data.add(singleResource.getVectorEntity());
+                    libraryLiveData.setValue(libraryLiveData.getValue());
+
+                } else if(singleResource.status == SingleResource.Status.SUCCESS) {
+
+                    libraryLiveData.removeSource(liveData);
+                    libraryLiveData.setValue(libraryLiveData.getValue());
+
+                    if(singleResource.getVectorEntity().getId() == 1)
+                        sharedPrefs.setEndReached(true);
+
+
+                }
             }
         });
+
     }
 
     public LiveData<Resource<List<VectorEntity>>> getLibraryLiveList() { return  libraryLiveData;}

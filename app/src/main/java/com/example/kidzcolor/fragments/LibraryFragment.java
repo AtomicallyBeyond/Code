@@ -33,7 +33,6 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
     private LibraryViewModel libraryViewModel;
     private ModelsAdapter modelsAdapter;
     private GridLayoutManager gridLayoutManager;
-    private boolean shouldFetch;
     private SharedPrefs sharedPrefs;
 
     public LibraryFragment() {
@@ -73,7 +72,7 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
             gridLayoutManager = new GridLayoutManager(getContext(), 3);
 
         recyclerView.setLayoutManager(gridLayoutManager);
-        modelsAdapter = new ModelsAdapter(sharedPrefs, this, orientation);
+        modelsAdapter = new ModelsAdapter(this, orientation);
         recyclerView.setAdapter(modelsAdapter);
     }
 
@@ -82,8 +81,6 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
                 .getModelsList().observe(getViewLifecycleOwner(), new Observer<Resource<List<VectorEntity>>>() {
             @Override
             public void onChanged(Resource<List<VectorEntity>> listResource) {
-                shouldFetch = true;
-
                 if(listResource.data != null) {
                     switch (listResource.status){
                         case SUCCESS:
@@ -91,7 +88,7 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
                             break;
                         case ERROR:
                             modelsAdapter.setModelsList(listResource.data);
-                            Toast.makeText(getActivity(), listResource.message, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), listResource.message, Toast.LENGTH_SHORT).show();
                             break;
                     }
                 }
@@ -108,27 +105,22 @@ public class LibraryFragment extends Fragment implements StartColoringActivity {
     }
 
     private void observeRecyclerView() {
+
         RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
 
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if(!sharedPrefs.getEndReached()) {
-                    int firstVisibleItem = gridLayoutManager.findFirstVisibleItemPosition();
-                    int visibleItemCount = gridLayoutManager.getChildCount();
-                    int totalItemCount = gridLayoutManager.getItemCount();
+                int lastVisible = modelsAdapter.getLastVisible();
 
-                    //should i put shouldFetch in first if statement?
-                    if((shouldFetch && (firstVisibleItem + visibleItemCount) > (totalItemCount - 4))) {
-                        shouldFetch = false;
-                        libraryViewModel.fetchMore();
-                    }
+                if(lastVisible > 1) {
+                    lastVisible--;
+                    libraryViewModel.fetchModel(lastVisible);
                 }
             }
         };
 
-        if(!sharedPrefs.getEndReached())
             recyclerView.addOnScrollListener(onScrollListener);
     }
 

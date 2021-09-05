@@ -26,7 +26,6 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
     private ResetModelListener resetModelListener;
     private List<VectorEntity> modelsList = new ArrayList<>();
     private int orientation;
-    private VectorMasterDrawable tempVectorDrawable;
 
     public MyColorsAdapter(StartColoringActivity startColoringActivity, ResetModelListener resetModelListener, int orientation) {
         this.startColoringActivity = startColoringActivity;

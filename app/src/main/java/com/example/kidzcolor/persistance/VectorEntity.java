@@ -29,6 +29,13 @@ public class VectorEntity {
         return vectorMasterDrawable;
     }
 
+    @Ignore
+    public boolean isModelLoaded() {
+        if(vectorMasterDrawable == null)
+            return false;
+        return true;
+    }
+
     public VectorEntity() {
 
     }

@@ -22,6 +22,7 @@ public class FirestoreQueryLiveData extends LiveData<QuerySnapshot> {
     protected void onActive() {
         super.onActive();
 
+
         query.get(Source.SERVER).addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
