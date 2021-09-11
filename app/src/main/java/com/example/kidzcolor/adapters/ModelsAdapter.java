@@ -5,42 +5,46 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.kidzcolor.R;
+import com.example.kidzcolor.interfaces.FetchModelListener;
 import com.example.kidzcolor.interfaces.StartColoringActivity;
 import com.example.kidzcolor.persistance.VectorEntity;
-import com.example.kidzcolor.utils.SharedPrefs;
 import com.example.kidzcolor.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ModelsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder> {
 
-    private static final int COMPLETED_TYPE = 1;
-    private static final int LOADING_TYPE = 2;
-
-    private int lastVisible = 0;
     private final int orientation;
-    private VectorEntity tempVectorEntity;
     private List<VectorEntity> modelsList = new ArrayList<>();
     private final StartColoringActivity startColoringActivity;
+    private final FetchModelListener fetchModelListener;
 
 
-    public ModelsAdapter(StartColoringActivity startColoringActivity, int orientation) {
+    public ModelsAdapter(StartColoringActivity startColoringActivity, FetchModelListener fetchModelListener, int orientation) {
         this.startColoringActivity = startColoringActivity;
         this.orientation = orientation;
+        this.fetchModelListener = fetchModelListener;
     }
 
     @NonNull
     @NotNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+    public ModelsAdapter.ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
 
-        View view = null;
+        View view = LayoutInflater
+                .from(parent.getContext())
+                .inflate(R.layout.vector_model_item, parent, false);
+        view.setLayoutParams(getLayoutParams(view, parent));
+        return new ViewHolder(view);
+
+/*        View view = null;
 
         if(viewType == COMPLETED_TYPE) {
             view = LayoutInflater
@@ -57,7 +61,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     .inflate(R.layout.vector_model_loading, parent, false);
             view.setLayoutParams(getLayoutParams(view, parent));
             return new LoadingViewHolder(view);
-        }
+        }*/
 
     }
 
@@ -77,22 +81,29 @@ public class ModelsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(@NonNull @NotNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull @NotNull ModelsAdapter.ViewHolder holder, int position) {
 
-        if(getItemViewType(position) == COMPLETED_TYPE) {
-            ((ViewHolder)holder).imageView.setImageDrawable(modelsList.get(position).getDrawable());
+        if(modelsList.get(position).isModelLoaded()) {
+
+            if(holder.isLoading){
+                holder.progressBar.setVisibility(View.GONE);
+                holder.imageView.setVisibility(View.VISIBLE);
+                holder.isLoading = false;
+            }
+
+            holder.imageView.setImageDrawable(modelsList.get(position).getDrawable());
+
+        } else {
+
+            if(!holder.isLoading){
+                holder.imageView.setVisibility(View.GONE);
+                holder.progressBar.setVisibility(View.VISIBLE);
+                holder.isLoading = true;
+            }
+
+            fetchModelListener.fetchModel(modelsList.get(position), position);
         }
 
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        tempVectorEntity = modelsList.get(position);
-
-        if(tempVectorEntity.isModelLoaded())
-            return COMPLETED_TYPE;
-        else
-            return LOADING_TYPE;
     }
 
     @Override
@@ -105,17 +116,21 @@ public class ModelsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         notifyDataSetChanged();
     }
 
-    public int getLastVisible() {
-        return modelsList.get(modelsList.size() - 1).getId();
+    public void setModel(VectorEntity vectorEntity, int position){
+        modelsList.set(position, vectorEntity);
+        notifyItemChanged(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private final ImageView imageView;
+        protected final ImageView imageView;
+        protected final ProgressBar progressBar;
+        protected Boolean isLoading = true;
 
         public ViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.main_imageview);
+            progressBar = itemView.findViewById(R.id.progress_bar);
 
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override

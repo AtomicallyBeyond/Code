@@ -26,7 +26,7 @@ public class MyColorsViewModel extends AndroidViewModel {
     }
 
     public LiveData<HashMap<Integer, VectorEntity>> getModelsList() {
-        return modelsProvider.getStudioLiveList();
+        return modelsProvider.getArtworkLiveList();
     }
 
     public void setCurrentVectorModel(VectorEntity vectorEntity){

@@ -5,9 +5,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
-import com.example.kidzcolor.mvvm.Resource;
+import com.example.kidzcolor.firestore.FirestoreMap;
+import com.example.kidzcolor.mvvm.ModelResource;
 import com.example.kidzcolor.mvvm.SingleLiveEvent;
-import com.example.kidzcolor.mvvm.SingleResource;
 import com.example.kidzcolor.mvvm.repository.Repository;
 import com.example.kidzcolor.persistance.BackupModelDao;
 import com.example.kidzcolor.persistance.BackupVector;
@@ -15,21 +15,24 @@ import com.example.kidzcolor.persistance.ModelDao;
 import com.example.kidzcolor.persistance.ModelsDatabase;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.AppExecutors;
-import com.example.kidzcolor.utils.SharedPrefs;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 public class ModelsProvider {
 
     private static ModelsProvider instance;
-    private final SharedPrefs sharedPrefs;
     private final Repository repository;
     private final ModelDao modelDao;
     private final BackupModelDao backupModelDao;
+    private final AppExecutors appExecutors;
     private VectorEntity selectedVectorEntity;
     private final SingleLiveEvent<Boolean> vectorModelChanged = new SingleLiveEvent<>();
-    private final MediatorLiveData<Resource<List<VectorEntity>>> libraryLiveData = new MediatorLiveData<>();
     private final MediatorLiveData<HashMap<Integer, VectorEntity>> artworkLivedata = new MediatorLiveData<>();
+    private MediatorLiveData<List<VectorEntity>> liveModels = new MediatorLiveData<>();
+    private MediatorLiveData<ModelResource> liveAdapterUpdater = new MediatorLiveData<>();
+    private MediatorLiveData<Boolean> removeLoading = new MediatorLiveData<>();
 
 
     public static ModelsProvider getInstance(Context context){
@@ -39,25 +42,140 @@ public class ModelsProvider {
         return instance;
     }
 
+
     public ModelsProvider(Context context){
-        sharedPrefs = SharedPrefs.getInstance(context);
         repository = Repository.getInstance(context);
         modelDao = ModelsDatabase.getInstance(context).getModelsDao();
         backupModelDao = ModelsDatabase.getInstance(context).getBackupModelsDao();
-        fetchUpdates();
+        appExecutors = AppExecutors.getInstance();
+        initializeModelProvider();
+
+    }
+
+
+    public void initializeModelProvider(){
+        LiveData<FirestoreMap> liveMap = repository.fetchFirestoreMap();
+
+        liveModels.addSource(liveMap, new Observer<FirestoreMap>() {
+            @Override
+            public void onChanged(FirestoreMap firestoreMap) {
+
+                if(firestoreMap != null) {
+                    liveModels.removeSource(liveMap);
+
+                    appExecutors.diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            firestoreMap.index.removeAll(modelDao.getAllIds());
+                            List<VectorEntity> emptyModels = new ArrayList<>(firestoreMap.index.size());
+
+                            for(Integer id : firestoreMap.index) {
+                                emptyModels.add(new VectorEntity(id));
+                            }
+
+                            List<VectorEntity> databaseModels = modelDao.getModels();
+                            HashMap<Integer, VectorEntity> artworkHashMap = new HashMap<>();
+
+                            for(VectorEntity vectorEntity : databaseModels){
+                                if(vectorEntity.isInProgress()) {
+                                    artworkHashMap.put(vectorEntity.getId(), vectorEntity);
+                                }
+                            }
+
+                            databaseModels.addAll(emptyModels);
+                            Collections.shuffle(databaseModels);
+
+                            appExecutors.mainThread().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    artworkLivedata.setValue(artworkHashMap);
+                                    liveModels.setValue(databaseModels);
+                                    removeLoading.setValue(true);
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    appExecutors.diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            List<VectorEntity> databaseModels = modelDao.getModels();
+                            HashMap<Integer, VectorEntity> artworkHashMap = new HashMap<>();
+
+                            for(VectorEntity vectorEntity : databaseModels){
+                                if(vectorEntity.isInProgress()) {
+                                    artworkHashMap.put(vectorEntity.getId(), vectorEntity);
+                                }
+                            }
+
+                            Collections.shuffle(databaseModels);
+
+                            appExecutors.mainThread().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    artworkLivedata.setValue(artworkHashMap);
+                                    liveModels.setValue(databaseModels);
+                                    removeLoading.setValue(true);
+                                }
+                            });
+                        }
+                    });
+                }
+
+            }
+        });
+    }
+
+
+    public void fetchModelWithEntity(VectorEntity vectorEntity, int position) {
+
+        LiveData<VectorEntity> liveData = repository.fetchModelWithEntity(vectorEntity);
+
+        liveAdapterUpdater.addSource(liveData, new Observer<VectorEntity>() {
+            @Override
+            public void onChanged(VectorEntity vectorEntity) {
+                liveAdapterUpdater.removeSource(liveData);
+
+                if(vectorEntity != null) {
+                    ModelResource modelResource = new ModelResource();
+                    modelResource.vectorEntity = vectorEntity;
+                    modelResource.position = position;
+                    liveAdapterUpdater.setValue(modelResource);
+                } else
+                    liveAdapterUpdater.setValue(null);
+            }
+        });
+    }
+
+
+    public LiveData<List<VectorEntity>> fetchLiveModels() {return liveModels;}
+
+    public LiveData<Boolean> getRemoveLoading(){
+        return removeLoading;
+    }
+
+    public LiveData<ModelResource> getAdapterUpdater() {
+        return liveAdapterUpdater;
     }
 
     public SingleLiveEvent<Boolean> getVectorModelChanged() {
         return vectorModelChanged;
     }
 
-    public void setSelectedVectorModel(VectorEntity selectedVectorModel) {
-        selectedVectorEntity = selectedVectorModel;
-    }
+    public LiveData<HashMap<Integer, VectorEntity>> getArtworkLiveList() { return artworkLivedata; }
 
     public VectorEntity getSelectedVectorModel() {
         return selectedVectorEntity;
     }
+
+    public void setSelectedVectorModel(VectorEntity selectedVectorModel) {
+        selectedVectorEntity = selectedVectorModel;
+    }
+
+    public void notifyVectorModelChange(boolean modelHasChanged){
+        vectorModelChanged.setValue(modelHasChanged);
+    }
+
 
     public LiveData<VectorEntity> resetSelectedVectorModel(){
 
@@ -86,6 +204,7 @@ public class ModelsProvider {
         return liveData;
     }
 
+
     public void resetVectorModel(VectorEntity vectorEntity) {
 
         if(artworkLivedata.getValue().containsKey(vectorEntity.getId()))
@@ -104,9 +223,6 @@ public class ModelsProvider {
         });
     }
 
-    public void notifyVectorModelChange(boolean modelHasChanged){
-        vectorModelChanged.setValue(modelHasChanged);
-    }
 
     public void saveSelectedVectorModel() {
         vectorModelChanged.setValue(true);
@@ -135,63 +251,5 @@ public class ModelsProvider {
             }
         });
     }
-
-    private void fetchUpdates() {
-        LiveData<Resource<List<VectorEntity>>> liveUpdates = repository.fetchUpdates();
-        libraryLiveData.addSource(liveUpdates, new Observer<Resource<List<VectorEntity>>>() {
-                @Override
-                public void onChanged(Resource<List<VectorEntity>> listResource) {
-                    libraryLiveData.removeSource(liveUpdates);
-
-                    HashMap<Integer, VectorEntity> temp = new HashMap<>();
-
-                    for(VectorEntity vectorEntity : listResource.data){
-                        if(vectorEntity.isInProgress()) {
-                            temp.put(vectorEntity.getId(), vectorEntity);
-                        }
-                    }
-
-                    artworkLivedata.setValue(temp);
-                    libraryLiveData.setValue(listResource);
-                }
-            });
-    }
-
-
-    public void fetchModel(int modelID) {
-
-        LiveData<SingleResource> liveData = repository.fetchModel(modelID);
-
-        libraryLiveData.addSource(liveData, new Observer<SingleResource>() {
-            @Override
-            public void onChanged(SingleResource singleResource) {
-                if(singleResource.status == SingleResource.Status.LOADING) {
-
-                    libraryLiveData.getValue().data.add(singleResource.getVectorEntity());
-                    libraryLiveData.setValue(libraryLiveData.getValue());
-
-                } else if(singleResource.status == SingleResource.Status.SUCCESS) {
-
-                    libraryLiveData.removeSource(liveData);
-                    libraryLiveData.setValue(libraryLiveData.getValue());
-
-                    if(singleResource.getVectorEntity().getId() == 1)
-                        sharedPrefs.setEndReached(true);
-
-
-                }
-            }
-        });
-
-    }
-
-    public LiveData<Resource<List<VectorEntity>>> getLibraryLiveList() { return  libraryLiveData;}
-
-
-    public LiveData<HashMap<Integer, VectorEntity>> getStudioLiveList() {
-        return artworkLivedata;
-    }
-
-
 
 }

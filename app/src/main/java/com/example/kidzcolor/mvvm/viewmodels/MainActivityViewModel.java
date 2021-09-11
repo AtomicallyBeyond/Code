@@ -7,12 +7,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import com.example.kidzcolor.ModelsProvider;
-import com.example.kidzcolor.mvvm.Resource;
-import com.example.kidzcolor.persistance.VectorEntity;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class MainActivityViewModel extends AndroidViewModel {
 
@@ -25,8 +21,8 @@ public class MainActivityViewModel extends AndroidViewModel {
         modelsProvider = ModelsProvider.getInstance(application);
     }
 
-    public LiveData<Resource<List<VectorEntity>>> initializeLibrary() {
-        return modelsProvider.getLibraryLiveList();
+    public LiveData<Boolean> removeLoading(){
+        return modelsProvider.getRemoveLoading();
     }
 
     public boolean isLibraryCurrent() {

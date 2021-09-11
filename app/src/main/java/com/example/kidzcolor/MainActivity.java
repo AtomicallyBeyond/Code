@@ -15,12 +15,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.kidzcolor.adapters.ViewPagerAdapter;
-import com.example.kidzcolor.mvvm.Resource;
 import com.example.kidzcolor.mvvm.viewmodels.MainActivityViewModel;
-import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.PaintProvider;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void subscribeObserver() {
-        mainViewModel.initializeLibrary().observe(this, new Observer<Resource<List<VectorEntity>>>() {
+        mainViewModel.removeLoading().observe(this, new Observer<Boolean>() {
             @Override
-            public void onChanged(Resource<List<VectorEntity>> listResource) {
+            public void onChanged(Boolean aBoolean) {
                 findViewById(R.id.main_progressbar).setVisibility(View.GONE);
                 libraryTextview.setOnClickListener(libraryOnClickListener);
                 artworkTextview.setOnClickListener(artworkOnClickListener);

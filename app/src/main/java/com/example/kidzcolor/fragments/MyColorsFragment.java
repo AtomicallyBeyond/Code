@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.example.kidzcolor.ColoringActivity;
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.adapters.MyColorsAdapter;

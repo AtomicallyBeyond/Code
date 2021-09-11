@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.interfaces.ResetModelListener;
 import com.example.kidzcolor.interfaces.StartColoringActivity;
-import com.example.kidzcolor.models.VectorMasterDrawable;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.example.kidzcolor.utils.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -22,10 +21,10 @@ import java.util.List;
 
 public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColorsViewHolder> {
 
-    private StartColoringActivity startColoringActivity;
-    private ResetModelListener resetModelListener;
-    private List<VectorEntity> modelsList = new ArrayList<>();
-    private int orientation;
+    private final StartColoringActivity startColoringActivity;
+    private final ResetModelListener resetModelListener;
+    private final List<VectorEntity> modelsList = new ArrayList<>();
+    private final int orientation;
 
     public MyColorsAdapter(StartColoringActivity startColoringActivity, ResetModelListener resetModelListener, int orientation) {
         this.startColoringActivity = startColoringActivity;
@@ -75,13 +74,13 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
 
     protected class MyColorsViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView imageView;
-        private ImageButton imageButton;
+        private final ImageView imageView;
 
         public MyColorsViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
+
             imageView = itemView.findViewById(R.id.main_imageview);
-            imageButton = itemView.findViewById(R.id.remove_button);
+            final ImageButton imageButton = itemView.findViewById(R.id.remove_button);
 
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override

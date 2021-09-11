@@ -40,6 +40,10 @@ public class VectorEntity {
 
     }
 
+    public VectorEntity(int id) {
+        this.id = id;
+    }
+
     public VectorEntity(BackupVector savedVector) {
         id = savedVector.getSavedID();
         model = savedVector.getModel();

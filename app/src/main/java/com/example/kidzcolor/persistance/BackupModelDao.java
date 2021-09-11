@@ -9,7 +9,7 @@ import androidx.room.Query;
 public interface BackupModelDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertSingleModel(VectorEntity vectorEntity);
+    void insertSingleModel(BackupVector backupVector);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertVectorModels(BackupVector... vectorEntities);

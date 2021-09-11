@@ -10,25 +10,23 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.kidzcolor.interfaces.FinishedColoringListener;
 import com.example.kidzcolor.interfaces.PositionListener;
 import com.example.kidzcolor.R;
 import com.example.kidzcolor.interfaces.ColorDepletedListener;
 import com.example.kidzcolor.models.CircleColorDrawable;
 import com.example.kidzcolor.models.VectorModelContainer;
-
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.ViewHolder> implements ColorDepletedListener {
 
-    private Context context;
-    private List<Integer> colorKeys;
-    private VectorModelContainer vectorModelContainer;
-    private ArrayList<PositionListener> positionListeners;
-    private FinishedColoringListener finishedColoringListener;
+    private final Context context;
+    private final List<Integer> colorKeys;
+    private final VectorModelContainer vectorModelContainer;
+    private final ArrayList<PositionListener> positionListeners;
+    private final FinishedColoringListener finishedColoringListener;
     private ViewHolder viewHolder = null;
     private int selectedPosition = 0;
 

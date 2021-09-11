@@ -23,12 +23,11 @@ public class PathModel {
     private final int strokeColor;
     private int fillColorStatus;
     private int patternColor;
-    private float strokeWidth;
+    private final float strokeWidth;
     private float strokeRatio;
     private final float trimPathStart, trimPathEnd, trimPathOffset;
     private Path originalPath;
     private Path path;
-    private Path trimmedPath;
     private Paint pathPaint;
     private Path.FillType fillType;
     private boolean isFillAndStroke = false;
@@ -127,11 +126,13 @@ public class PathModel {
 
     public void transform(Matrix matrix) {
         scaleMatrix = matrix;
-
         trimPath();
     }
 
     public void trimPath() {
+
+        Path trimmedPath;
+
         if (scaleMatrix != null) {
             if (trimPathStart == 0 && trimPathEnd == 1 && trimPathOffset == 0) {
                 path = new Path(originalPath);

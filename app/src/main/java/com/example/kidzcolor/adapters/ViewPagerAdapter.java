@@ -32,7 +32,7 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
                 return myColorsFragment;
         }
 
-        return null;
+        return libraryFragment;
     }
 
     @Override

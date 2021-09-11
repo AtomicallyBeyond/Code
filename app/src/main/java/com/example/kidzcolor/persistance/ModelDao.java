@@ -20,8 +20,14 @@ public interface ModelDao {
     void insertVector(VectorEntity vectorEntity);
 
     @Query("SELECT * FROM models ORDER BY id DESC")
-    LiveData<List<VectorEntity>> getModels();
+    LiveData<List<VectorEntity>> getModelsLive();
+
+    @Query("SELECT * FROM models ORDER BY id DESC")
+    List<VectorEntity> getModels();
 
     @Query("SELECT * FROM models WHERE in_progress=1 ORDER BY id DESC")
     List<VectorEntity> getModelsInProgress();
+
+    @Query("SELECT id FROM models")
+    List<Integer> getAllIds();
 }

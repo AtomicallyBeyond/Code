@@ -12,6 +12,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
-            android:background="@color/white"/>
+            android:background="@color/white"
+            android:visibility="gone"/>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:indeterminateDrawable="@drawable/progressbar_custom"/>
 
 </androidx.cardview.widget.CardView>

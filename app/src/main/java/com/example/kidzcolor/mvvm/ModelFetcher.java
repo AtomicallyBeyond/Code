@@ -9,41 +9,40 @@ import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
+
 import com.example.kidzcolor.utils.AppExecutors;
 import com.example.kidzcolor.firestore.FirestoreQueryLiveData;
 import com.example.kidzcolor.persistance.VectorEntity;
 import com.google.firebase.firestore.QuerySnapshot;
 
 public abstract class ModelFetcher {
-    private final int modelID;
+    private VectorEntity vectorEntity;
     private final AppExecutors appExecutors;
-    private final MediatorLiveData<SingleResource> liveVectorEntity = new MediatorLiveData<>();
+    private final MediatorLiveData<VectorEntity> liveVectorEntity = new MediatorLiveData<>();
 
-    public ModelFetcher(int modelID, AppExecutors appExecutors) {
-        this.modelID = modelID;
+    public ModelFetcher(VectorEntity vectorEntity, AppExecutors appExecutors) {
+        this.vectorEntity = vectorEntity;
         this.appExecutors = appExecutors;
-        init();
-    }
-
-    private void init() {
-        SingleResource singleResource = new SingleResource(modelID);
-        liveVectorEntity.setValue(singleResource.loading());
         fetchFromFirestore();
     }
 
+
+
     private void fetchFromFirestore() {
-        FirestoreQueryLiveData firestoreQueryLiveData = createCall(modelID);
+        FirestoreQueryLiveData firestoreQueryLiveData = createCall(vectorEntity.getId());
 
         liveVectorEntity.addSource(firestoreQueryLiveData, new Observer<QuerySnapshot>() {
             @Override
             public void onChanged(QuerySnapshot queryDocumentSnapshots) {
+
 
                 if(firestoreQueryLiveData.success){
 
                     if(queryDocumentSnapshots != null) {
 
                         if(queryDocumentSnapshots.size() == 0) {
-                            liveVectorEntity.setValue(liveVectorEntity.getValue().error());
+                            liveVectorEntity.removeSource(firestoreQueryLiveData);
+                            liveVectorEntity.setValue(null);
                             return;
                         }
 
@@ -51,7 +50,7 @@ public abstract class ModelFetcher {
                             @Override
                             public void run() {
 
-                                VectorEntity vectorEntity = queryDocumentSnapshots
+                                ModelFetcher.this.vectorEntity = queryDocumentSnapshots
                                         .getDocuments()
                                         .get(0)
                                         .toObject(VectorEntity.class);
@@ -62,10 +61,9 @@ public abstract class ModelFetcher {
                                 appExecutors.mainThread().execute(new Runnable() {
                                     @Override
                                     public void run() {
+                                        liveVectorEntity.removeSource(firestoreQueryLiveData);
+                                        liveVectorEntity.setValue(vectorEntity);
 
-                                        liveVectorEntity.getValue().success(vectorEntity.getModel());
-                                        /*liveVectorEntity
-                                                .setValue(liveVectorEntity.getValue().success(vectorEntity.getModel()))*/;
                                     }
                                 });
                             }
@@ -95,7 +93,7 @@ public abstract class ModelFetcher {
 
     // Returns a LiveData object that represents the resource that's implemented
     // in the base class.
-    public final LiveData<SingleResource> getAsLiveData(){
+    public final LiveData<VectorEntity> getAsLiveData(){
         return liveVectorEntity;
     }
 
