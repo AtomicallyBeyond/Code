@@ -1,18 +1,19 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
 }
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    buildToolsVersion "31.0.0"
 
     defaultConfig {
-        applicationId "com.example.kidzcolor"
+        applicationId "com.digitalartsplayground.easycolor"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "2.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,6 +44,15 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
+
+    implementation platform('com.google.firebase:firebase-bom:28.4.1')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-firestore'
+
+
+
     //Loading Animation
     implementation 'com.github.Marvel999:Android-Loading-Animation:1.0.0'
 
@@ -51,9 +61,6 @@ dependencies {
 
     //Coordinatelayout
     implementation "androidx.coordinatorlayout:coordinatorlayout:1.1.0"
-
-    //Firebase
-    implementation 'com.google.firebase:firebase-firestore:23.0.2'
 
     //Room Persistence
     implementation "androidx.room:room-rxjava2:$room_version"

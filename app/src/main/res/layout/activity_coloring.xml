@@ -16,7 +16,7 @@
         app:layout_constraintRight_toRightOf="parent"
         android:background="@drawable/ic_square_gradient_horizontal"/>
 
-    <com.example.kidzcolor.zoomageview.ZoomageView
+    <com.digitalartsplayground.easycolor.zoomageview.ZoomageView
         android:id="@+id/zoomage_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -27,18 +27,6 @@
         app:zoomage_restrictBounds="false"
         app:zoomage_autoCenter="false"
         app:zoomage_maxScale="40"/>
-
-    <ImageView
-        android:id="@+id/coloring_imageview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toTopOf="@id/coloring_recyclerView"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"
-        android:importantForAccessibility="no"/>
-
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -90,17 +78,33 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ImageButton
-        android:id="@+id/coloring_hint_button"
+    <RelativeLayout
+        android:id="@+id/hint_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginRight="10dp"
-        android:src="@drawable/ic_lightening_2"
-        android:backgroundTint="#00FFFFFF"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:importantForAccessibility="no"/>
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="14dp">
+
+        <ImageButton
+            android:id="@+id/coloring_hint_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_lightening_2"
+            android:backgroundTint="@color/transparent_white"
+            android:importantForAccessibility="no"/>
+
+        <ProgressBar
+            android:id="@+id/hint_progress_bar"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_centerInParent="true"
+            android:indeterminateOnly="false"
+            android:progressDrawable="@drawable/progress_hint"/>
+
+    </RelativeLayout>
 
     <ImageButton
         android:id="@+id/coloring_back_button"
@@ -113,6 +117,19 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:importantForAccessibility="no"/>
+
+    <ImageButton
+        android:id="@+id/zoom_out_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="80dp"
+        android:layout_marginRight="10dp"
+        android:src="@drawable/ic_zoom_out"
+        android:backgroundTint="#00FFFFFF"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone"/>
 
 
     <nl.dionsegijn.konfetti.KonfettiView

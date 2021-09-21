@@ -1,4 +1,2 @@
-include ':example'
-include ':zoomage'
 include ':app'
-rootProject.name = "KidzColor"
+rootProject.name = "EasyColor"
