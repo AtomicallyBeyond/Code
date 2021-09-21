@@ -26,6 +26,7 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.WindowCompat;
@@ -82,16 +83,10 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private void hideSystemUI() {
 
         if(Build.VERSION.SDK_INT < 30) {
-            View decorView = getWindow().getDecorView();
-            int uiOptions = decorView.getSystemUiVisibility();
-            int newUiOptions = uiOptions;
-            newUiOptions |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
-            newUiOptions |= View.SYSTEM_UI_FLAG_FULLSCREEN;
-            newUiOptions |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-            newUiOptions |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-            newUiOptions |= View.SYSTEM_UI_FLAG_IMMERSIVE;
-            newUiOptions |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            decorView.setSystemUiVisibility(newUiOptions);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|
+                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         } else {
             getWindow().setDecorFitsSystemWindows(false);
             WindowInsetsController controller = getWindow().getInsetsController();

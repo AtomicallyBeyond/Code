@@ -22,6 +22,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ColoringActivity"/>
+
         <service
             android:name=".notification.PushNotificationService"
             android:exported="false">
@@ -29,8 +31,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <activity android:name=".ColoringActivity"/>
 
         <meta-data
             android:name="preloaded_fonts"
