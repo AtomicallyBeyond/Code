@@ -35,10 +35,16 @@ public class ModelsProvider {
     private MediatorLiveData<Boolean> removeLoading = new MediatorLiveData<>();
 
 
-    public static ModelsProvider getInstance(Context context){
+    public static synchronized ModelsProvider getInstance(Context context){
         if(instance == null){
             instance = new ModelsProvider(context);
         }
+        return instance;
+    }
+
+    public static ModelsProvider getExistingInstance() {
+        if(instance == null)
+            return null;
         return instance;
     }
 
@@ -49,7 +55,6 @@ public class ModelsProvider {
         backupModelDao = ModelsDatabase.getInstance(context).getBackupModelsDao();
         appExecutors = AppExecutors.getInstance();
         initializeModelProvider();
-
     }
 
 
@@ -61,6 +66,7 @@ public class ModelsProvider {
             public void onChanged(FirestoreMap firestoreMap) {
 
                 if(firestoreMap != null) {
+
                     liveModels.removeSource(liveMap);
 
                     appExecutors.diskIO().execute(new Runnable() {
@@ -82,12 +88,9 @@ public class ModelsProvider {
                                 }
                             }
 
-
                             Collections.shuffle(emptyModels);
                             Collections.shuffle(databaseModels);
                             emptyModels.addAll(databaseModels);
-/*                            databaseModels.addAll(emptyModels);
-                            Collections.shuffle(databaseModels);*/
 
                             appExecutors.mainThread().execute(new Runnable() {
                                 @Override
@@ -99,7 +102,9 @@ public class ModelsProvider {
                             });
                         }
                     });
+
                 } else {
+
                     appExecutors.diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
@@ -124,7 +129,8 @@ public class ModelsProvider {
                             });
                         }
                     });
-                }
+
+                }//end else
 
             }
         });
@@ -169,8 +175,12 @@ public class ModelsProvider {
         return selectedVectorEntity;
     }
 
-    public void setSelectedVectorModel(VectorEntity selectedVectorModel) {
+    public SingleLiveEvent<Boolean> setSelectedVectorModel(VectorEntity selectedVectorModel) {
+
+        SingleLiveEvent<Boolean> modelSet = new SingleLiveEvent<>();
         selectedVectorEntity = selectedVectorModel;
+        modelSet.setValue(true);
+        return modelSet;
     }
 
     public void notifyVectorModelChange(boolean modelHasChanged){
@@ -189,6 +199,7 @@ public class ModelsProvider {
                         .getModelByID(selectedVectorEntity.getId());
 
                 selectedVectorEntity.setModel(backupVector.getModel());
+                selectedVectorEntity.loadDrawable();
                 selectedVectorEntity.setInProgress(false);
                 modelDao.insertVector(selectedVectorEntity);
 
@@ -218,6 +229,7 @@ public class ModelsProvider {
                         .getModelByID(vectorEntity.getId());
 
                 vectorEntity.setModel(backupVector.getModel());
+                vectorEntity.loadDrawable();
                 vectorEntity.setInProgress(false);
                 modelDao.insertVector(vectorEntity);
             }
@@ -231,6 +243,7 @@ public class ModelsProvider {
             @Override
             public void run() {
                 selectedVectorEntity.setModel(selectedVectorEntity.getModel());
+                selectedVectorEntity.loadDrawable();
 
                 HashMap<Integer, VectorEntity> temp = artworkLivedata.getValue();
                 int id = selectedVectorEntity.getId();

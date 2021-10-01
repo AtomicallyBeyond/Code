@@ -9,6 +9,7 @@ import com.digitalartsplayground.easycolor.utils.Utils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,20 +18,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VectorModel {
+public class ColoringVectorModel {
 
     private float width, height;
     private float viewportWidth, viewportHeight;
-    protected List<PathModel> pathModels = new ArrayList<>();
+    protected List<ColoringPathModel> coloringPathModels = new ArrayList<>();
 
-    public VectorModel(String model){
-            buildVectorModel(model);
+    public ColoringVectorModel(String model){
+        buildVectorModel(model);
     }
 
     private void buildVectorModel(String model) {
         XmlPullParser xpp;
 
-        PathModel pathModel = null;
+        ColoringPathModel coloringPathModel = null;
         int tempPosition;
 
         try {
@@ -66,25 +67,32 @@ public class VectorModel {
                             tempPosition = getAttrPosition(xpp, "height");
                             setHeight((tempPosition != -1) ? Utils.getFloatFromDimensionString(xpp.getAttributeValue(tempPosition)) : DefaultValues.VECTOR_HEIGHT);
                         } else if (name.equals("path")) {
-                            pathModel = new PathModel();
+                            coloringPathModel = new ColoringPathModel();
 
                             tempPosition = getAttrPosition(xpp, "fillColor");
-                            pathModel.setFillColor((tempPosition != -1) ? Utils.getColorFromString(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_FILL_COLOR);
+                            coloringPathModel.setFillColor((tempPosition != -1) ? Utils.getColorFromString(xpp.getAttributeValue(tempPosition)) : DefaultValues.PATH_FILL_COLOR);
 
-                            tempPosition = getAttrPosition(xpp, "isFilled");
-                            pathModel.setFillColorStatus((tempPosition != -1) ? Integer.parseInt(xpp.getAttributeValue(tempPosition)) : 0);
+                            coloringPathModel.setFillColorString((tempPosition != -1) ? xpp.getAttributeValue(tempPosition) : "");
 
                             tempPosition = getAttrPosition(xpp, "pathData");
-                            pathModel.buildPath((tempPosition != -1) ? xpp.getAttributeValue(tempPosition) : null);
+                            coloringPathModel.setPathData((tempPosition != -1) ? xpp.getAttributeValue(tempPosition) : null);
+
+                            tempPosition = getAttrPosition(xpp, "isFilled");
+                            coloringPathModel.setFillColorStatus((tempPosition != -1) ? Integer.parseInt(xpp.getAttributeValue(tempPosition)) : 0);
+
+                            coloringPathModel.setPatternColor(Utils.getColorFromInt(patternColor));
+                            coloringPathModel.buildPath();
                         }
                         break;
                     case XmlPullParser.END_TAG:
                         if (name.equals("path")) {
-                            if (pathModel != null)
-                                addPathModel(pathModel);
+                            if (coloringPathModel != null)
+                                addPathModel(coloringPathModel);
                         }
                         break;
                 }
+
+                patternColor += 10000;
                 event = xpp.next();
             } //end while loop
 
@@ -94,24 +102,23 @@ public class VectorModel {
         }
     }
 
-    public void drawPaths(Canvas canvas) {
-
-        for(PathModel pathModel : pathModels)
-            pathModel.drawPath(canvas);
+    public void drawHDPaths(Canvas canvas){
+        for(ColoringPathModel coloringPathModel : coloringPathModels)
+            coloringPathModel.drawHDPath(canvas);
     }
 
     public void scaleAllPaths(Matrix scaleMatrix) {
-        for (PathModel pathModel : pathModels) {
-            pathModel.transform(scaleMatrix);
+        for (ColoringPathModel coloringPathModel : coloringPathModels) {
+            coloringPathModel.transform(scaleMatrix);
         }
     }
 
-    public void addPathModel(PathModel pathModel) {
-            pathModels.add(pathModel);
+    public void addPathModel(ColoringPathModel coloringPathModel) {
+        coloringPathModels.add(coloringPathModel);
     }
 
-    public List<PathModel> getPathModels() {
-        return pathModels;
+    public List<ColoringPathModel> getPathModels() {
+        return coloringPathModels;
     }
 
     public float getWidth() {

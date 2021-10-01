@@ -16,14 +16,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class VectorModelContainer extends VectorModel {
+public class VectorModelContainer extends ColoringVectorModel {
 
     private VectorEntity vectorEntity;
     private Bitmap patternMap;
     private ColorDepletedListener colorDepletedListener = null;
-    private List<PathModel> coloredPathsHistory = new ArrayList<>();
-    private List<PathModel> shadedModels = new ArrayList<>();
-    private Map<Integer, List<PathModel>> shadeAndColorMap = new TreeMap<>();
+    private List<ColoringPathModel> coloredPathsHistory = new ArrayList<>();
+    private List<ColoringPathModel> shadedModels = new ArrayList<>();
+    private Map<Integer, List<ColoringPathModel>> shadeAndColorMap = new TreeMap<>();
+
 
     public VectorModelContainer(VectorEntity vectorEntity) {
         super(vectorEntity.getModel());
@@ -35,20 +36,20 @@ public class VectorModelContainer extends VectorModel {
 
         int fillColor;
 
-        for(PathModel pathModel : pathModels){
+        for(ColoringPathModel coloringPathModel : coloringPathModels){
 
-             fillColor = pathModel.getFillColor();
+             fillColor = coloringPathModel.getFillColor();
 
-             if(pathModel.getFillColorStatus() == PathModel.NO_FILL_COLOR) {
+             if(coloringPathModel.getFillColorStatus() == ColoringPathModel.NO_FILL_COLOR) {
                  if (shadeAndColorMap.containsKey(fillColor)) {
-                     shadeAndColorMap.get(fillColor).add(pathModel);
+                     shadeAndColorMap.get(fillColor).add(coloringPathModel);
                  } else {
-                     List<PathModel> newList = new ArrayList<>();
-                     newList.add(pathModel);
+                     List<ColoringPathModel> newList = new ArrayList<>();
+                     newList.add(coloringPathModel);
                      shadeAndColorMap.put(fillColor, newList);
                  }
-             } else if(pathModel.getFillColorStatus() == PathModel.YES_FILL_COLOR){
-                 coloredPathsHistory.add(pathModel);
+             } else if(coloringPathModel.getFillColorStatus() == ColoringPathModel.YES_FILL_COLOR){
+                 coloredPathsHistory.add(coloringPathModel);
              }
 
 
@@ -88,23 +89,24 @@ public class VectorModelContainer extends VectorModel {
                 + "android:viewportHeight=\"" + (int)getViewportHeight() + "\"\n"
                 + "android:viewportWidth=\"" + (int)getViewportWidth() + "\">\n";
 
-        for(PathModel pathModel : coloredPathsHistory) {
-            model += "<path android:fillColor=\"" + pathModel.getFillColorString() + "\" "
-                    + "android:isFilled=\"" + ((pathModel.getFillColorStatus() == 1) ? 1 : 0) + "\" "
-                    + "android:pathData=\"" + pathModel.getPathData()  + "\"/>\n";
+        for(ColoringPathModel coloringPathModel : coloredPathsHistory) {
+            model += "<path android:fillColor=\"" + coloringPathModel.getFillColorString() + "\" "
+                    + "android:isFilled=\"" + ((coloringPathModel.getFillColorStatus() == 1) ? 1 : 0) + "\" "
+                    + "android:pathData=\"" + coloringPathModel.getPathData()  + "\"/>\n";
         }
 
         for(Integer integer : shadeAndColorMap.keySet()){
-            for(PathModel pathModel : shadeAndColorMap.get(integer)){
-                model += "<path android:fillColor=\"" + pathModel.getFillColorString() + "\" "
-                        + "android:isFilled=\"" + ((pathModel.getFillColorStatus() == 1) ? 1 : 0) + "\" "
-                        + "android:pathData=\"" + pathModel.getPathData()  + "\"/>\n";
+            for(ColoringPathModel coloringPathModel : shadeAndColorMap.get(integer)){
+                model += "<path android:fillColor=\"" + coloringPathModel.getFillColorString() + "\" "
+                        + "android:isFilled=\"" + ((coloringPathModel.getFillColorStatus() == 1) ? 1 : 0) + "\" "
+                        + "android:pathData=\"" + coloringPathModel.getPathData()  + "\"/>\n";
             }
         }
 
         model += "</vector>";
 
         vectorEntity.setModel(model);
+        vectorEntity.loadDrawable();
     }
 
 
@@ -118,11 +120,11 @@ public class VectorModelContainer extends VectorModel {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
 
-        for (PathModel aPathModel : getPathModels()) {
+        for (ColoringPathModel aColoringPathModel : getPathModels()) {
 
-                int color = aPathModel.getPatternColor();
+                int color = aColoringPathModel.getPatternColor();
                 paint.setColor(color);
-                canvas.drawPath(aPathModel.getPath(), paint);
+                canvas.drawPath(aColoringPathModel.getPath(), paint);
         }
 
         Paint border = new Paint();
@@ -133,6 +135,10 @@ public class VectorModelContainer extends VectorModel {
     }
 
     public boolean checkIfCordInPatternMap(int xCoord, int yCoord) {
+
+        if(patternMap == null)
+            drawPatternMap();
+
         int width = patternMap.getWidth();
         int height = patternMap.getHeight();
 
@@ -158,9 +164,9 @@ public class VectorModelContainer extends VectorModel {
         shadedModels = shadeAndColorMap.get(colorKey);
 
         if(shadedModels != null) {
-            for(PathModel pathModel : shadedModels) {
-                pathModel.setFillColorStatus(PathModel.SHADE_FILL_COLOR);
-                pathModel.makeFillPaint();
+            for(ColoringPathModel coloringPathModel : shadedModels) {
+                coloringPathModel.setFillColorStatus(ColoringPathModel.SHADE_FILL_COLOR);
+                coloringPathModel.makeFillPaint();
             }
 
         }
@@ -170,9 +176,9 @@ public class VectorModelContainer extends VectorModel {
     public void unShadePaths(){
 
         if(shadedModels != null) {
-            for(PathModel pathModel : shadedModels){
-                pathModel.resetPaint();
-                pathModel.makeFillPaint();
+            for(ColoringPathModel coloringPathModel : shadedModels){
+                coloringPathModel.resetPaint();
+                coloringPathModel.makeFillPaint();
             }
 
             shadedModels = null;
@@ -195,13 +201,13 @@ public class VectorModelContainer extends VectorModel {
             int i = 0;
             int actualColor = shadedModels.get(0).getFillColor();
             int patternColor;
-            for(PathModel pathModel : shadedModels){
-                patternColor = pathModel.getPatternColor();
+            for(ColoringPathModel coloringPathModel : shadedModels){
+                patternColor = coloringPathModel.getPatternColor();
 
                 if(patternColor == pixelPatternColor) {
-                    pathModel.setFillColorStatus(PathModel.YES_FILL_COLOR);
-                    pathModel.makeFillPaint();
-                    coloredPathsHistory.add(pathModel);
+                    coloringPathModel.setFillColorStatus(PathModel.YES_FILL_COLOR);
+                    coloringPathModel.makeFillPaint();
+                    coloredPathsHistory.add(coloringPathModel);
                     shadedModels.remove(i);
 
                     if(shadedModels.isEmpty()) {
@@ -216,7 +222,7 @@ public class VectorModelContainer extends VectorModel {
         return false;
     }
 
-    public List<PathModel> getColoredPathsHistory() {return coloredPathsHistory;}
+    public List<ColoringPathModel> getColoredPathsHistory() {return coloredPathsHistory;}
 
     public void setShadedPathDepletedListener(ColorDepletedListener shadedPathDepletedListener) {
         this.colorDepletedListener = shadedPathDepletedListener;

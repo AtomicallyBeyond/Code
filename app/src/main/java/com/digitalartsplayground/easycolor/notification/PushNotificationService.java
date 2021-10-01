@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 public class PushNotificationService extends FirebaseMessagingService {
 
     @Override
+    @SuppressWarnings("deprecation")
     public void onMessageReceived(@NonNull @NotNull RemoteMessage remoteMessage) {
 
         final String CHANNEL_ID = "HEADS_UP_NOTIFICATION";

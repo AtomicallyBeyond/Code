@@ -22,6 +22,8 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
+        maven { url "https://adcolony.bintray.com/AdColony" }
+        maven {url 'https://android-sdk.is.com/'}
     }
 }
 

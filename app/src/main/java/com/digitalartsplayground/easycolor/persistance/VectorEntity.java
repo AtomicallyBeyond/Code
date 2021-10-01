@@ -5,7 +5,7 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import com.digitalartsplayground.easycolor.models.VectorMasterDrawable;
+import com.digitalartsplayground.easycolor.models.VectorDrawable;
 import com.digitalartsplayground.easycolor.models.VectorModel;
 
 @Entity(tableName = "models")
@@ -22,18 +22,25 @@ public class VectorEntity {
     private boolean isInProgress = false;
 
     @Ignore
-    private VectorMasterDrawable vectorMasterDrawable;
+    private VectorDrawable vectorDrawable;
 
     @Ignore
-    public VectorMasterDrawable getDrawable() {
-        return vectorMasterDrawable;
+    public VectorDrawable getDrawable() {
+        return vectorDrawable;
     }
 
     @Ignore
-    public boolean isModelLoaded() {
-        if(vectorMasterDrawable == null)
+    public boolean isDrawableAvailable() {
+        if(vectorDrawable == null)
             return false;
         return true;
+    }
+
+    @Ignore
+    public boolean  isModelAvailable() {
+        if(model != null)
+            return true;
+        return false;
     }
 
     public VectorEntity() {
@@ -65,7 +72,6 @@ public class VectorEntity {
 
     public void setModel(String model) {
         this.model = model;
-        vectorMasterDrawable = new VectorMasterDrawable(new VectorModel(model));
     }
 
     public boolean isInProgress() {
@@ -74,5 +80,9 @@ public class VectorEntity {
 
     public void setInProgress(boolean inProgress) {
         isInProgress = inProgress;
+    }
+
+    public void loadDrawable() {
+        vectorDrawable = new VectorDrawable(new VectorModel(model));
     }
 }

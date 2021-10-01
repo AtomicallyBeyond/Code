@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.digitalartsplayground.easycolor.utils.Utils;
 
-public class VectorMasterDrawable extends Drawable {
+public class VectorDrawable extends Drawable {
 
     private final VectorModel vectorModel;
     private int width = -1, height = -1;
@@ -21,7 +21,7 @@ public class VectorMasterDrawable extends Drawable {
         drawHD = true;
     }
 
-    public VectorMasterDrawable(VectorModel vectorModel) {
+    public VectorDrawable(VectorModel vectorModel) {
         this.vectorModel = vectorModel;
     }
 
@@ -37,22 +37,13 @@ public class VectorMasterDrawable extends Drawable {
 
             buildScaleMatrix();
             scaleAllPaths();
-            scaleAllStrokes();
         }
     }
 
 
-
-
     @Override
     public void draw(Canvas canvas) {
-
-/*        for(PathModel pathModel : vectorModel.pathModels)
-            canvas.drawPath(pathModel.getPath(), paint);*/
-            if(!drawHD)
                 vectorModel.drawPaths(canvas);
-            else
-                vectorModel.drawHDPaths(canvas);
     }
 
     @Override
@@ -89,12 +80,6 @@ public class VectorMasterDrawable extends Drawable {
 
     private void scaleAllPaths() {
         vectorModel.scaleAllPaths(scaleMatrix);
-    }
-
-    private void scaleAllStrokes() {
-        float strokeRatio;
-        strokeRatio = Math.min(width / vectorModel.getWidth(), height / vectorModel.getHeight());
-        vectorModel.scaleAllStrokeWidth(strokeRatio);
     }
 
 }

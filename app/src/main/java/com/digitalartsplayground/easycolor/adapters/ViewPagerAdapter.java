@@ -18,7 +18,6 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
         super(fragmentManager, lifecycle);
 
         libraryFragment = new LibraryFragment();
-        myColorsFragment = new MyColorsFragment();
     }
 
     @NonNull
@@ -29,7 +28,7 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
             case 0:
                 return libraryFragment;
             case 1:
-                return myColorsFragment;
+                return new MyColorsFragment();
         }
 
         return libraryFragment;
@@ -39,4 +38,6 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
     public int getItemCount() {
         return 2;
     }
+
+
 }

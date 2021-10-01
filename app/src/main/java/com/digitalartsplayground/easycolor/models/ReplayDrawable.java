@@ -20,26 +20,26 @@ import java.util.List;
 public class ReplayDrawable extends Drawable {
 
     private int listSize;
-    private final List<PathModel> drawingList;
+    private final List<ColoringPathModel> drawingList;
     private final Paint outlinePaint;
 
-    private final VectorModel vectorModel;
+    private final ColoringVectorModel coloringVectorModel;
     private int width = -1, height = -1;
     private Matrix scaleMatrix;
     private int index = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-    public ReplayDrawable(VectorModelContainer vectorModel) {
-        this.vectorModel = vectorModel;
+    public ReplayDrawable(VectorModelContainer coloringVectorModel) {
+        this.coloringVectorModel = coloringVectorModel;
 
-        List<PathModel> pathsList;
-        pathsList = vectorModel.getColoredPathsHistory();
+        List<ColoringPathModel> pathsList;
+        pathsList = coloringVectorModel.getColoredPathsHistory();
         drawingList = new ArrayList<>(pathsList.size());
 
-        PathModel tempPath;
+        ColoringPathModel tempPath;
 
-        for(PathModel pathModel : pathsList) {
-            tempPath = new PathModel(pathModel);
+        for(ColoringPathModel coloringPathModel : pathsList) {
+            tempPath = new ColoringPathModel(coloringPathModel);
             tempPath.setFillColorStatus(PathModel.NO_FILL_COLOR);
             tempPath.makeFillPaint();
             drawingList.add(tempPath);
@@ -55,18 +55,14 @@ public class ReplayDrawable extends Drawable {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            try {
+
                 if(index < listSize){
                     drawingList.get(index).setFillColorStatus(PathModel.YES_FILL_COLOR);
                     drawingList.get(index).makeFillPaint();
                     index++;
                     ReplayDrawable.this.invalidateSelf();
-                } else {
-                    handler.removeCallbacks(runnable);
+                    handler.postDelayed(runnable, 100);
                 }
-            } finally {
-                handler.postDelayed(runnable, 100);
-            }
         }
     };
 
@@ -78,9 +74,9 @@ public class ReplayDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
 
-        for(PathModel pathModel : drawingList) {
-            canvas.drawPath(pathModel.getPath(), pathModel.getPathPaint());
-            canvas.drawPath(pathModel.getPath(), outlinePaint);
+        for(ColoringPathModel coloringPathModel : drawingList) {
+            canvas.drawPath(coloringPathModel.getPath(), coloringPathModel.getPathPaint());
+            canvas.drawPath(coloringPathModel.getPath(), outlinePaint);
         }
     }
 
@@ -96,40 +92,33 @@ public class ReplayDrawable extends Drawable {
 
             buildScaleMatrix();
             scaleAllPaths();
-            scaleAllStrokes();
         }
     }
 
     @Override
     public int getIntrinsicWidth() {
-        return Utils.dpToPx((int) vectorModel.getWidth());
+        return Utils.dpToPx((int) coloringVectorModel.getWidth());
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return Utils.dpToPx((int) vectorModel.getHeight());
+        return Utils.dpToPx((int) coloringVectorModel.getHeight());
     }
 
     private void buildScaleMatrix() {
         scaleMatrix = new Matrix();
 
-        scaleMatrix.postTranslate(width / 2 - vectorModel.getViewportWidth() / 2, height / 2 - vectorModel.getViewportHeight() / 2);
+        scaleMatrix.postTranslate(width / 2 - coloringVectorModel.getViewportWidth() / 2, height / 2 - coloringVectorModel.getViewportHeight() / 2);
 
-        float widthRatio = width / vectorModel.getViewportWidth();
-        float heightRatio = height / vectorModel.getViewportHeight();
+        float widthRatio = width / coloringVectorModel.getViewportWidth();
+        float heightRatio = height / coloringVectorModel.getViewportHeight();
         float ratio = Math.min(widthRatio, heightRatio);
 
         scaleMatrix.postScale(ratio, ratio, width / 2, height / 2);
     }
 
     private void scaleAllPaths() {
-        vectorModel.scaleAllPaths(scaleMatrix);
-    }
-
-    private void scaleAllStrokes() {
-        float strokeRatio;
-        strokeRatio = Math.min(width / vectorModel.getWidth(), height / vectorModel.getHeight());
-        vectorModel.scaleAllStrokeWidth(strokeRatio);
+        coloringVectorModel.scaleAllPaths(scaleMatrix);
     }
 
     @Override

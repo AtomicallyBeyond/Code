@@ -27,6 +27,7 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
     private final ResetModelListener resetModelListener;
     private final List<VectorEntity> modelsList = new ArrayList<>();
     private final int orientation;
+    private VectorEntity tempEntity;
 
     public MyColorsAdapter(StartColoringActivity startColoringActivity, ResetModelListener resetModelListener, int orientation) {
         this.startColoringActivity = startColoringActivity;
@@ -60,7 +61,13 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull MyColorsAdapter.MyColorsViewHolder holder, int position) {
-        holder.imageView.setImageDrawable(modelsList.get(position).getDrawable());
+
+        tempEntity = modelsList.get(position);
+
+        if(!tempEntity.isDrawableAvailable())
+            tempEntity.loadDrawable();
+
+        holder.imageView.setImageDrawable(tempEntity.getDrawable());
     }
 
     @Override

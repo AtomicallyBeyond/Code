@@ -105,10 +105,18 @@ public class LibraryFragment extends Fragment implements StartColoringActivity, 
     @Override
     public void startActivity(VectorEntity selectedVectorEntity) {
 
-        libraryViewModel.setCurrentVectorModel(selectedVectorEntity);
-        Intent coloringIntent = new Intent(getActivity(), ColoringActivity.class);
-        startActivity(coloringIntent);
-
+        if(selectedVectorEntity.isModelAvailable()) {
+            libraryViewModel.setCurrentVectorModel(selectedVectorEntity)
+                    .observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean aBoolean) {
+                    if(aBoolean) {
+                        Intent coloringIntent = new Intent(getActivity(), ColoringActivity.class);
+                        startActivity(coloringIntent);
+                    }
+                }
+            });
+        }
     }
 
 

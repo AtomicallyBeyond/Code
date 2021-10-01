@@ -50,7 +50,7 @@ public class Repository {
             @Override
             protected FirestoreQueryLiveData createCall() {
                 Query query  = getFireCollectionReference()
-                        .whereEqualTo("id", 0);
+                        .whereEqualTo("id", -1);
 
                 return new FirestoreQueryLiveData(query);
             }

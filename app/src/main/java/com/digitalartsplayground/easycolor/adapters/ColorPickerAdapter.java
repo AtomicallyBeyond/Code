@@ -25,13 +25,14 @@ import java.util.List;
 
 public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.ViewHolder> implements ColorDepletedListener {
 
-    private final Context context;
-    private final List<Integer> colorKeys;
-    private final VectorModelContainer vectorModelContainer;
-    private final ArrayList<PositionListener> positionListeners;
-    private final FinishedColoringListener finishedColoringListener;
+    private  Context context;
+    private  List<Integer> colorKeys;
+    private  VectorModelContainer vectorModelContainer;
+    private  ArrayList<PositionListener> positionListeners;
+    private FinishedColoringListener finishedColoringListener;
     private ViewHolder viewHolder = null;
     private int selectedPosition = 0;
+
 
     public ColorPickerAdapter (Context context, VectorModelContainer vectorModelContainer, ArrayList<PositionListener> positionListeners, FinishedColoringListener finishedColoringListener){
         this.context = context;

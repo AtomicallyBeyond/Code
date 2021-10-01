@@ -14,12 +14,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.digitalartsplayground.easycolor.R;
 import com.digitalartsplayground.easycolor.adapters.ViewPagerAdapter;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.MainActivityViewModel;
 import com.digitalartsplayground.easycolor.utils.PaintProvider;
@@ -58,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressWarnings("deprecation")
     @SuppressLint("MissingPermission")
     private void init() {
 

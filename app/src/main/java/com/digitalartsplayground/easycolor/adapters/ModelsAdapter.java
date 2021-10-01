@@ -27,6 +27,7 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
     private List<VectorEntity> modelsList = new ArrayList<>();
     private final StartColoringActivity startColoringActivity;
     private final FetchModelListener fetchModelListener;
+    private VectorEntity tempEntity;
 
 
     public ModelsAdapter(StartColoringActivity startColoringActivity, FetchModelListener fetchModelListener, int orientation) {
@@ -45,25 +46,6 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
                 .inflate(R.layout.vector_model_item, parent, false);
         view.setLayoutParams(getLayoutParams(view, parent));
         return new ViewHolder(view);
-
-/*        View view = null;
-
-        if(viewType == COMPLETED_TYPE) {
-            view = LayoutInflater
-                    .from(parent.getContext())
-                    .inflate(R.layout.vector_model_item, parent, false);
-            view.setLayoutParams(getLayoutParams(view, parent));
-            return new ViewHolder(view);
-        }
-
-        else {
-
-            view = LayoutInflater
-                    .from(parent.getContext())
-                    .inflate(R.layout.vector_model_loading, parent, false);
-            view.setLayoutParams(getLayoutParams(view, parent));
-            return new LoadingViewHolder(view);
-        }*/
 
     }
 
@@ -85,7 +67,9 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull @NotNull ModelsAdapter.ViewHolder holder, int position) {
 
-        if(modelsList.get(position).isModelLoaded()) {
+        tempEntity = modelsList.get(position);
+
+        if(tempEntity.isDrawableAvailable()) {
 
             if(holder.isLoading){
                 holder.progressBar.setVisibility(View.GONE);
@@ -103,7 +87,12 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
                 holder.isLoading = true;
             }
 
-            fetchModelListener.fetchModel(modelsList.get(position), position);
+            if(tempEntity.isModelAvailable()) {
+                tempEntity.loadDrawable();
+                onBindViewHolder(holder, position);
+            } else {
+                fetchModelListener.fetchModel(modelsList.get(position), position);
+            }
         }
 
     }

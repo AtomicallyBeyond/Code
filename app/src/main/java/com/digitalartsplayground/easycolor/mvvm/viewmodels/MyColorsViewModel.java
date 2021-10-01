@@ -18,11 +18,10 @@ import java.util.List;
 public class MyColorsViewModel extends AndroidViewModel {
 
     private ModelsProvider modelsProvider;
-    private MediatorLiveData<List<VectorEntity>> liveModelsList = new MediatorLiveData<>();
 
     public MyColorsViewModel(@NonNull @NotNull Application application) {
         super(application);
-        modelsProvider = ModelsProvider.getInstance(application);
+        modelsProvider = ModelsProvider.getExistingInstance();
     }
 
     public LiveData<HashMap<Integer, VectorEntity>> getModelsList() {

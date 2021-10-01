@@ -2,7 +2,6 @@ package com.digitalartsplayground.easycolor;
 
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.content.ClipData;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -14,7 +13,6 @@ import android.os.Looper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
@@ -23,14 +21,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -39,32 +32,35 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.Slide;
 import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
-
+import com.adcolony.sdk.AdColony;
+import com.adcolony.sdk.AdColonyAdSize;
+import com.adcolony.sdk.AdColonyAdView;
+import com.adcolony.sdk.AdColonyAdViewListener;
 import com.digitalartsplayground.easycolor.interfaces.ZoomListener;
-import com.digitalartsplayground.easycolor.R;
 import com.digitalartsplayground.easycolor.adapters.ColorPickerAdapter;
 import com.digitalartsplayground.easycolor.interfaces.FinishedColoringListener;
 import com.digitalartsplayground.easycolor.interfaces.PositionListener;
+import com.digitalartsplayground.easycolor.models.ColoringVectorDrawable;
 import com.digitalartsplayground.easycolor.models.ReplayDrawable;
-import com.digitalartsplayground.easycolor.models.VectorMasterDrawable;
+import com.digitalartsplayground.easycolor.models.VectorDrawable;
 import com.digitalartsplayground.easycolor.models.VectorModelContainer;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.ColoringViewModel;
 import com.digitalartsplayground.easycolor.zoomageview.ZoomageView;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.ironsource.mediationsdk.IronSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import nl.dionsegijn.konfetti.KonfettiView;
 import nl.dionsegijn.konfetti.models.Shape;
 import nl.dionsegijn.konfetti.models.Size;
+
 
 public class ColoringActivity extends AppCompatActivity implements PositionListener, FinishedColoringListener, ZoomListener {
 
     private ColoringViewModel coloringViewModel;
     private ZoomageView zoomageView;
     private VectorModelContainer vectorModelContainer;
-    private VectorMasterDrawable vectorMasterDrawable;
+    private ColoringVectorDrawable coloringVectorDrawable;
     private RecyclerView colorsRecyclerView;
     private int drawingHeight;
     private int drawingWidth;
@@ -75,26 +71,81 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private ProgressBar hintProgressBar;
     private boolean hintAvailable = true;
     private ImageButton zoomOutButton;
-    private FirebaseAnalytics firebaseAnalytics;
-    ObjectAnimator hintAnimator;
+    private ObjectAnimator hintAnimator;
+    private final String ADCOLONY_APP_ID = "appa2f1094825e045e18e";
+    private final String BANNER_ZONE_ID = "vz05e0ee28f50c4d7582";
+    private RelativeLayout adContainer;
 
 
+
+    @SuppressLint("MissingPermission")
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        hideSystemUI();
+        setContentView(R.layout.activity_coloring);
+
+        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
+
+        int orientation = getResources().getConfiguration().orientation;
+        if(orientation == Configuration.ORIENTATION_PORTRAIT)
+            IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
+            //loadAdColonyAd();
+
+        konfettiView  = findViewById(R.id.konfetti);
+        zoomOutButton = findViewById(R.id.zoom_out_button);
+        hintProgressBar = findViewById(R.id.hint_progress_bar);
+        animateProgress(hintProgressBar, 100);
+        observeModelFromRepository();
+
+    }
+
+
+    private void loadAdColonyAd() {
+
+        AdColony.configure(ColoringActivity.this, ADCOLONY_APP_ID, BANNER_ZONE_ID);
+        AdColonyAdViewListener listener = new AdColonyAdViewListener() {
+            @Override
+            public void onRequestFilled(AdColonyAdView adColonyAdView) {
+                adContainer = findViewById(R.id.adcolony_container);
+                adContainer.addView(adColonyAdView);
+            }
+        };
+
+        AdColony.requestAdView(BANNER_ZONE_ID, listener, AdColonyAdSize.BANNER);
+    }
+
+
+    @SuppressWarnings("deprecation")
     private void hideSystemUI() {
 
         if(Build.VERSION.SDK_INT < 30) {
-            View decorView = getWindow().getDecorView();
-            int uiOptions = decorView.getSystemUiVisibility();
-            int newUiOptions = uiOptions;
-            newUiOptions |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
-            newUiOptions |= View.SYSTEM_UI_FLAG_FULLSCREEN;
-            newUiOptions |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-            newUiOptions |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-            newUiOptions |= View.SYSTEM_UI_FLAG_IMMERSIVE;
-            newUiOptions |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            decorView.setSystemUiVisibility(newUiOptions);
+
+            @SuppressLint("WrongConstant") final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().getDecorView().setSystemUiVisibility(flags);
+
+            final View decorView = getWindow().getDecorView();
+            decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
+                @Override
+                public void onSystemUiVisibilityChange(int i) {
+                    if((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                        decorView.setSystemUiVisibility(flags);
+                    }
+                }
+            });
+
         } else {
+
             getWindow().setDecorFitsSystemWindows(false);
             WindowInsetsController controller = getWindow().getInsetsController();
+
             if (controller != null) {
                 controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
                 controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
@@ -106,22 +157,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES; }
     }
 
-    @SuppressLint("MissingPermission")
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_coloring);
-        hideSystemUI();
-
-        zoomOutButton = findViewById(R.id.zoom_out_button);
-        hintProgressBar = findViewById(R.id.hint_progress_bar);
-        animateProgress(hintProgressBar, 100);
-        konfettiView  = findViewById(R.id.konfetti);
-        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        observeModelFromRepository();
-
-    }
 
     private void observeModelFromRepository() {
 
@@ -138,11 +173,9 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         });
     }
 
+
     private void init() {
         initZoomageView();
-        zoomageView.setZoomListener(this);
-        setZoomageViewListener(zoomageView);
-        setZoomOutButtonListener(zoomOutButton);
         setHintButtonListener(findViewById(R.id.coloring_hint_button));
         setBackButtonListener(findViewById(R.id.coloring_back_button));
         setPlayButtonListener(findViewById(R.id.coloring_play_button));
@@ -153,10 +186,11 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
 
     private void initZoomageView() {
-        vectorMasterDrawable = new VectorMasterDrawable(vectorModelContainer);
-        vectorMasterDrawable.setDrawHD();
+        coloringVectorDrawable = new ColoringVectorDrawable(vectorModelContainer);
         zoomageView = findViewById(R.id.zoomage_view);
-        zoomageView.setImageDrawable(vectorMasterDrawable);
+        zoomageView.setImageDrawable(coloringVectorDrawable);
+        int a = zoomageView.getHeight();
+        int b = zoomageView.getWidth();
         zoomageView.post(new Runnable() {
             @Override
             public void run() {
@@ -165,8 +199,11 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                 drawingWidth = zoomageView.getWidth();
                 zoomageView.setScaleType(ImageView.ScaleType.MATRIX);
                 zoomageView.setStartValues();
-                xScale = (float) drawingWidth / (float)vectorMasterDrawable.getIntrinsicWidth();
-                yScale = (float) drawingHeight / (float)vectorMasterDrawable.getIntrinsicHeight();
+                xScale = (float) drawingWidth / (float) coloringVectorDrawable.getIntrinsicWidth();
+                yScale = (float) drawingHeight / (float) coloringVectorDrawable.getIntrinsicHeight();
+                zoomageView.setZoomListener(ColoringActivity.this);
+                setZoomageViewListener(zoomageView);
+                setZoomOutButtonListener(zoomOutButton);
             }
         });
 
@@ -218,7 +255,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
             int pixelColor = vectorModelContainer.getPixelColorFromPatternMap(xCoord, yCoord);
 
             if(vectorModelContainer.paintShadedPath(pixelColor))
-                vectorMasterDrawable.invalidateSelf();
+                coloringVectorDrawable.invalidateSelf();
         }
     }
 
@@ -253,7 +290,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                     inverse.setScale(scaleFactor, scaleFactor);
                     inverse.postTranslate(-x, -y);
 
-                    zoomageView.animateScaleAndTranslationToMatrix(inverse, 500);;
+                    zoomageView.animateScaleAndTranslationToMatrix(inverse, 500);
 
                     animateProgress(progressBar, 10000);
                     hintAvailable = false;
@@ -376,7 +413,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         colorPickerAdapter = new ColorPickerAdapter(
                 this,
                 vectorModelContainer,
-                new ArrayList<PositionListener>(Arrays.asList(this, coloringViewModel)),
+                new ArrayList<>(Arrays.asList(this, coloringViewModel)),
                 this);
 
         colorsRecyclerView.setAdapter(colorPickerAdapter);
@@ -402,7 +439,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     @Override
     public void positionChanged(int newPosition) {
-        vectorMasterDrawable.invalidateSelf();
+        coloringVectorDrawable.invalidateSelf();
         colorsRecyclerView.smoothScrollToPosition(newPosition);
     }
 
@@ -490,4 +527,5 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
             zoomOutButton.setVisibility(View.GONE);
         }
     }
+
 }
