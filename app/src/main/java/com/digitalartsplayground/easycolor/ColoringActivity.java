@@ -17,6 +17,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -46,7 +47,11 @@ import com.digitalartsplayground.easycolor.models.VectorDrawable;
 import com.digitalartsplayground.easycolor.models.VectorModelContainer;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.ColoringViewModel;
 import com.digitalartsplayground.easycolor.zoomageview.ZoomageView;
+import com.ironsource.mediationsdk.ISBannerSize;
 import com.ironsource.mediationsdk.IronSource;
+import com.ironsource.mediationsdk.IronSourceBannerLayout;
+import com.ironsource.mediationsdk.logger.IronSourceError;
+import com.ironsource.mediationsdk.sdk.BannerListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,11 +77,21 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private boolean hintAvailable = true;
     private ImageButton zoomOutButton;
     private ObjectAnimator hintAnimator;
-    private final String ADCOLONY_APP_ID = "appa2f1094825e045e18e";
+    private FrameLayout mBannerParentLayout;
+    private IronSourceBannerLayout mIronSourceBannerLayout;
+    private IronSourceBannerLayout banner;
+
+
+/*    private final String ADCOLONY_APP_ID = "appa2f1094825e045e18e";
     private final String BANNER_ZONE_ID = "vz05e0ee28f50c4d7582";
-    private RelativeLayout adContainer;
+    private RelativeLayout adContainer;*/
 
 
+    @Override
+    protected void onDestroy() {
+        IronSource.destroyBanner(banner);
+        super.onDestroy();
+    }
 
     @SuppressLint("MissingPermission")
     @Override
@@ -89,7 +104,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
         int orientation = getResources().getConfiguration().orientation;
         if(orientation == Configuration.ORIENTATION_PORTRAIT)
-            IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
+            loadIronSource();
             //loadAdColonyAd();
 
         konfettiView  = findViewById(R.id.konfetti);
@@ -101,7 +116,50 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     }
 
 
-    private void loadAdColonyAd() {
+    private void loadIronSource() {
+        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
+        final FrameLayout bannerContainer = findViewById(R.id.ironsource_container);
+        banner = IronSource.createBanner(this, ISBannerSize.BANNER);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT);
+        bannerContainer.addView(banner, 0, layoutParams);
+        banner.setBannerListener(new BannerListener() {
+            @Override
+            public void onBannerAdLoaded() {
+                // Called after a banner ad has been successfully loaded
+            }
+            @Override
+            public void onBannerAdLoadFailed(IronSourceError error) {
+                // Called after a banner has attempted to load an ad but failed.
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        bannerContainer.removeAllViews();
+                    }
+                });
+            }
+            @Override
+            public void onBannerAdClicked() {
+                // Called after a banner has been clicked.
+            }
+            @Override
+            public void onBannerAdScreenPresented() {
+                // Called when a banner is about to present a full screen content.
+            }
+            @Override
+            public void onBannerAdScreenDismissed() {
+                // Called after a full screen content has been dismissed
+            }
+            @Override
+            public void onBannerAdLeftApplication() {
+                // Called when a user would be taken out of the application context.
+            }
+        });
+        IronSource.loadBanner(banner);
+    }
+
+
+/*    private void loadAdColonyAd() {
 
         AdColony.configure(ColoringActivity.this, ADCOLONY_APP_ID, BANNER_ZONE_ID);
         AdColonyAdViewListener listener = new AdColonyAdViewListener() {
@@ -113,7 +171,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         };
 
         AdColony.requestAdView(BANNER_ZONE_ID, listener, AdColonyAdSize.BANNER);
-    }
+    }*/
 
 
     @SuppressWarnings("deprecation")

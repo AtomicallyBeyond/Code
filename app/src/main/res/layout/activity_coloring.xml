@@ -146,11 +146,11 @@
 </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <RelativeLayout
-        android:id="@+id/adcolony_container"
+    <FrameLayout
+        android:id="@+id/ironsource_container"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
         android:layout_alignParentBottom="true"
         android:gravity="center"/>
 

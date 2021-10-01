@@ -37,6 +37,16 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:17.1.0'
     implementation 'com.google.android.gms:play-services-basement:17.6.0'
 
+// Add AdColony Network
+    implementation 'com.ironsource.adapters:adcolonyadapter:4.3.9'
+    implementation 'com.adcolony:sdk:4.6.4'
+// Add AdMob and Ad Manager Network
+    implementation 'com.google.android.gms:play-services-ads:20.4.0'
+    implementation 'com.ironsource.adapters:admobadapter:4.3.22'
+// Add Facebook Network
+    implementation 'com.ironsource.adapters:facebookadapter:4.3.30'
+    implementation 'com.facebook.android:audience-network-sdk:6.6.0'
+
     implementation 'com.adcolony:sdk:4.6.4'
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
