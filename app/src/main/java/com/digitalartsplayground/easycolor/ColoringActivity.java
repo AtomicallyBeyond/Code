@@ -2,7 +2,6 @@ package com.digitalartsplayground.easycolor;
 
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -41,11 +40,7 @@ import com.digitalartsplayground.easycolor.models.ColoringVectorDrawable;
 import com.digitalartsplayground.easycolor.models.ReplayDrawable;
 import com.digitalartsplayground.easycolor.models.VectorModelContainer;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.ColoringViewModel;
-import com.digitalartsplayground.easycolor.utils.SharedPrefs;
 import com.digitalartsplayground.easycolor.zoomageview.ZoomageView;
-import com.ironsource.mediationsdk.ISBannerSize;
-import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.IronSourceBannerLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import nl.dionsegijn.konfetti.KonfettiView;
@@ -76,8 +71,8 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     @Override
     protected void onDestroy() {
 
-        if(MainActivity.ironSourceLoaded) {
-            MainActivity.destroyIronSourceAd();
+        if(BaseActivity.ironSourceLoaded) {
+            BaseActivity.destroyIronSourceAd();
         }
 
         adContainer = null;
@@ -87,7 +82,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private void loadIronSource() {
 
         adContainer = findViewById(R.id.ironsource_container);
-        MainActivity.loadIronSource(adContainer);
+        BaseActivity.loadIronSource(adContainer);
     }
 
     @SuppressLint("MissingPermission")
@@ -102,7 +97,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
         int orientation = getResources().getConfiguration().orientation;
         if(orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if(MainActivity.counter < 5)
+            if(BaseActivity.counter < 5)
                 loadIronSource();
         }
 

@@ -228,5 +228,4 @@ public class VectorModelContainer extends ColoringVectorModel {
         this.colorDepletedListener = shadedPathDepletedListener;
     }
 
-
 }
