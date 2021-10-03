@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static void loadIronSource(FrameLayout bannerContainer) {
 
-
         tempBanner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.BANNER);
         ironSourceContainer = bannerContainer;
 
@@ -208,8 +207,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        MemoryLeakContainerActivity = null;
         super.onDestroy();
+        MemoryLeakContainerActivity = null;
     }
 
     public MainActivity() {
