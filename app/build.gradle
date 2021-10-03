@@ -32,8 +32,6 @@ android {
 
 dependencies {
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
-
     implementation 'com.ironsource.sdk:mediationsdk:7.1.11'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.android.gms:play-services-ads-identifier:17.1.0'

@@ -77,6 +77,7 @@ public class VectorModelContainer extends ColoringVectorModel {
 
 
     public void saveModel(){
+
         if(isInProgress())
             vectorEntity.setInProgress(true);
 
@@ -161,6 +162,7 @@ public class VectorModelContainer extends ColoringVectorModel {
 
 
     public void shadePaths(int colorKey) {
+
         shadedModels = shadeAndColorMap.get(colorKey);
 
         if(shadedModels != null) {
@@ -168,9 +170,7 @@ public class VectorModelContainer extends ColoringVectorModel {
                 coloringPathModel.setFillColorStatus(ColoringPathModel.SHADE_FILL_COLOR);
                 coloringPathModel.makeFillPaint();
             }
-
         }
-
     }
 
     public void unShadePaths(){
@@ -186,6 +186,7 @@ public class VectorModelContainer extends ColoringVectorModel {
     }
 
     public RectF getNextShadedPathBounds() {
+
         if(!shadedModels.isEmpty()){
             RectF rectF = new RectF();
             Path path = shadedModels.get(0).getPath();

@@ -36,6 +36,8 @@ public class BaseActivity extends AppCompatActivity {
             counter = 0;
         }
 
+        IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.BANNER);
+
         Intent startIntent = new Intent(this, MainActivity.class);
         startActivity(startIntent);
     }
@@ -44,8 +46,6 @@ public class BaseActivity extends AppCompatActivity {
 
         tempBanner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.BANNER);
         ironSourceContainer = bannerContainer;
-
-        IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.BANNER);
 
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
