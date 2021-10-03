@@ -2,6 +2,7 @@ package com.digitalartsplayground.easycolor;
 
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -21,7 +22,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -33,26 +33,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.Slide;
 import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
-import com.adcolony.sdk.AdColony;
-import com.adcolony.sdk.AdColonyAdSize;
-import com.adcolony.sdk.AdColonyAdView;
-import com.adcolony.sdk.AdColonyAdViewListener;
 import com.digitalartsplayground.easycolor.interfaces.ZoomListener;
 import com.digitalartsplayground.easycolor.adapters.ColorPickerAdapter;
 import com.digitalartsplayground.easycolor.interfaces.FinishedColoringListener;
 import com.digitalartsplayground.easycolor.interfaces.PositionListener;
 import com.digitalartsplayground.easycolor.models.ColoringVectorDrawable;
 import com.digitalartsplayground.easycolor.models.ReplayDrawable;
-import com.digitalartsplayground.easycolor.models.VectorDrawable;
 import com.digitalartsplayground.easycolor.models.VectorModelContainer;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.ColoringViewModel;
+import com.digitalartsplayground.easycolor.utils.SharedPrefs;
 import com.digitalartsplayground.easycolor.zoomageview.ZoomageView;
 import com.ironsource.mediationsdk.ISBannerSize;
 import com.ironsource.mediationsdk.IronSource;
 import com.ironsource.mediationsdk.IronSourceBannerLayout;
-import com.ironsource.mediationsdk.logger.IronSourceError;
-import com.ironsource.mediationsdk.sdk.BannerListener;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import nl.dionsegijn.konfetti.KonfettiView;
@@ -77,35 +70,42 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private boolean hintAvailable = true;
     private ImageButton zoomOutButton;
     private ObjectAnimator hintAnimator;
-    private FrameLayout mBannerParentLayout;
-    private IronSourceBannerLayout mIronSourceBannerLayout;
-    private IronSourceBannerLayout banner;
-
-
-/*    private final String ADCOLONY_APP_ID = "appa2f1094825e045e18e";
-    private final String BANNER_ZONE_ID = "vz05e0ee28f50c4d7582";
-    private RelativeLayout adContainer;*/
+    private FrameLayout adContainer;
 
 
     @Override
     protected void onDestroy() {
-        IronSource.destroyBanner(banner);
+
+        if(MainActivity.ironSourceLoaded) {
+            MainActivity.destroyIronSourceAd();
+        }
+
+        adContainer = null;
         super.onDestroy();
+    }
+
+    private void loadIronSource() {
+
+        adContainer = findViewById(R.id.ironsource_container);
+        MainActivity.loadIronSource(adContainer);
     }
 
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        hideSystemUI();
+
         setContentView(R.layout.activity_coloring);
+        hideSystemUI();
 
         coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
 
         int orientation = getResources().getConfiguration().orientation;
-        if(orientation == Configuration.ORIENTATION_PORTRAIT)
-            loadIronSource();
-            //loadAdColonyAd();
+        if(orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if(MainActivity.counter < 5)
+                loadIronSource();
+        }
+
 
         konfettiView  = findViewById(R.id.konfetti);
         zoomOutButton = findViewById(R.id.zoom_out_button);
@@ -115,105 +115,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
 
     }
 
-
-    private void loadIronSource() {
-        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
-        final FrameLayout bannerContainer = findViewById(R.id.ironsource_container);
-        banner = IronSource.createBanner(this, ISBannerSize.BANNER);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT);
-        bannerContainer.addView(banner, 0, layoutParams);
-        banner.setBannerListener(new BannerListener() {
-            @Override
-            public void onBannerAdLoaded() {
-                // Called after a banner ad has been successfully loaded
-            }
-            @Override
-            public void onBannerAdLoadFailed(IronSourceError error) {
-                // Called after a banner has attempted to load an ad but failed.
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        bannerContainer.removeAllViews();
-                    }
-                });
-            }
-            @Override
-            public void onBannerAdClicked() {
-                // Called after a banner has been clicked.
-            }
-            @Override
-            public void onBannerAdScreenPresented() {
-                // Called when a banner is about to present a full screen content.
-            }
-            @Override
-            public void onBannerAdScreenDismissed() {
-                // Called after a full screen content has been dismissed
-            }
-            @Override
-            public void onBannerAdLeftApplication() {
-                // Called when a user would be taken out of the application context.
-            }
-        });
-        IronSource.loadBanner(banner);
-    }
-
-
-/*    private void loadAdColonyAd() {
-
-        AdColony.configure(ColoringActivity.this, ADCOLONY_APP_ID, BANNER_ZONE_ID);
-        AdColonyAdViewListener listener = new AdColonyAdViewListener() {
-            @Override
-            public void onRequestFilled(AdColonyAdView adColonyAdView) {
-                adContainer = findViewById(R.id.adcolony_container);
-                adContainer.addView(adColonyAdView);
-            }
-        };
-
-        AdColony.requestAdView(BANNER_ZONE_ID, listener, AdColonyAdSize.BANNER);
-    }*/
-
-
-    @SuppressWarnings("deprecation")
-    private void hideSystemUI() {
-
-        if(Build.VERSION.SDK_INT < 30) {
-
-            @SuppressLint("WrongConstant") final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            getWindow().getDecorView().setSystemUiVisibility(flags);
-
-            final View decorView = getWindow().getDecorView();
-            decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
-                @Override
-                public void onSystemUiVisibilityChange(int i) {
-                    if((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                        decorView.setSystemUiVisibility(flags);
-                    }
-                }
-            });
-
-        } else {
-
-            getWindow().setDecorFitsSystemWindows(false);
-            WindowInsetsController controller = getWindow().getInsetsController();
-
-            if (controller != null) {
-                controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            getWindow().getAttributes().layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES; }
-    }
 
 
     private void observeModelFromRepository() {
@@ -584,6 +485,49 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         } else {
             zoomOutButton.setVisibility(View.GONE);
         }
+    }
+
+
+
+    @SuppressWarnings("deprecation")
+    private void hideSystemUI() {
+
+        if(Build.VERSION.SDK_INT < 30) {
+
+            @SuppressLint("WrongConstant") final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().getDecorView().setSystemUiVisibility(flags);
+
+            final View decorView = getWindow().getDecorView();
+            decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
+                @Override
+                public void onSystemUiVisibilityChange(int i) {
+                    if((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                        decorView.setSystemUiVisibility(flags);
+                    }
+                }
+            });
+
+        } else {
+
+            getWindow().setDecorFitsSystemWindows(false);
+            WindowInsetsController controller = getWindow().getInsetsController();
+
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES; }
     }
 
 }

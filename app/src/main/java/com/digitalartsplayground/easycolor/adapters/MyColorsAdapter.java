@@ -9,13 +9,11 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.digitalartsplayground.easycolor.interfaces.StartColoringActivity;
 import com.digitalartsplayground.easycolor.persistance.VectorEntity;
 import com.digitalartsplayground.easycolor.utils.Utils;
 import com.digitalartsplayground.easycolor.R;
 import com.digitalartsplayground.easycolor.interfaces.ResetModelListener;
-
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;

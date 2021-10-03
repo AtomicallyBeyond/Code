@@ -17,7 +17,7 @@ import com.digitalartsplayground.easycolor.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReplayDrawable extends Drawable {
+public class /**/ReplayDrawable extends Drawable {
 
     private int listSize;
     private final List<ColoringPathModel> drawingList;

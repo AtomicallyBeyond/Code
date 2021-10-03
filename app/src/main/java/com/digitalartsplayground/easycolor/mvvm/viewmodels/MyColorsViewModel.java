@@ -21,7 +21,7 @@ public class MyColorsViewModel extends AndroidViewModel {
 
     public MyColorsViewModel(@NonNull @NotNull Application application) {
         super(application);
-        modelsProvider = ModelsProvider.getExistingInstance();
+        modelsProvider = ModelsProvider.getInstance(application);
     }
 
     public LiveData<HashMap<Integer, VectorEntity>> getModelsList() {

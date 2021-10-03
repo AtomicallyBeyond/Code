@@ -3,7 +3,6 @@ package com.digitalartsplayground.easycolor.mvvm.repository;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
-
 import com.digitalartsplayground.easycolor.mvvm.FetchServerMap;
 import com.digitalartsplayground.easycolor.mvvm.ModelFetcher;
 import com.digitalartsplayground.easycolor.persistance.BackupModelDao;
@@ -14,8 +13,6 @@ import com.digitalartsplayground.easycolor.firestore.FirestoreMap;
 import com.digitalartsplayground.easycolor.utils.AppExecutors;
 import com.digitalartsplayground.easycolor.firestore.FirestoreQueryLiveData;
 import com.digitalartsplayground.easycolor.persistance.ModelDao;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;

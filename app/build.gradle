@@ -12,8 +12,8 @@ android {
         applicationId "com.digitalartsplayground.easycolor"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 8
-        versionName "2.42"
+        versionCode 9
+        versionName "2.43"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,23 +32,23 @@ android {
 
 dependencies {
 
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+
     implementation 'com.ironsource.sdk:mediationsdk:7.1.11'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.android.gms:play-services-ads-identifier:17.1.0'
     implementation 'com.google.android.gms:play-services-basement:17.6.0'
 
-// Add AdColony Network
-    implementation 'com.ironsource.adapters:adcolonyadapter:4.3.9'
-    implementation 'com.adcolony:sdk:4.6.4'
-// Add AdMob and Ad Manager Network
+
+    // Add AdMob and Ad Manager Network
     implementation 'com.google.android.gms:play-services-ads:20.4.0'
     implementation 'com.ironsource.adapters:admobadapter:4.3.22'
-// Add Facebook Network
+    // Add Facebook Network
     implementation 'com.ironsource.adapters:facebookadapter:4.3.30'
     implementation 'com.facebook.android:audience-network-sdk:6.6.0'
-
-    implementation 'com.adcolony:sdk:4.6.4'
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+    // Add Applovin Network
+    implementation 'com.ironsource.adapters:applovinadapter:4.3.28'
+    implementation 'com.applovin:applovin-sdk:10.3.2'
 
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

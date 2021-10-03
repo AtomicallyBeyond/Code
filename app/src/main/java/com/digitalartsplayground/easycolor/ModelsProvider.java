@@ -42,12 +42,6 @@ public class ModelsProvider {
         return instance;
     }
 
-    public static ModelsProvider getExistingInstance() {
-        if(instance == null)
-            return null;
-        return instance;
-    }
-
 
     public ModelsProvider(Context context){
         repository = Repository.getInstance(context);

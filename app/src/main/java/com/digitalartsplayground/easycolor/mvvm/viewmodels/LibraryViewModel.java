@@ -20,7 +20,7 @@ public class LibraryViewModel extends AndroidViewModel {
 
     public LibraryViewModel(@NonNull @NotNull Application application) {
         super(application);
-        modelsProvider = ModelsProvider.getExistingInstance();
+        modelsProvider = ModelsProvider.getInstance(application);
     }
 
     public LiveData<List<VectorEntity>> fetchLiveModels() {

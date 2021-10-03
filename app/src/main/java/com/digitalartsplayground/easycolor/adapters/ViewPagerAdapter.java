@@ -12,12 +12,11 @@ import org.jetbrains.annotations.NotNull;
 public class ViewPagerAdapter  extends FragmentStateAdapter {
 
     LibraryFragment libraryFragment;
-    MyColorsFragment myColorsFragment;
 
     public ViewPagerAdapter(@NonNull @NotNull FragmentManager fragmentManager, @NonNull @NotNull Lifecycle lifecycle) {
         super(fragmentManager, lifecycle);
 
-        libraryFragment = new LibraryFragment();
+
     }
 
     @NonNull
@@ -26,7 +25,7 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return libraryFragment;
+                return new LibraryFragment();
             case 1:
                 return new MyColorsFragment();
         }
@@ -38,6 +37,8 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
     public int getItemCount() {
         return 2;
     }
+
+
 
 
 }

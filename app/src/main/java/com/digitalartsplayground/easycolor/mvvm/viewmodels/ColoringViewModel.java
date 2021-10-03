@@ -27,7 +27,7 @@ public class ColoringViewModel extends AndroidViewModel implements PositionListe
 
     public ColoringViewModel(@NonNull Application application) {
         super(application);
-        modelsProvider = ModelsProvider.getExistingInstance();
+        modelsProvider = ModelsProvider.getInstance(application);
         VectorModelContainer vectorModelContainer = new VectorModelContainer(modelsProvider.getSelectedVectorModel());
         vectorModelLiveData.setValue(vectorModelContainer);
 

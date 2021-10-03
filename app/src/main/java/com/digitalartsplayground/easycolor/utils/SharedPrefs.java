@@ -8,6 +8,8 @@ public class SharedPrefs {
     public static final String LAST_MODIFIED = "lastModified";
     public static final String LAST_VISIBLE = "lastVisible";
     public static final String END_REACHED = "endReached";
+    public static final String COUNTER = "counter";
+    public static final String EXPIRE_DATE = "expireDate";
 
     private static SharedPrefs instance;
     private static SharedPreferences sharedPreferences;
@@ -25,6 +27,11 @@ public class SharedPrefs {
         editor = sharedPreferences.edit();
     }
 
+    public void resetAdPrefs(){
+        setCounter(0);
+        setExpireDate(0);
+    }
+
     public int getLastModified() {
         return sharedPreferences.getInt(LAST_MODIFIED, 0);
     }
@@ -35,6 +42,18 @@ public class SharedPrefs {
 
     public boolean getEndReached() {
         return sharedPreferences.getBoolean(END_REACHED, false);
+    }
+
+    public int getCounter() { return sharedPreferences.getInt(COUNTER, 0); }
+
+    public long getExpireDate() { return sharedPreferences.getLong(EXPIRE_DATE, -1); }
+
+    public void setExpireDate(long expireDate) {
+        editor.putLong(EXPIRE_DATE, expireDate).apply();
+    }
+
+    public void setCounter(int counter){
+        editor.putInt(COUNTER, counter).apply();
     }
 
     public void setLastModified(int lastModified) {
