@@ -28,6 +28,7 @@ public class /**/ReplayDrawable extends Drawable {
     private Matrix scaleMatrix;
     private int index = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private boolean replayInProgress = false;
 
     public ReplayDrawable(VectorModelContainer coloringVectorModel) {
         this.coloringVectorModel = coloringVectorModel;
@@ -62,12 +63,21 @@ public class /**/ReplayDrawable extends Drawable {
                     index++;
                     ReplayDrawable.this.invalidateSelf();
                     handler.postDelayed(runnable, 100);
+                    replayInProgress = true;
+                } else {
+                    replayInProgress = false;
                 }
         }
     };
 
     public void startReplay() {
         runnable.run();
+    }
+
+    public void stopReplay() {
+        if(replayInProgress) {
+            handler.removeCallbacks(runnable);
+        }
     }
 
 

@@ -12,17 +12,22 @@ import com.ironsource.mediationsdk.IronSource;
 import com.ironsource.mediationsdk.IronSourceBannerLayout;
 import com.ironsource.mediationsdk.logger.IronSourceError;
 import com.ironsource.mediationsdk.sdk.BannerListener;
+import com.ironsource.mediationsdk.sdk.InterstitialListener;
 
 import java.util.concurrent.TimeUnit;
+
 
 public class BaseActivity extends AppCompatActivity {
 
     public static BaseActivity MemoryLeakContainerActivity;
     public static boolean ironSourceLoaded = false;
     private static BannerListener bannerListener;
+    private static InterstitialListener interstitialListener;
     private static IronSourceBannerLayout tempBanner;
     private static FrameLayout ironSourceContainer;
     public static int counter = 0;
+    public static boolean insterstitialReady = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,10 @@ public class BaseActivity extends AppCompatActivity {
         }
 
         IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.BANNER);
+        IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);
+        setBannerListener();
+        setInterstitialListener();
+        IronSource.setInterstitialListener(interstitialListener);
 
         Intent startIntent = new Intent(this, MainActivity.class);
         startActivity(startIntent);
@@ -54,6 +63,10 @@ public class BaseActivity extends AppCompatActivity {
         tempBanner.setBannerListener(bannerListener);
         IronSource.loadBanner(tempBanner);
         ironSourceLoaded = true;
+    }
+
+    public static void loadInterstitial() {
+        IronSource.loadInterstitial();
     }
 
     public static void destroyIronSourceAd() {
@@ -74,9 +87,11 @@ public class BaseActivity extends AppCompatActivity {
 
     public BaseActivity() {
         super();
-
         MemoryLeakContainerActivity = this;
+    }
 
+
+    private void setBannerListener() {
         bannerListener = new BannerListener() {
 
             @Override
@@ -120,6 +135,48 @@ public class BaseActivity extends AppCompatActivity {
             @Override
             public void onBannerAdLeftApplication() {
                 // Called when a user would be taken out of the application context.
+            }
+        };
+    }
+
+
+    private void setInterstitialListener() {
+
+        interstitialListener = new InterstitialListener() {
+            @Override
+            public void onInterstitialAdReady() {
+                insterstitialReady = true;
+            }
+
+            @Override
+            public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {
+
+            }
+
+            @Override
+            public void onInterstitialAdOpened() {
+
+            }
+
+            @Override
+            public void onInterstitialAdClosed() {
+
+            }
+
+            @Override
+            public void onInterstitialAdShowSucceeded() {
+                insterstitialReady = false;
+                loadInterstitial();
+            }
+
+            @Override
+            public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {
+
+            }
+
+            @Override
+            public void onInterstitialAdClicked() {
+
             }
         };
     }

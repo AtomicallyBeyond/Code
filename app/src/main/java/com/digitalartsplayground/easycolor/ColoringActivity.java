@@ -41,6 +41,9 @@ import com.digitalartsplayground.easycolor.models.ReplayDrawable;
 import com.digitalartsplayground.easycolor.models.VectorModelContainer;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.ColoringViewModel;
 import com.digitalartsplayground.easycolor.zoomageview.ZoomageView;
+import com.ironsource.mediationsdk.IronSource;
+import com.ironsource.mediationsdk.integration.IntegrationHelper;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import nl.dionsegijn.konfetti.KonfettiView;
@@ -66,6 +69,21 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private ImageButton zoomOutButton;
     private ObjectAnimator hintAnimator;
     private FrameLayout adContainer;
+    private ReplayDrawable replayDrawable;
+
+    protected void onResume() {
+        super.onResume();
+        IronSource.onResume(BaseActivity.MemoryLeakContainerActivity);
+        if(BaseActivity.insterstitialReady) {
+            IronSource.showInterstitial();
+        }
+
+    }
+
+    protected void onPause() {
+        super.onPause();
+        IronSource.onPause(BaseActivity.MemoryLeakContainerActivity);
+    }
 
 
     @Override
@@ -89,9 +107,10 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_coloring);
         hideSystemUI();
+
+
 
         coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
 
@@ -99,7 +118,11 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         if(orientation == Configuration.ORIENTATION_PORTRAIT) {
             if(BaseActivity.counter < 5)
                 loadIronSource();
+        } else {
+            BaseActivity.loadInterstitial();
         }
+
+        IntegrationHelper.validateIntegration(this);
 
 
         konfettiView  = findViewById(R.id.konfetti);
@@ -327,6 +350,9 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if(replayDrawable != null)
+                    replayDrawable.stopReplay();
                 finish();
             }
         });
@@ -468,7 +494,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     }
 
     private void startReplay(){
-        ReplayDrawable replayDrawable = new ReplayDrawable(vectorModelContainer);
+        replayDrawable = new ReplayDrawable(vectorModelContainer);
         zoomageView.setImageDrawable(replayDrawable);
         replayDrawable.startReplay();
     }
