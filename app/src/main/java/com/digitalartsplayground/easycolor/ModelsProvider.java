@@ -236,7 +236,7 @@ public class ModelsProvider {
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                selectedVectorEntity.setModel(selectedVectorEntity.getModel());
+                
                 selectedVectorEntity.loadDrawable();
 
                 HashMap<Integer, VectorEntity> temp = artworkLivedata.getValue();

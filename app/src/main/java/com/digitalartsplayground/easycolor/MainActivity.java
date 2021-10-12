@@ -14,21 +14,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.digitalartsplayground.easycolor.adapters.ViewPagerAdapter;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.MainActivityViewModel;
 import com.digitalartsplayground.easycolor.utils.PaintProvider;
-import com.digitalartsplayground.easycolor.utils.SharedPrefs;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.ironsource.mediationsdk.ISBannerSize;
-import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.IronSourceBannerLayout;
-import com.ironsource.mediationsdk.logger.IronSourceError;
-import com.ironsource.mediationsdk.sdk.BannerListener;
 
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -172,6 +164,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 50);
     }
-
 
 }

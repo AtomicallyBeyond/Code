@@ -71,14 +71,42 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private FrameLayout adContainer;
     private ReplayDrawable replayDrawable;
 
+
+    @SuppressLint("MissingPermission")
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_coloring);
+        hideSystemUI();
+
+        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
+
+        int orientation = getResources().getConfiguration().orientation;
+        if(orientation == Configuration.ORIENTATION_PORTRAIT) {
+            //if(BaseActivity.counter < 5)
+                //loadIronSource();
+        }
+
+        IntegrationHelper.validateIntegration(this);
+
+        konfettiView  = findViewById(R.id.konfetti);
+        zoomOutButton = findViewById(R.id.zoom_out_button);
+        hintProgressBar = findViewById(R.id.hint_progress_bar);
+        animateProgress(hintProgressBar, 100);
+        observeModelFromRepository();
+
+    }
+
+
     protected void onResume() {
         super.onResume();
         IronSource.onResume(BaseActivity.MemoryLeakContainerActivity);
-        if(BaseActivity.insterstitialReady) {
+        if(BaseActivity.interstitialReady) {
             IronSource.showInterstitial();
         }
 
     }
+
 
     protected void onPause() {
         super.onPause();
@@ -89,8 +117,10 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     @Override
     protected void onDestroy() {
 
+        //BaseActivity.loadIronSourceInterstitial();
+
         if(BaseActivity.ironSourceLoaded) {
-            BaseActivity.destroyIronSourceAd();
+            BaseActivity.destroyIronSourceBanner();
         }
 
         adContainer = null;
@@ -100,39 +130,8 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     private void loadIronSource() {
 
         adContainer = findViewById(R.id.ironsource_container);
-        BaseActivity.loadIronSource(adContainer);
+        BaseActivity.loadIronSourceBanner(adContainer);
     }
-
-    @SuppressLint("MissingPermission")
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_coloring);
-        hideSystemUI();
-
-
-
-        coloringViewModel = new ViewModelProvider(this).get(ColoringViewModel.class);
-
-        int orientation = getResources().getConfiguration().orientation;
-        if(orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if(BaseActivity.counter < 5)
-                loadIronSource();
-        } else {
-            BaseActivity.loadInterstitial();
-        }
-
-        IntegrationHelper.validateIntegration(this);
-
-
-        konfettiView  = findViewById(R.id.konfetti);
-        zoomOutButton = findViewById(R.id.zoom_out_button);
-        hintProgressBar = findViewById(R.id.hint_progress_bar);
-        animateProgress(hintProgressBar, 100);
-        observeModelFromRepository();
-
-    }
-
 
 
     private void observeModelFromRepository() {
@@ -270,7 +269,7 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
                     zoomageView.animateScaleAndTranslationToMatrix(inverse, 500);
 
                     animateProgress(progressBar, 10000);
-                    hintAvailable = false;
+                    hintAvailable = true;
 
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.postDelayed(new Runnable() {
@@ -416,7 +415,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
     }
 
 
-
     @Override
     public void positionChanged(int newPosition) {
         coloringVectorDrawable.invalidateSelf();
@@ -507,7 +505,6 @@ public class ColoringActivity extends AppCompatActivity implements PositionListe
             zoomOutButton.setVisibility(View.GONE);
         }
     }
-
 
 
     @SuppressWarnings("deprecation")

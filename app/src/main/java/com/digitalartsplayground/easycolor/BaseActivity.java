@@ -3,9 +3,7 @@ package com.digitalartsplayground.easycolor;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.digitalartsplayground.easycolor.utils.SharedPrefs;
 import com.ironsource.mediationsdk.ISBannerSize;
 import com.ironsource.mediationsdk.IronSource;
@@ -13,7 +11,6 @@ import com.ironsource.mediationsdk.IronSourceBannerLayout;
 import com.ironsource.mediationsdk.logger.IronSourceError;
 import com.ironsource.mediationsdk.sdk.BannerListener;
 import com.ironsource.mediationsdk.sdk.InterstitialListener;
-
 import java.util.concurrent.TimeUnit;
 
 
@@ -25,9 +22,14 @@ public class BaseActivity extends AppCompatActivity {
     private static InterstitialListener interstitialListener;
     private static IronSourceBannerLayout tempBanner;
     private static FrameLayout ironSourceContainer;
+    public static boolean interstitialReady = false;
     public static int counter = 0;
-    public static boolean insterstitialReady = false;
 
+
+    public BaseActivity() {
+        super();
+        MemoryLeakContainerActivity = this;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,15 +45,19 @@ public class BaseActivity extends AppCompatActivity {
 
         IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.BANNER);
         IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);
-        setBannerListener();
-        setInterstitialListener();
+        loadBannerListener();
+        loadInterstitialListener();
         IronSource.setInterstitialListener(interstitialListener);
 
         Intent startIntent = new Intent(this, MainActivity.class);
         startActivity(startIntent);
     }
 
-    public static void loadIronSource(FrameLayout bannerContainer) {
+    public static void loadIronSourceInterstitial() {
+        IronSource.loadInterstitial();
+    }
+
+    public static void loadIronSourceBanner(FrameLayout bannerContainer) {
 
         tempBanner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.BANNER);
         ironSourceContainer = bannerContainer;
@@ -59,17 +65,16 @@ public class BaseActivity extends AppCompatActivity {
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
 
-        ironSourceContainer.addView(tempBanner, 0, layoutParams);
-        tempBanner.setBannerListener(bannerListener);
-        IronSource.loadBanner(tempBanner);
-        ironSourceLoaded = true;
+        if(tempBanner != null) {
+            ironSourceContainer.addView(tempBanner, 0, layoutParams);
+            tempBanner.setBannerListener(bannerListener);
+            IronSource.loadBanner(tempBanner);
+            ironSourceLoaded = true;
+        }
+
     }
 
-    public static void loadInterstitial() {
-        IronSource.loadInterstitial();
-    }
-
-    public static void destroyIronSourceAd() {
+    public static void destroyIronSourceBanner() {
         ironSourceContainer.removeAllViews();
         ironSourceContainer = null;
         tempBanner.removeBannerListener();
@@ -85,13 +90,8 @@ public class BaseActivity extends AppCompatActivity {
         MemoryLeakContainerActivity = null;
     }
 
-    public BaseActivity() {
-        super();
-        MemoryLeakContainerActivity = this;
-    }
 
-
-    private void setBannerListener() {
+    private void loadBannerListener() {
         bannerListener = new BannerListener() {
 
             @Override
@@ -120,7 +120,7 @@ public class BaseActivity extends AppCompatActivity {
 
                 if(counter > 4) {
                     if(BaseActivity.ironSourceLoaded)
-                        destroyIronSourceAd();
+                        destroyIronSourceBanner();
                 }
 
             }
@@ -140,12 +140,12 @@ public class BaseActivity extends AppCompatActivity {
     }
 
 
-    private void setInterstitialListener() {
+    private void loadInterstitialListener() {
 
         interstitialListener = new InterstitialListener() {
             @Override
             public void onInterstitialAdReady() {
-                insterstitialReady = true;
+                interstitialReady = true;
             }
 
             @Override
@@ -165,8 +165,8 @@ public class BaseActivity extends AppCompatActivity {
 
             @Override
             public void onInterstitialAdShowSucceeded() {
-                insterstitialReady = false;
-                loadInterstitial();
+                interstitialReady = false;
+                loadIronSourceInterstitial();
             }
 
             @Override

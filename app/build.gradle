@@ -12,8 +12,8 @@ android {
         applicationId "com.digitalartsplayground.easycolor"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 9
-        versionName "2.43"
+        versionCode 10
+        versionName "2.44"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -31,8 +31,6 @@ android {
 }
 
 dependencies {
-
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
     implementation 'com.ironsource.sdk:mediationsdk:7.1.11'
     implementation fileTree(dir: 'libs', include: ['*.jar'])

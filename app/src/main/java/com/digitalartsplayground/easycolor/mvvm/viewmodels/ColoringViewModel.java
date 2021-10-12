@@ -21,14 +21,14 @@ public class ColoringViewModel extends AndroidViewModel implements PositionListe
     private SingleLiveEvent<Boolean> isCompleted = new SingleLiveEvent<>();
     private int position = 0;
 
-
-
     public SingleLiveEvent<Boolean> getIsCompleted() {return isCompleted;}
 
     public ColoringViewModel(@NonNull Application application) {
         super(application);
         modelsProvider = ModelsProvider.getInstance(application);
-        VectorModelContainer vectorModelContainer = new VectorModelContainer(modelsProvider.getSelectedVectorModel());
+
+        VectorEntity vectorEntity = modelsProvider.getSelectedVectorModel();
+        VectorModelContainer vectorModelContainer = new VectorModelContainer(vectorEntity);
         vectorModelLiveData.setValue(vectorModelContainer);
 
     }
