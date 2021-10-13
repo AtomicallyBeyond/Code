@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.digitalartsplayground.easycolor.fragments.LibraryFragment;
-import com.digitalartsplayground.easycolor.fragments.MyColorsFragment;
+import com.digitalartsplayground.easycolor.fragments.MyArtworkFragment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +27,7 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
             case 0:
                 return new LibraryFragment();
             case 1:
-                return new MyColorsFragment();
+                return new MyArtworkFragment();
         }
 
         return libraryFragment;

@@ -23,13 +23,13 @@ import com.digitalartsplayground.easycolor.interfaces.ResetModelListener;
 
 import java.util.HashMap;
 
-public class MyColorsFragment extends Fragment implements StartColoringActivity, ResetModelListener {
+public class MyArtworkFragment extends Fragment implements StartColoringActivity, ResetModelListener {
 
     private MyColorsViewModel myColorsViewModel;
     private MyColorsAdapter myColorsAdapter;
 
 
-    public MyColorsFragment() {
+    public MyArtworkFragment() {
         // Required empty public constructor
     }
 
@@ -91,8 +91,13 @@ public class MyColorsFragment extends Fragment implements StartColoringActivity,
     public void startActivity(VectorEntity vectorEntity) {
 
         myColorsViewModel.setCurrentVectorModel(vectorEntity);
-        Intent coloringIntent = new Intent(getActivity(), ColoringActivity.class);
-        startActivity(coloringIntent);
+
+        ColoringFragment coloringFragment = new ColoringFragment();
+        getActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.fragment_container, coloringFragment)
+                .commit();
     }
 
     @Override

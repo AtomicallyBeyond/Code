@@ -4,6 +4,8 @@ package com.digitalartsplayground.easycolor.fragments;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -105,14 +107,21 @@ public class LibraryFragment extends Fragment implements StartColoringActivity, 
     @Override
     public void startActivity(VectorEntity selectedVectorEntity) {
 
+
+        //I don't need all of this error checking anymore
         if(selectedVectorEntity.isModelAvailable()) {
             libraryViewModel.setCurrentVectorModel(selectedVectorEntity)
                     .observe(getViewLifecycleOwner(), new Observer<Boolean>() {
                 @Override
                 public void onChanged(Boolean aBoolean) {
                     if(aBoolean) {
-                        Intent coloringIntent = new Intent(getActivity(), ColoringActivity.class);
-                        startActivity(coloringIntent);
+
+                        ColoringFragment coloringFragment = new ColoringFragment();
+                        getActivity()
+                                .getSupportFragmentManager()
+                                .beginTransaction()
+                                .add(R.id.fragment_container, coloringFragment)
+                                .commit();
                     }
                 }
             });
