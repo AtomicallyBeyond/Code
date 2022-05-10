@@ -7,12 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.digitalartsplayground.easycolor.interfaces.DrawableAvailable;
+import com.digitalartsplayground.easycolor.interfaces.FetchModelListener;
 import com.digitalartsplayground.easycolor.interfaces.StartColoringActivity;
 import com.digitalartsplayground.easycolor.models.VectorEntity;
 import com.digitalartsplayground.easycolor.utils.Utils;
@@ -20,19 +19,23 @@ import com.digitalartsplayground.easycolor.R;
 import com.digitalartsplayground.easycolor.interfaces.ResetModelListener;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
-public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColorsViewHolder> {
 
-    private final StartColoringActivity startColoringActivity;
-    private final ResetModelListener resetModelListener;
-    private final List<VectorEntity> modelsList = new ArrayList<>();
+public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColorsViewHolder> {
     private final int orientation;
     private VectorEntity tempEntity;
+    private final StartColoringActivity startColoringActivity;
+    private final FetchModelListener fetchModelListener;
+    private final ResetModelListener resetModelListener;
+    private List<Integer> artworkIDList = new ArrayList<>();
+    private HashMap<Integer, VectorEntity> artworkHashMap = new HashMap<>();
 
-    public MyColorsAdapter(StartColoringActivity startColoringActivity, ResetModelListener resetModelListener, int orientation) {
+
+    public MyColorsAdapter(StartColoringActivity startColoringActivity, FetchModelListener fetchModelListener, ResetModelListener resetModelListener, int orientation) {
         this.startColoringActivity = startColoringActivity;
+        this.fetchModelListener = fetchModelListener;
         this.resetModelListener = resetModelListener;
         this.orientation = orientation;
     }
@@ -41,8 +44,16 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
     @NotNull
     @Override
     public MyColorsAdapter.MyColorsViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.vector_model_inprogress_item, parent, false);
+        view.setLayoutParams(getLayoutParams(view, parent));
+        view.findViewById(R.id.remove_button).setVisibility(View.VISIBLE);
+        return new MyColorsAdapter.MyColorsViewHolder(view);
+
+    }
+
+    private GridLayoutManager.LayoutParams getLayoutParams(View view, ViewGroup parent) {
 
         int width;
         if(orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -53,39 +64,37 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
         GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
         params.height = width;
         params.width = width;
-        view.setLayoutParams(params);
-
-        view.findViewById(R.id.remove_button).setVisibility(View.VISIBLE);
-
-        return new MyColorsAdapter.MyColorsViewHolder(view);
-
+        return params;
     }
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull MyColorsAdapter.MyColorsViewHolder holder, int position) {
 
-        tempEntity = modelsList.get(position);
+        int artworkID = artworkIDList.get(position);
+        tempEntity = artworkHashMap.get(artworkID);
 
-        if(!tempEntity.isDrawableAvailable()) {
+        if(tempEntity == null || tempEntity.getModel() == null) {
 
             if(!holder.isLoading){
                 holder.progressBar.setVisibility(View.VISIBLE);
                 holder.imageView.setVisibility(View.GONE);
-                holder.deleteButton.setVisibility(View.GONE);
                 holder.isLoading = true;
             }
 
+            VectorEntity emptyEntity = new VectorEntity();
+            emptyEntity.setId(artworkID);
+            artworkHashMap.put(artworkID, emptyEntity);
+            holder.bindModel(emptyEntity);
+            fetchModelListener.fetchModel(artworkID);
+
+        } else if (tempEntity.isDrawableAvailable()) {
+
             holder.bindModel(tempEntity);
-            tempEntity.loadDrawable();
-
-        } else {
-
             holder.imageView.setImageDrawable(tempEntity.getDrawable());
 
             if(holder.isLoading){
                 holder.progressBar.setVisibility(View.GONE);
                 holder.imageView.setVisibility(View.VISIBLE);
-                holder.deleteButton.setVisibility(View.VISIBLE);
                 holder.isLoading = false;
             }
         }
@@ -93,12 +102,15 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
 
     @Override
     public int getItemCount() {
-        return modelsList.size();
+        return artworkIDList.size();
     }
 
-    public void setModelsList(Collection<VectorEntity> modelsCollection) {
-        modelsList.clear();
-        modelsList.addAll(modelsCollection);
+    public void setArtworkIDList(List<Integer> artworkIDList) {
+        this.artworkIDList = artworkIDList;
+    }
+
+    public void setArtworkHashMap(HashMap<Integer, VectorEntity> artworkHashMap) {
+        this.artworkHashMap = artworkHashMap;
         notifyDataSetChanged();
     }
 
@@ -112,7 +124,6 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
 
         public MyColorsViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
-
             imageView = itemView.findViewById(R.id.main_imageview);
             deleteButton = itemView.findViewById(R.id.remove_button);
             progressBar = itemView.findViewById(R.id.artwork_progress_bar);
@@ -120,7 +131,8 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    VectorEntity vectorEntity = modelsList.get(getLayoutPosition());
+                    int selectedModelID = artworkIDList.get(getLayoutPosition());
+                    VectorEntity vectorEntity = artworkHashMap.get(selectedModelID);
                     if(vectorEntity != null)
                         startColoringActivity.startActivity(vectorEntity);
                 }
@@ -129,9 +141,11 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    resetModelListener.resetModel(modelsList.get(getLayoutPosition()));
-                    modelsList.remove(getLayoutPosition());
-                    notifyDataSetChanged();
+                    VectorEntity vectorEntity =
+                            artworkHashMap.get(artworkIDList.get(getLayoutPosition()));
+                    if(vectorEntity != null) {
+                        resetModelListener.resetModel(vectorEntity);
+                    }
                 }
             });
         }

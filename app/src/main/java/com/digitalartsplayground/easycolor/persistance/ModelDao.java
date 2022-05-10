@@ -19,6 +19,9 @@ public interface ModelDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertVectorModels(List<VectorEntity> vectorEntities);
 
+    @Query("SELECT id FROM models WHERE in_progress=1")
+    LiveData<List<Integer>> getArtworkIDs();
+
     @Query("SELECT * FROM models WHERE id=:id")
     VectorEntity getModel(int id);
 

@@ -64,7 +64,6 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
         GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
         params.height = width;
         params.width = width;
-
         return params;
     }
 

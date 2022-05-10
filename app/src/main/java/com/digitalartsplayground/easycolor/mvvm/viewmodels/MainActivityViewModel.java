@@ -21,16 +21,16 @@ public class MainActivityViewModel extends AndroidViewModel {
 
     private final Repository repository;
     private final SharedPrefs sharedPrefs;
-    private final MediatorLiveData<VectorEntity> liveModelList = new MediatorLiveData<>();
-    private final MediatorLiveData<List<VectorEntity>> liveArtWorkList = new MediatorLiveData<>();
 
-    //Firestore map should be cached and then only updated once every day or week
     private final MediatorLiveData<FirestoreMap> liveFirestoreMap = new MediatorLiveData<>();
+    private final MediatorLiveData<List<Integer>> liveArtworkIDs = new MediatorLiveData<>();
 
     //Integer in HashMap is the modelID
     private final HashMap<Integer, VectorEntity> modelHashMap = new HashMap<>();
+    private final HashMap<Integer, VectorEntity> artworkHashMap = new HashMap<>();
 
     private boolean isLibraryCurrent = true;
+
 
     public MainActivityViewModel(@NonNull @NotNull Application application) {
         super(application);
@@ -39,6 +39,52 @@ public class MainActivityViewModel extends AndroidViewModel {
         repository = Repository.getInstance(application);
     }
 
+    public LiveData<List<Integer>> getLiveArtworkIDs() {
+        return liveArtworkIDs;
+    }
+
+    public HashMap<Integer, VectorEntity> getArtworkHashMap() {
+        return artworkHashMap;
+    }
+
+    public void loadArtworkIDs() {
+        liveArtworkIDs.addSource(repository.fetchArtworkIDs(), new Observer<List<Integer>>() {
+            @Override
+            public void onChanged(List<Integer> integers) {
+                if(integers != null) {
+                    liveArtworkIDs.setValue(integers);
+                }
+            }
+        });
+    }
+
+    public void fetchArtwork(int modelID) {
+        LiveData<VectorEntity> liveModel = repository.fetchModelFromServer(modelID);
+        liveArtworkIDs.addSource(liveModel, new Observer<VectorEntity>() {
+            @Override
+            public void onChanged(VectorEntity vectorEntity) {
+
+                if(vectorEntity != null) {
+
+                    VectorEntity savedVector = artworkHashMap.get(vectorEntity.getId());
+
+                    if(savedVector == null) {
+                        artworkHashMap.put(vectorEntity.getId(), vectorEntity);
+                        vectorEntity.loadDrawable();
+                    } else {
+                        savedVector.setId(vectorEntity.getId());
+                        savedVector.setModel(vectorEntity.getModel());
+                        savedVector.loadDrawable();
+                    }
+                }
+
+                liveArtworkIDs.removeSource(liveModel);
+            }
+        });
+    }
+
+
+    // FirestoreMap contains ids off all available models from cache.
     public void loadFirestoreMap() {
 
         long currentTime = System.currentTimeMillis();
@@ -96,52 +142,38 @@ public class MainActivityViewModel extends AndroidViewModel {
     }
 
 
-    public LiveData<VectorEntity> getLiveModelList() {
-        return liveModelList;
-    }
-
-
-    public void loadLiveArtWorkList() {
-        LiveData<List<VectorEntity>> liveData = repository.fetchLiveArtworkList();
-
-        liveArtWorkList.addSource(liveData, new Observer<List<VectorEntity>>() {
-            @Override
-            public void onChanged(List<VectorEntity> vectorEntities) {
-                if(vectorEntities != null) {
-                    liveArtWorkList.setValue(vectorEntities);
-                }
-            }
-        });
-    }
-
-    public LiveData<List<VectorEntity>> getLiveArtworkList() {
-        return liveArtWorkList;
-    }
-
-
     public void resetVectorModel(int modelID) {
 
         LiveData<BackupVector> liveData = repository.fetchLiveBackUpModel(modelID);
-        liveArtWorkList.addSource(liveData, new Observer<BackupVector>() {
+        liveArtworkIDs.addSource(liveData, new Observer<BackupVector>() {
             @Override
             public void onChanged(BackupVector backupVector) {
 
                 if(backupVector != null) {
+
+                    final int modelID = backupVector.getSavedID();
+                    VectorEntity modelEntity = modelHashMap.get(modelID);
+
+                    if(modelEntity != null) {
+                        modelEntity.setModel(backupVector.getModel());
+                        modelEntity.loadDrawable();
+                    }
+
+                    modelEntity = artworkHashMap.get(modelID);
+                    if(modelEntity != null) {
+                        artworkHashMap.remove(backupVector.getSavedID());
+                    }
+
+
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
                             repository.insertModel(new VectorEntity(backupVector));
-                            AppExecutors.getInstance().mainThread().execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    fetchModel(modelID);
-                                }
-                            });
                         }
                     });
                 }
 
-                liveArtWorkList.removeSource(liveData);
+                liveArtworkIDs.removeSource(liveData);
             }
         });
     }

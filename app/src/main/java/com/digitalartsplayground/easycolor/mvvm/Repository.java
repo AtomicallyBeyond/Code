@@ -55,6 +55,10 @@ public class Repository {
         return backupModelDao.getLiveModel(modelID);
     }
 
+    public LiveData<List<Integer>> fetchArtworkIDs() {
+        return modelDao.getArtworkIDs();
+    }
+
     public LiveData<List<VectorEntity>> fetchLiveArtworkList() {
         return modelDao.getLiveModelsInProgress();
     }

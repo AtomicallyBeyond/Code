@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -20,6 +21,7 @@ import android.view.ViewGroup;
 
 import com.digitalartsplayground.easycolor.adapters.ModelsAdapter;
 import com.digitalartsplayground.easycolor.adapters.MyColorsAdapter;
+import com.digitalartsplayground.easycolor.interfaces.FetchModelListener;
 import com.digitalartsplayground.easycolor.interfaces.StartColoringActivity;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.MainActivityViewModel;
 import com.digitalartsplayground.easycolor.models.VectorEntity;
@@ -33,7 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class MyArtworkFragment extends Fragment implements StartColoringActivity, ResetModelListener {
+public class MyArtworkFragment extends Fragment implements StartColoringActivity, FetchModelListener, ResetModelListener {
 
     private MainActivityViewModel mainViewModel;
     private MyColorsAdapter myColorsAdapter;
@@ -88,13 +90,29 @@ public class MyArtworkFragment extends Fragment implements StartColoringActivity
             gridLayoutManager = new GridLayoutManager(getContext(), 3);
 
         recyclerView.setLayoutManager(gridLayoutManager);
-        myColorsAdapter = new MyColorsAdapter(this, this, orientation);
+        myColorsAdapter = new MyColorsAdapter(this, this, this, orientation);
         recyclerView.setAdapter(myColorsAdapter);
     }
 
     private void subscribeObserver() {
 
-        mainViewModel.getLiveArtworkList().observe(getViewLifecycleOwner(), new Observer<List<VectorEntity>>() {
+        LiveData<List<Integer>> liveIDList = mainViewModel.getLiveArtworkIDs();
+
+        liveIDList.observe(getViewLifecycleOwner(), new Observer<List<Integer>>() {
+            @Override
+            public void onChanged(List<Integer> integers) {
+                if(integers != null) {
+                    myColorsAdapter.setArtworkIDList(integers);
+                    myColorsAdapter.setArtworkHashMap(mainViewModel.getArtworkHashMap());
+                }
+            }
+        });
+
+        if(mainViewModel.getLiveArtworkIDs().getValue() == null) {
+            mainViewModel.loadArtworkIDs();
+        }
+
+/*        mainViewModel.getLiveArtworkList().observe(getViewLifecycleOwner(), new Observer<List<VectorEntity>>() {
             @Override
             public void onChanged(List<VectorEntity> vectorEntities) {
                 if(vectorEntities != null) {
@@ -105,7 +123,7 @@ public class MyArtworkFragment extends Fragment implements StartColoringActivity
 
         if(mainViewModel.getLiveArtworkList().getValue() == null) {
             mainViewModel.loadLiveArtWorkList();
-        }
+        }*/
     }
 
     @Override
@@ -146,5 +164,10 @@ public class MyArtworkFragment extends Fragment implements StartColoringActivity
     @Override
     public void resetModel(VectorEntity vectorEntity) {
         mainViewModel.resetVectorModel(vectorEntity.getId());
+    }
+
+    @Override
+    public void fetchModel(int modelID) {
+        mainViewModel.fetchArtwork(modelID);
     }
 }
