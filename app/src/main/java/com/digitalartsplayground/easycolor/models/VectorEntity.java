@@ -1,12 +1,12 @@
-package com.digitalartsplayground.easycolor.persistance;
+package com.digitalartsplayground.easycolor.models;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-
-import com.digitalartsplayground.easycolor.models.VectorDrawable;
-import com.digitalartsplayground.easycolor.models.VectorModel;
+import com.digitalartsplayground.easycolor.interfaces.DrawableAvailable;
+import com.digitalartsplayground.easycolor.persistance.BackupVector;
+import com.digitalartsplayground.easycolor.utils.AppExecutors;
 
 @Entity(tableName = "models")
 public class VectorEntity {
@@ -23,6 +23,17 @@ public class VectorEntity {
 
     @Ignore
     private VectorDrawable vectorDrawable;
+
+    @Ignore
+    private DrawableAvailable drawableAvailable;
+
+    public DrawableAvailable getDrawableAvailable() {
+        return drawableAvailable;
+    }
+
+    public void setDrawableAvailable(DrawableAvailable drawableAvailable) {
+        this.drawableAvailable = drawableAvailable;
+    }
 
     @Ignore
     public VectorDrawable getDrawable() {
@@ -83,6 +94,20 @@ public class VectorEntity {
     }
 
     public void loadDrawable() {
-        vectorDrawable = new VectorDrawable(new VectorModel(model));
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                vectorDrawable = new VectorDrawable(new VectorModel(model));
+
+                AppExecutors.getInstance().mainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(drawableAvailable != null)
+                            drawableAvailable.drawableAvailable();
+                    }
+                });
+            }
+        });
     }
 }

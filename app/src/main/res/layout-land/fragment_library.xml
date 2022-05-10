@@ -6,7 +6,7 @@
     tools:context="com.digitalartsplayground.easycolor.fragments.LibraryFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/main_recylerview"
+        android:id="@+id/main_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

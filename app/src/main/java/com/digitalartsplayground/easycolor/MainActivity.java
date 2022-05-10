@@ -1,6 +1,7 @@
 package com.digitalartsplayground.easycolor;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.transition.Fade;
@@ -20,12 +21,14 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.digitalartsplayground.easycolor.adapters.ViewPagerAdapter;
+import com.digitalartsplayground.easycolor.firestore.FirestoreMap;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.MainActivityViewModel;
 import com.digitalartsplayground.easycolor.utils.PaintProvider;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.ironsource.mediationsdk.IronSource;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     private MainActivityViewModel mainViewModel;
     private ViewPager2 viewPager2;
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         hideSystemUI();
         mainViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         subscribeObserver();
@@ -57,19 +61,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void subscribeObserver() {
-        mainViewModel.removeLoading().observe(this, new Observer<Boolean>() {
+
+        LiveData<FirestoreMap> liveFireMap = mainViewModel.getLiveFirestoreMap();
+
+        liveFireMap.observe(this, new Observer<FirestoreMap>() {
             @Override
-            public void onChanged(Boolean aBoolean) {
-                findViewById(R.id.main_progressbar).setVisibility(View.GONE);
-                libraryTextview.setOnClickListener(libraryOnClickListener);
-                artworkTextview.setOnClickListener(artworkOnClickListener);
+            public void onChanged(FirestoreMap firestoreMap) {
+                if(firestoreMap != null) {
+                    findViewById(R.id.main_progressbar).setVisibility(View.GONE);
+                    libraryTextview.setOnClickListener(libraryOnClickListener);
+                    artworkTextview.setOnClickListener(artworkOnClickListener);
+                    liveFireMap.removeObservers(MainActivity.this);
+                }
             }
         });
+
+        if(mainViewModel.getLiveFirestoreMap().getValue() == null) {
+            mainViewModel.loadFirestoreMap();
+        }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IronSource.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        IronSource.onPause(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
     }
 
     @SuppressWarnings("deprecation")
     @SuppressLint("MissingPermission")
     private void init() {
+        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
+        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);
 
         PaintProvider.createPaint();
         PaintProvider.createHDPaint();
@@ -101,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
             artworkTextview.setTextColor(highlightedTextColor);
         }
     }
+
 
     private final View.OnClickListener libraryOnClickListener = new View.OnClickListener() {
         @Override

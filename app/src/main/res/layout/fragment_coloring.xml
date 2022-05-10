@@ -10,7 +10,7 @@
         android:id="@+id/coloring_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/ironsource_container"
+        android:layout_above="@+id/banner_container"
         android:animateLayoutChanges="true"
         android:background="@color/white">
 
@@ -147,9 +147,9 @@
 
 
     <FrameLayout
-        android:id="@+id/ironsource_container"
+        android:id="@+id/banner_container"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_alignParentBottom="true"
         android:gravity="center"/>

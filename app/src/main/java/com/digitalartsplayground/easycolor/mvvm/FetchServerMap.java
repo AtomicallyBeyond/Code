@@ -5,22 +5,48 @@ import android.os.Looper;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
 
 import com.digitalartsplayground.easycolor.firestore.FirestoreMap;
 import com.digitalartsplayground.easycolor.firestore.FirestoreQueryLiveData;
+import com.digitalartsplayground.easycolor.models.VectorEntity;
+import com.digitalartsplayground.easycolor.utils.AppExecutors;
+import com.digitalartsplayground.easycolor.utils.SharedPrefs;
 import com.google.firebase.firestore.QuerySnapshot;
 
 public abstract class FetchServerMap {
-    private final MediatorLiveData<FirestoreMap> liveFireMap = new MediatorLiveData<>();
-    private Boolean loadLocalCache = false;
 
-    public FetchServerMap() {
-        fetchFromFirestore();
+    private int fetchCount = 0;
+    private final long randomSeed;
+    private final AppExecutors appExecutors;
+    private final MediatorLiveData<FirestoreMap> liveFireMap = new MediatorLiveData<>();
+
+    public FetchServerMap(long randomSeed) {
+        this.randomSeed = randomSeed;
+        appExecutors = AppExecutors.getInstance();
+        init();
     }
 
+
+    private void init() {
+
+        if(shouldFetch()) {
+            fetchFromFirestore();
+        } else {
+            liveFireMap.addSource(loadFromDb(), new Observer<FirestoreMap>() {
+                @Override
+                public void onChanged(FirestoreMap firestoreMap) {
+                    if(firestoreMap != null) {
+                        firestoreMap.shuffleList(randomSeed);
+                        liveFireMap.setValue(firestoreMap);
+                    }
+                }
+            });
+        }
+    }
 
 
     private void fetchFromFirestore() {
@@ -38,36 +64,60 @@ public abstract class FetchServerMap {
                         if(queryDocumentSnapshots.size() == 0) {
                             liveFireMap.removeSource(firestoreQueryLiveData);
                             liveFireMap.setValue(null);
-                            loadLocalCache = true;
                             return;
                         }
 
-                        FirestoreMap firestoreMap = queryDocumentSnapshots
-                                .getDocuments()
-                                .get(0)
-                                .toObject(FirestoreMap.class);
+                        appExecutors.diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
 
-                        liveFireMap.removeSource(firestoreQueryLiveData);
-                        liveFireMap.setValue(firestoreMap);
+                                FirestoreMap firestoreMap = queryDocumentSnapshots
+                                        .getDocuments()
+                                        .get(0)
+                                        .toObject(FirestoreMap.class);
+                                saveCallResult(firestoreMap);
+
+                                appExecutors.mainThread().execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        liveFireMap.addSource(loadFromDb(), new Observer<FirestoreMap>() {
+                                            @Override
+                                            public void onChanged(FirestoreMap firestoreMap) {
+                                                if(firestoreMap != null) {
+                                                    firestoreMap.shuffleList(randomSeed);
+                                                    liveFireMap.setValue(firestoreMap);
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
 
                     }
                 } else {
 
-                    if(!loadLocalCache) {
-                        liveFireMap.setValue(null);
-                        loadLocalCache = true;
+                    if(fetchCount < 2) {
+                        fetchCount++;
+                        fetchFromFirestore();
                     }
-                    Handler handler = new Handler(Looper.getMainLooper());
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            fetchFromFirestore();
-                        }
-                    }, 1000);
                 }
             }
         });
     }
+
+    // Called to save the result of the API response into the database.
+    @WorkerThread
+    protected abstract void saveCallResult(FirestoreMap firestoreMap);
+
+    // Called with the data in the database to decide whether to fetch
+    // potentially updated data from the network.
+    @MainThread
+    protected abstract boolean shouldFetch();
+
+    // Called to get the cached data from the database.
+    @NonNull @MainThread
+    protected abstract LiveData<FirestoreMap> loadFromDb();
 
     // Called to create the API call.
     @NonNull @MainThread

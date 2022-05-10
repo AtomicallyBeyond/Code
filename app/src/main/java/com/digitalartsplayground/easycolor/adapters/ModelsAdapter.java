@@ -9,20 +9,26 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.digitalartsplayground.easycolor.interfaces.DrawableAvailable;
 import com.digitalartsplayground.easycolor.interfaces.FetchModelListener;
 import com.digitalartsplayground.easycolor.interfaces.StartColoringActivity;
-import com.digitalartsplayground.easycolor.persistance.VectorEntity;
+import com.digitalartsplayground.easycolor.models.VectorEntity;
 import com.digitalartsplayground.easycolor.utils.Utils;
 import com.digitalartsplayground.easycolor.R;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
 public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder> {
 
     private final int orientation;
-    private List<VectorEntity> modelsList = new ArrayList<>();
+
+    private List<Integer> modelIDList = new ArrayList<>();
+    private HashMap<Integer, VectorEntity> modelHashMap = new HashMap<>();
+
     private final StartColoringActivity startColoringActivity;
     private final FetchModelListener fetchModelListener;
     private VectorEntity tempEntity;
@@ -65,31 +71,32 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull @NotNull ModelsAdapter.ViewHolder holder, int position) {
 
-        tempEntity = modelsList.get(position);
+        int modelID = modelIDList.get(position);
+        tempEntity = modelHashMap.get(modelID);
 
-        if(tempEntity.isDrawableAvailable()) {
+        if(tempEntity == null || tempEntity.getModel() == null) {
+
+            if(!holder.isLoading){
+                holder.progressBar.setVisibility(View.VISIBLE);
+                holder.imageView.setVisibility(View.GONE);
+                holder.isLoading = true;
+            }
+
+            VectorEntity emptyEntity = new VectorEntity();
+            emptyEntity.setId(modelID);
+            modelHashMap.put(modelID, emptyEntity);
+            holder.bindModel(emptyEntity);
+            fetchModelListener.fetchModel(modelID);
+
+        } else if (tempEntity.isDrawableAvailable()) {
+
+            holder.bindModel(tempEntity);
+            holder.imageView.setImageDrawable(tempEntity.getDrawable());
 
             if(holder.isLoading){
                 holder.progressBar.setVisibility(View.GONE);
                 holder.imageView.setVisibility(View.VISIBLE);
                 holder.isLoading = false;
-            }
-
-            holder.imageView.setImageDrawable(modelsList.get(position).getDrawable());
-
-        } else {
-
-            if(!holder.isLoading){
-                holder.imageView.setVisibility(View.GONE);
-                holder.progressBar.setVisibility(View.VISIBLE);
-                holder.isLoading = true;
-            }
-
-            if(tempEntity.isModelAvailable()) {
-                tempEntity.loadDrawable();
-                onBindViewHolder(holder, position);
-            } else {
-                fetchModelListener.fetchModel(modelsList.get(position), position);
             }
         }
 
@@ -97,19 +104,27 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return modelsList.size();
+        return modelIDList.size();
     }
 
-    public void setModelsList(List<VectorEntity> modelsList) {
-        this.modelsList = modelsList;
+
+    public void setModelIDList(List<Integer> modelIDList) {
+        this.modelIDList = modelIDList;
+    }
+
+    public void setModelHashMap(HashMap<Integer, VectorEntity> modelHashMap) {
+        this.modelHashMap = modelHashMap;
         notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
 
+    public class ViewHolder extends RecyclerView.ViewHolder implements DrawableAvailable {
+
+        protected VectorEntity currentEntity;
         protected final ImageView imageView;
         protected final ProgressBar progressBar;
         protected Boolean isLoading = true;
+
 
         public ViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
@@ -119,9 +134,40 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startColoringActivity.startActivity(modelsList.get(getLayoutPosition()));
+                    int selectedModelID = modelIDList.get(getLayoutPosition());
+                    VectorEntity vectorEntity = modelHashMap.get(selectedModelID);
+                    if(vectorEntity != null)
+                        startColoringActivity.startActivity(vectorEntity);
                 }
             });
+        }
+
+        public void bindModel(VectorEntity vectorEntity) {
+
+            if(currentEntity != null)
+                currentEntity.setDrawableAvailable(null);
+
+            currentEntity = vectorEntity;
+            currentEntity.setDrawableAvailable(this);
+        }
+
+        public void disableListener() {
+            currentEntity.setDrawableAvailable(null);
+        }
+
+        //need to handle the destruction of ViewHolder from fragment by setting
+        //null DrawableAvailable in currentEntity
+
+        @Override
+        public void drawableAvailable() {
+
+            imageView.setImageDrawable(currentEntity.getDrawable());
+
+            if(isLoading){
+                progressBar.setVisibility(View.GONE);
+                imageView.setVisibility(View.VISIBLE);
+                isLoading = false;
+            }
         }
     }
 }

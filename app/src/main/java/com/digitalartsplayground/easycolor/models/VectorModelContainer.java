@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.graphics.RectF;
 
 import com.digitalartsplayground.easycolor.interfaces.ColorDepletedListener;
-import com.digitalartsplayground.easycolor.persistance.VectorEntity;
 import com.digitalartsplayground.easycolor.utils.Utils;
 
 import java.util.ArrayList;

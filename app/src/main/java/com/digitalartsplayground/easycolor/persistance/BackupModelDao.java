@@ -1,5 +1,6 @@
 package com.digitalartsplayground.easycolor.persistance;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -16,5 +17,8 @@ public interface BackupModelDao {
 
     @Query("SELECT * FROM backup_vectors WHERE savedID=:id ")
     BackupVector getModelByID(int id);
+
+    @Query("SELECT * FROM backup_vectors WHERE savedID=:modelID ")
+    LiveData<BackupVector> getLiveModel(int modelID);
 
 }

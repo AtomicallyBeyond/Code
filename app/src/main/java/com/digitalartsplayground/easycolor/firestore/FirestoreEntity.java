@@ -1,6 +1,6 @@
 package com.digitalartsplayground.easycolor.firestore;
 
-public class FirestoreEntity {
+public class  FirestoreEntity {
 
     public int id;
     public Integer count;

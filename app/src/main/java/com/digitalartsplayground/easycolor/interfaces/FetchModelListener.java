@@ -1,7 +1,7 @@
 package com.digitalartsplayground.easycolor.interfaces;
 
-import com.digitalartsplayground.easycolor.persistance.VectorEntity;
+import com.digitalartsplayground.easycolor.models.VectorEntity;
 
 public interface FetchModelListener {
-    void fetchModel(VectorEntity vectorEntity, int position);
+    void fetchModel(int modelID);
 }

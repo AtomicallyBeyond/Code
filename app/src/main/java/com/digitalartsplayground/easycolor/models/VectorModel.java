@@ -47,7 +47,6 @@ public class VectorModel {
         try {
 
             int event = xpp.getEventType();
-            int patternColor = 500;
 
             while (event != XmlPullParser.END_DOCUMENT) {
                 String name = xpp.getName();

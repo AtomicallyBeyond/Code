@@ -11,6 +11,7 @@
         android:id="@+id/view_pager_2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingTop="2dp"
         android:layout_above="@+id/bottom_bar_layout"
         android:background="@color/white"/>
 
@@ -22,7 +23,7 @@
         android:paddingTop="10dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        android:paddingBottom="10dp"
+        android:paddingBottom="14dp"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
         android:weightSum="2"

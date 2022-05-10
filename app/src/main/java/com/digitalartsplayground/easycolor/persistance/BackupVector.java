@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.digitalartsplayground.easycolor.models.VectorEntity;
+
 @Entity(tableName = "backup_vectors")
 public class BackupVector {
 

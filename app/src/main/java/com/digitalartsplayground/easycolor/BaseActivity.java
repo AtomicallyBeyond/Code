@@ -1,5 +1,6 @@
 package com.digitalartsplayground.easycolor;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
@@ -11,9 +12,11 @@ import com.ironsource.mediationsdk.IronSourceBannerLayout;
 import com.ironsource.mediationsdk.logger.IronSourceError;
 import com.ironsource.mediationsdk.sdk.BannerListener;
 import com.ironsource.mediationsdk.sdk.InterstitialListener;
+
 import java.util.concurrent.TimeUnit;
 
 
+/*
 public class BaseActivity extends AppCompatActivity {
 
     public static BaseActivity MemoryLeakContainerActivity;
@@ -35,6 +38,16 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        initSharedPrefs();
+        initIronSource();
+        loadIronSourceListeners();
+
+        Intent startIntent = new Intent(this, MainActivity.class);
+        startActivity(startIntent);
+    }
+
+
+    private void initSharedPrefs() {
         SharedPrefs sharedPrefs = SharedPrefs.getInstance(this);
         counter = sharedPrefs.getCounter();
 
@@ -42,37 +55,47 @@ public class BaseActivity extends AppCompatActivity {
             sharedPrefs.resetAdPrefs();
             counter = 0;
         }
+    }
 
+
+    private static void initIronSource(){
         IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.BANNER);
         IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);
+    }
+
+
+    private void loadIronSourceListeners(){
         loadBannerListener();
         loadInterstitialListener();
         IronSource.setInterstitialListener(interstitialListener);
-
-        Intent startIntent = new Intent(this, MainActivity.class);
-        startActivity(startIntent);
     }
+
 
     public static void loadIronSourceInterstitial() {
         IronSource.loadInterstitial();
     }
 
+
     public static void loadIronSourceBanner(FrameLayout bannerContainer) {
 
-        tempBanner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.BANNER);
         ironSourceContainer = bannerContainer;
+
+        tempBanner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.BANNER);
+
+        if(tempBanner == null){
+            initIronSource();
+            tempBanner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.BANNER);
+        }
 
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
 
-        if(tempBanner != null) {
-            ironSourceContainer.addView(tempBanner, 0, layoutParams);
-            tempBanner.setBannerListener(bannerListener);
-            IronSource.loadBanner(tempBanner);
-            ironSourceLoaded = true;
-        }
-
+        ironSourceContainer.addView(tempBanner, 0, layoutParams);
+        tempBanner.setBannerListener(bannerListener);
+        IronSource.loadBanner(tempBanner);
+        ironSourceLoaded = true;
     }
+
 
     public static void destroyIronSourceBanner() {
         ironSourceContainer.removeAllViews();
@@ -82,12 +105,6 @@ public class BaseActivity extends AppCompatActivity {
         IronSource.destroyBanner(tempBanner);
         tempBanner = null;
         ironSourceLoaded = false;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        MemoryLeakContainerActivity = null;
     }
 
 
@@ -116,7 +133,7 @@ public class BaseActivity extends AppCompatActivity {
                 counter++;
                 SharedPrefs sharedPrefs = SharedPrefs.getInstance(BaseActivity.this);
                 sharedPrefs.setCounter(counter);
-                sharedPrefs.setExpireDate(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(2));
+                sharedPrefs.setExpireDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24));
 
                 if(counter > 4) {
                     if(BaseActivity.ironSourceLoaded)
@@ -182,3 +199,4 @@ public class BaseActivity extends AppCompatActivity {
     }
 
 }
+*/

@@ -7,4 +7,5 @@
     <color name="text_gray">#808080</color>
     <color name="transparent_white">#00FFFFFF</color>
     <color name="highlighted_text">#FFFFFF</color>
+    <color name="green_konfetti">#3cba54</color>
 </resources>

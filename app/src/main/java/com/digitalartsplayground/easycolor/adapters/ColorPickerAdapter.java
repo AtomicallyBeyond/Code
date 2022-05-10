@@ -7,38 +7,36 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.digitalartsplayground.easycolor.interfaces.ColorDepletedListener;
 import com.digitalartsplayground.easycolor.interfaces.FinishedColoringListener;
 import com.digitalartsplayground.easycolor.interfaces.PositionListener;
 import com.digitalartsplayground.easycolor.models.CircleColorDrawable;
 import com.digitalartsplayground.easycolor.models.VectorModelContainer;
 import com.digitalartsplayground.easycolor.R;
-
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.ViewHolder> implements ColorDepletedListener {
 
+    //Is there a way to avoid using context here?
     private  Context context;
     private  List<Integer> colorKeys;
     private  VectorModelContainer vectorModelContainer;
-    private  ArrayList<PositionListener> positionListeners;
+    private PositionListener positionListener;
     private FinishedColoringListener finishedColoringListener;
     private ViewHolder viewHolder = null;
     private int selectedPosition = 0;
 
 
-    public ColorPickerAdapter (Context context, VectorModelContainer vectorModelContainer, ArrayList<PositionListener> positionListeners, FinishedColoringListener finishedColoringListener){
+    public ColorPickerAdapter (Context context, VectorModelContainer vectorModelContainer, PositionListener positionListener, FinishedColoringListener finishedColoringListener){
         this.context = context;
         this.vectorModelContainer = vectorModelContainer;
         colorKeys = vectorModelContainer.getColorKeys();
-        this.positionListeners = positionListeners;
+        this.positionListener = positionListener;
         this.finishedColoringListener = finishedColoringListener;
 
     }
@@ -105,10 +103,7 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
 
             if(selectedPosition >= 0 && !colorKeys.isEmpty()) {
                 vectorModelContainer.shadePaths(colorKeys.get(selectedPosition));
-
-                for(PositionListener positionListener : positionListeners){
-                    positionListener.positionChanged(selectedPosition);
-                }
+                positionListener.positionChanged(selectedPosition);
             }
 
             if(colorKeys.isEmpty())
@@ -166,10 +161,7 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
                     vectorModelContainer.shadePaths(colorKeys.get(position));
                     selectedPosition = position;
 
-                    for(PositionListener positionListener : positionListeners)
-                        positionListener.positionChanged(position);
-
-
+                    positionListener.positionChanged(position);
                 }
             }); //end of setOnClickListener
         }

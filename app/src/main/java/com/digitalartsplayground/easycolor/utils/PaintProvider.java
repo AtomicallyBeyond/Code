@@ -10,7 +10,7 @@ public class PaintProvider {
 
     public static void createPaint() {
         strokePaint.setStyle(Paint.Style.STROKE);
-        strokePaint.setStrokeWidth(3.0f);
+        strokePaint.setStrokeWidth(4.0f);
         strokePaint.setColor(Color.BLACK);
     }
 

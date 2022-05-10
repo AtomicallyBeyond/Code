@@ -6,11 +6,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.digitalartsplayground.easycolor.interfaces.DrawableAvailable;
 import com.digitalartsplayground.easycolor.interfaces.StartColoringActivity;
-import com.digitalartsplayground.easycolor.persistance.VectorEntity;
+import com.digitalartsplayground.easycolor.models.VectorEntity;
 import com.digitalartsplayground.easycolor.utils.Utils;
 import com.digitalartsplayground.easycolor.R;
 import com.digitalartsplayground.easycolor.interfaces.ResetModelListener;
@@ -62,10 +66,29 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
 
         tempEntity = modelsList.get(position);
 
-        if(!tempEntity.isDrawableAvailable())
+        if(!tempEntity.isDrawableAvailable()) {
+
+            if(!holder.isLoading){
+                holder.progressBar.setVisibility(View.VISIBLE);
+                holder.imageView.setVisibility(View.GONE);
+                holder.deleteButton.setVisibility(View.GONE);
+                holder.isLoading = true;
+            }
+
+            holder.bindModel(tempEntity);
             tempEntity.loadDrawable();
 
-        holder.imageView.setImageDrawable(tempEntity.getDrawable());
+        } else {
+
+            holder.imageView.setImageDrawable(tempEntity.getDrawable());
+
+            if(holder.isLoading){
+                holder.progressBar.setVisibility(View.GONE);
+                holder.imageView.setVisibility(View.VISIBLE);
+                holder.deleteButton.setVisibility(View.VISIBLE);
+                holder.isLoading = false;
+            }
+        }
     }
 
     @Override
@@ -79,24 +102,31 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
         notifyDataSetChanged();
     }
 
-    protected class MyColorsViewHolder extends RecyclerView.ViewHolder {
+    protected class MyColorsViewHolder extends RecyclerView.ViewHolder implements DrawableAvailable {
 
-        private final ImageView imageView;
+        protected VectorEntity currentEntity;
+        protected final ImageView imageView;
+        protected final ImageButton deleteButton;
+        protected final ProgressBar progressBar;
+        protected Boolean isLoading = true;
 
         public MyColorsViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
 
             imageView = itemView.findViewById(R.id.main_imageview);
-            final ImageButton imageButton = itemView.findViewById(R.id.remove_button);
+            deleteButton = itemView.findViewById(R.id.remove_button);
+            progressBar = itemView.findViewById(R.id.artwork_progress_bar);
 
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startColoringActivity.startActivity(modelsList.get(getLayoutPosition()));
+                    VectorEntity vectorEntity = modelsList.get(getLayoutPosition());
+                    if(vectorEntity != null)
+                        startColoringActivity.startActivity(vectorEntity);
                 }
             });
 
-            imageButton.setOnClickListener(new View.OnClickListener() {
+            deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     resetModelListener.resetModel(modelsList.get(getLayoutPosition()));
@@ -104,6 +134,32 @@ public class MyColorsAdapter extends RecyclerView.Adapter<MyColorsAdapter.MyColo
                     notifyDataSetChanged();
                 }
             });
+        }
+
+        public void bindModel(VectorEntity vectorEntity) {
+
+            if(currentEntity != null)
+                currentEntity.setDrawableAvailable(null);
+
+            currentEntity = vectorEntity;
+            currentEntity.setDrawableAvailable(this);
+        }
+
+        public void disableListener() {
+            currentEntity.setDrawableAvailable(null);
+        }
+
+        @Override
+        public void drawableAvailable() {
+
+            imageView.setImageDrawable(currentEntity.getDrawable());
+
+            if(isLoading){
+                progressBar.setVisibility(View.GONE);
+                imageView.setVisibility(View.VISIBLE);
+                deleteButton.setVisibility(View.VISIBLE);
+                isLoading = false;
+            }
         }
     }
 }

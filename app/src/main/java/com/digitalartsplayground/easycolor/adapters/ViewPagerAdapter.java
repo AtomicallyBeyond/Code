@@ -15,8 +15,6 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
 
     public ViewPagerAdapter(@NonNull @NotNull FragmentManager fragmentManager, @NonNull @NotNull Lifecycle lifecycle) {
         super(fragmentManager, lifecycle);
-
-
     }
 
     @NonNull
