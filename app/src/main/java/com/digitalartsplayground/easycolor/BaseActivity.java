@@ -1,10 +1,11 @@
 package com.digitalartsplayground.easycolor;
 
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.digitalartsplayground.easycolor.utils.SharedPrefs;
 import com.ironsource.mediationsdk.ISBannerSize;
 import com.ironsource.mediationsdk.IronSource;
@@ -15,18 +16,13 @@ import com.ironsource.mediationsdk.sdk.InterstitialListener;
 
 import java.util.concurrent.TimeUnit;
 
-
-/*
 public class BaseActivity extends AppCompatActivity {
 
     public static BaseActivity MemoryLeakContainerActivity;
-    public static boolean ironSourceLoaded = false;
+    public static int bannerClickCount = 0;
+    private static IronSourceBannerLayout banner;
     private static BannerListener bannerListener;
     private static InterstitialListener interstitialListener;
-    private static IronSourceBannerLayout tempBanner;
-    private static FrameLayout ironSourceContainer;
-    public static boolean interstitialReady = false;
-    public static int counter = 0;
 
 
     public BaseActivity() {
@@ -35,168 +31,147 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        IronSource.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        IronSource.onPause(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_base);
+        init();
 
-        initSharedPrefs();
-        initIronSource();
-        loadIronSourceListeners();
+
+
+    }
+
+    public void init() {
+        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
+        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);
+        checkAdServingTimeLimit();
+        loadBannerListener();
+        loadInterstitialListener();
+        IronSource.setInterstitialListener(interstitialListener);
 
         Intent startIntent = new Intent(this, MainActivity.class);
         startActivity(startIntent);
     }
 
 
-    private void initSharedPrefs() {
+
+    public void checkAdServingTimeLimit(){
         SharedPrefs sharedPrefs = SharedPrefs.getInstance(this);
-        counter = sharedPrefs.getCounter();
+        bannerClickCount = sharedPrefs.getBannerClickCounter();
 
         if(sharedPrefs.getExpireDate() < System.currentTimeMillis()) {
             sharedPrefs.resetAdPrefs();
-            counter = 0;
+            bannerClickCount = 0;
         }
     }
 
+    public static void loadInterstitial() {
 
-    private static void initIronSource(){
-        IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.BANNER);
-        IronSource.init(MemoryLeakContainerActivity, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);
+        if (MemoryLeakContainerActivity != null) {
+            SharedPrefs sharedPrefs = SharedPrefs.getInstance(MemoryLeakContainerActivity);
+            int coinViewCount = sharedPrefs.getModelViewCount();
+            if (coinViewCount > 2) {
+                sharedPrefs.setModelViewCount(0);
+                IronSource.loadInterstitial();
+            }
+        }
     }
-
-
-    private void loadIronSourceListeners(){
-        loadBannerListener();
-        loadInterstitialListener();
-        IronSource.setInterstitialListener(interstitialListener);
-    }
-
-
-    public static void loadIronSourceInterstitial() {
-        IronSource.loadInterstitial();
-    }
-
 
     public static void loadIronSourceBanner(FrameLayout bannerContainer) {
 
-        ironSourceContainer = bannerContainer;
+        if(banner != null)
+            destroyBanner(bannerContainer);
 
-        tempBanner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.BANNER);
+        if(bannerClickCount < 5 && MemoryLeakContainerActivity != null && bannerContainer != null) {
+            banner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.SMART);
+            bannerContainer.addView(banner);
 
-        if(tempBanner == null){
-            initIronSource();
-            tempBanner = IronSource.createBanner(MemoryLeakContainerActivity, ISBannerSize.BANNER);
+            if (banner != null) {
+                banner.setBannerListener(bannerListener);
+                IronSource.loadBanner(banner);
+            }
         }
 
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT);
-
-        ironSourceContainer.addView(tempBanner, 0, layoutParams);
-        tempBanner.setBannerListener(bannerListener);
-        IronSource.loadBanner(tempBanner);
-        ironSourceLoaded = true;
     }
 
+    public static void destroyBanner(FrameLayout bannerContainer){
 
-    public static void destroyIronSourceBanner() {
-        ironSourceContainer.removeAllViews();
-        ironSourceContainer = null;
-        tempBanner.removeBannerListener();
-        tempBanner.setBannerListener(null);
-        IronSource.destroyBanner(tempBanner);
-        tempBanner = null;
-        ironSourceLoaded = false;
+        if(bannerContainer != null) {
+            bannerContainer.removeAllViews();
+        }
+
+        if(banner != null && !banner.isDestroyed()) {
+            banner.removeBannerListener();
+            IronSource.destroyBanner(banner);
+            banner = null;
+        }
     }
-
 
     private void loadBannerListener() {
+
         bannerListener = new BannerListener() {
 
             @Override
-            public void onBannerAdLoaded() {
-                // Called after a banner ad has been successfully loaded
-            }
+            public void onBannerAdLoaded() { }
             @Override
-            public void onBannerAdLoadFailed(IronSourceError error) {
+            public void onBannerAdLoadFailed(IronSourceError ironSourceError) {
                 // Called after a banner has attempted to load an ad but failed.
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        if(ironSourceContainer != null)
-                            ironSourceContainer.removeAllViews();
-                    }
-                });
+                if(banner != null) {
+                    banner.removeBannerListener();
+                    IronSource.destroyBanner(banner);
+                    banner = null;
+                }
             }
             @Override
             public void onBannerAdClicked() {
-                // Called after a banner has been clicked.
-                counter++;
-                SharedPrefs sharedPrefs = SharedPrefs.getInstance(BaseActivity.this);
-                sharedPrefs.setCounter(counter);
-                sharedPrefs.setExpireDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24));
-
-                if(counter > 4) {
-                    if(BaseActivity.ironSourceLoaded)
-                        destroyIronSourceBanner();
+                bannerClickCount++;
+                if(MemoryLeakContainerActivity != null) {
+                    SharedPrefs sharedPrefs = SharedPrefs.getInstance(MemoryLeakContainerActivity);
+                    sharedPrefs.setBannerClickCounter(bannerClickCount);
+                    sharedPrefs.setExpireDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24));
                 }
-
             }
             @Override
-            public void onBannerAdScreenPresented() {
-                // Called when a banner is about to present a full screen content.
-            }
+            public void onBannerAdScreenPresented() {}
             @Override
-            public void onBannerAdScreenDismissed() {
-                // Called after a full screen content has been dismissed
-            }
+            public void onBannerAdScreenDismissed() {}
             @Override
-            public void onBannerAdLeftApplication() {
-                // Called when a user would be taken out of the application context.
-            }
+            public void onBannerAdLeftApplication() {}
         };
     }
 
 
     private void loadInterstitialListener() {
-
         interstitialListener = new InterstitialListener() {
             @Override
             public void onInterstitialAdReady() {
-                interstitialReady = true;
+                IronSource.showInterstitial();
             }
 
             @Override
-            public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {
-
-            }
-
+            public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {}
             @Override
-            public void onInterstitialAdOpened() {
-
-            }
-
+            public void onInterstitialAdOpened() {}
             @Override
-            public void onInterstitialAdClosed() {
-
-            }
-
+            public void onInterstitialAdClosed() {}
             @Override
-            public void onInterstitialAdShowSucceeded() {
-                interstitialReady = false;
-                loadIronSourceInterstitial();
-            }
-
+            public void onInterstitialAdShowSucceeded() {}
             @Override
-            public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {
-
-            }
-
+            public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {}
             @Override
-            public void onInterstitialAdClicked() {
-
-            }
+            public void onInterstitialAdClicked() {}
         };
     }
 
 }
-*/

@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Easy Color</string>
     <string name="library">LIBRARY</string>
-    <string name="my_artwork">MY ARTWORK</string>
+    <string name="my_artwork">ARTWORK</string>
 </resources>

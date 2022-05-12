@@ -24,19 +24,17 @@ import java.util.List;
 
 public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder> {
 
-    private final int orientation;
-
     private List<Integer> modelIDList = new ArrayList<>();
     private HashMap<Integer, VectorEntity> modelHashMap = new HashMap<>();
+    private List<ViewHolder> viewHolders = new ArrayList<>();
 
-    private final StartColoringActivity startColoringActivity;
-    private final FetchModelListener fetchModelListener;
+    private StartColoringActivity startColoringActivity;
+    private FetchModelListener fetchModelListener;
     private VectorEntity tempEntity;
 
 
-    public ModelsAdapter(StartColoringActivity startColoringActivity, FetchModelListener fetchModelListener, int orientation) {
+    public ModelsAdapter(StartColoringActivity startColoringActivity, FetchModelListener fetchModelListener) {
         this.startColoringActivity = startColoringActivity;
-        this.orientation = orientation;
         this.fetchModelListener = fetchModelListener;
     }
 
@@ -48,23 +46,9 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
         View view = LayoutInflater
                 .from(parent.getContext())
                 .inflate(R.layout.vector_model_item, parent, false);
-        view.setLayoutParams(getLayoutParams(view, parent));
+        ViewHolder holder = new ViewHolder(view);
+        viewHolders.add(holder);
         return new ViewHolder(view);
-
-    }
-
-    private GridLayoutManager.LayoutParams getLayoutParams(View view, ViewGroup parent) {
-
-        int width;
-        if(orientation == Configuration.ORIENTATION_PORTRAIT)
-            width  = (parent.getWidth() / 2) - Utils.dpToPx(20);
-        else
-            width = (parent.getWidth() / 3) - Utils.dpToPx(20);
-
-        GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
-        params.height = width;
-        params.width = width;
-        return params;
     }
 
     @Override
@@ -108,7 +92,8 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
 
 
     public void setModelIDList(List<Integer> modelIDList) {
-        this.modelIDList = modelIDList;
+        this.modelIDList.clear();
+        this.modelIDList.addAll(modelIDList);
     }
 
     public void setModelHashMap(HashMap<Integer, VectorEntity> modelHashMap) {
@@ -116,12 +101,41 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
         notifyDataSetChanged();
     }
 
+    public void destroyAdapter() {
+
+        for(ViewHolder holder : viewHolders) {
+            if(holder != null) {
+                holder.disableListener();
+                holder.destroyHolder();
+                holder = null;
+            }
+        }
+        viewHolders.clear();
+        viewHolders = null;
+
+        VectorEntity entity;
+
+        for(int id : modelIDList) {
+
+            entity = modelHashMap.get(id);
+            if(entity != null)
+                entity.setDrawableAvailable(null);
+        }
+
+        modelIDList.clear();
+        modelIDList = null;
+        modelHashMap = null;
+        startColoringActivity = null;
+        fetchModelListener = null;
+        tempEntity = null;
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder implements DrawableAvailable {
 
         protected VectorEntity currentEntity;
-        protected final ImageView imageView;
-        protected final ProgressBar progressBar;
+        protected ImageView imageView;
+        protected ProgressBar progressBar;
         protected Boolean isLoading = true;
 
 
@@ -151,11 +165,10 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
         }
 
         public void disableListener() {
-            currentEntity.setDrawableAvailable(null);
-        }
 
-        //need to handle the destruction of ViewHolder from fragment by setting
-        //null DrawableAvailable in currentEntity
+            if(currentEntity != null)
+                currentEntity.setDrawableAvailable(null);
+        }
 
         @Override
         public void drawableAvailable() {
@@ -167,6 +180,12 @@ public class ModelsAdapter extends RecyclerView.Adapter<ModelsAdapter.ViewHolder
                 imageView.setVisibility(View.VISIBLE);
                 isLoading = false;
             }
+        }
+
+        public void destroyHolder() {
+            currentEntity = null;
+            imageView = null;
+            progressBar = null;
         }
     }
 }

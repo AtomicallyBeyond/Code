@@ -73,10 +73,10 @@ public class ColoringFragmentViewModel extends AndroidViewModel {
                         @Override
                         public void run() {
                             repository.insertModel(new VectorEntity(backupVector));
-                            isCompleted.setValue(false);
                             AppExecutors.getInstance().mainThread().execute(new Runnable() {
                                 @Override
                                 public void run() {
+                                    isCompleted.setValue(false);
                                     fetchModel(modelID);
                                 }
                             });

@@ -11,8 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class ViewPagerAdapter  extends FragmentStateAdapter {
 
-    LibraryFragment libraryFragment;
-
     public ViewPagerAdapter(@NonNull @NotNull FragmentManager fragmentManager, @NonNull @NotNull Lifecycle lifecycle) {
         super(fragmentManager, lifecycle);
     }
@@ -21,14 +19,11 @@ public class ViewPagerAdapter  extends FragmentStateAdapter {
     @NotNull
     @Override
     public Fragment createFragment(int position) {
-        switch (position) {
-            case 0:
-                return new LibraryFragment();
-            case 1:
-                return new MyArtworkFragment();
-        }
 
-        return libraryFragment;
+        if(position == 0)
+            return new LibraryFragment();
+        else
+            return new MyArtworkFragment();
     }
 
     @Override

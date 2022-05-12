@@ -49,11 +49,7 @@ public class MyArtworkFragment extends Fragment implements StartColoringActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
-        for(int childCount = recyclerView.getChildCount(), i = 0; i < childCount; i++) {
-            final ModelsAdapter.ViewHolder holder =
-                    (ModelsAdapter.ViewHolder)(recyclerView.getChildViewHolder(recyclerView.getChildAt(i)));
-            holder.disableListener();
-        }
+        myColorsAdapter.destroyHolders();
     }
 
     @Override
@@ -77,20 +73,20 @@ public class MyArtworkFragment extends Fragment implements StartColoringActivity
     }
 
     private void initRecyclerView(View view) {
+
+        GridLayoutManager gridLayoutManager;
         recyclerView = view.findViewById(R.id.my_colors_recyclerview);
         recyclerView.setHasFixedSize(true);
 
         int orientation = getResources().getConfiguration().orientation;
 
-        GridLayoutManager gridLayoutManager;
-
         if (orientation == Configuration.ORIENTATION_PORTRAIT)
             gridLayoutManager = new GridLayoutManager(getContext(), 2);
         else
-            gridLayoutManager = new GridLayoutManager(getContext(), 3);
+            gridLayoutManager = new GridLayoutManager(getContext(), 4);
 
         recyclerView.setLayoutManager(gridLayoutManager);
-        myColorsAdapter = new MyColorsAdapter(this, this, this, orientation);
+        myColorsAdapter = new MyColorsAdapter(this, this, this);
         recyclerView.setAdapter(myColorsAdapter);
     }
 
@@ -111,19 +107,6 @@ public class MyArtworkFragment extends Fragment implements StartColoringActivity
         if(mainViewModel.getLiveArtworkIDs().getValue() == null) {
             mainViewModel.loadArtworkIDs();
         }
-
-/*        mainViewModel.getLiveArtworkList().observe(getViewLifecycleOwner(), new Observer<List<VectorEntity>>() {
-            @Override
-            public void onChanged(List<VectorEntity> vectorEntities) {
-                if(vectorEntities != null) {
-                    myColorsAdapter.setModelsList(vectorEntities);
-                }
-            }
-        });
-
-        if(mainViewModel.getLiveArtworkList().getValue() == null) {
-            mainViewModel.loadLiveArtWorkList();
-        }*/
     }
 
     @Override
@@ -145,9 +128,9 @@ public class MyArtworkFragment extends Fragment implements StartColoringActivity
                         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                mainViewModel.fetchModel(vectorEntity.getId());
+                                mainViewModel.fetchArtwork(vectorEntity.getId());
                             }
-                        }, 100);
+                        }, 500);
 
                         fragmentManager.unregisterFragmentLifecycleCallbacks(this);
                     }

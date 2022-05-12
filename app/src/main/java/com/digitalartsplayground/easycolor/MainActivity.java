@@ -79,32 +79,25 @@ public class MainActivity extends AppCompatActivity{
         if(mainViewModel.getLiveFirestoreMap().getValue() == null) {
             mainViewModel.loadFirestoreMap();
         }
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        IronSource.onResume(this);
+        //IronSource.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        IronSource.onPause(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
+        //IronSource.onPause(this);
     }
 
     @SuppressWarnings("deprecation")
     @SuppressLint("MissingPermission")
     private void init() {
-        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
-        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);
+/*        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
+        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);*/
 
         PaintProvider.createPaint();
         PaintProvider.createHDPaint();

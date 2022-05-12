@@ -2,7 +2,6 @@ package com.digitalartsplayground.easycolor.fragments;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -11,11 +10,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Update;
-
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +23,6 @@ import com.digitalartsplayground.easycolor.models.VectorEntity;
 import com.digitalartsplayground.easycolor.R;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.MainActivityViewModel;
 import com.digitalartsplayground.easycolor.utils.SharedPrefs;
-
 import org.jetbrains.annotations.NotNull;
 
 
@@ -37,6 +32,7 @@ public class LibraryFragment extends Fragment implements StartColoringActivity, 
     private ModelsAdapter modelsAdapter;
     private RecyclerView recyclerView;
 
+
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -44,12 +40,8 @@ public class LibraryFragment extends Fragment implements StartColoringActivity, 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        for(int childCount = recyclerView.getChildCount(), i = 0; i < childCount; i++) {
-            final ModelsAdapter.ViewHolder holder =
-                    (ModelsAdapter.ViewHolder)(recyclerView.getChildViewHolder(recyclerView.getChildAt(i)));
-            holder.disableListener();
-        }
-
+        modelsAdapter.destroyAdapter();
+        recyclerView = null;
     }
 
     @Override
@@ -82,10 +74,10 @@ public class LibraryFragment extends Fragment implements StartColoringActivity, 
         if (orientation == Configuration.ORIENTATION_PORTRAIT)
             gridLayoutManager = new GridLayoutManager(getContext(), 2);
         else
-            gridLayoutManager = new GridLayoutManager(getContext(), 3);
+            gridLayoutManager = new GridLayoutManager(getContext(), 4);
 
         recyclerView.setLayoutManager(gridLayoutManager);
-        modelsAdapter = new ModelsAdapter(this, this, orientation);
+        modelsAdapter = new ModelsAdapter(this, this);
         recyclerView.setAdapter(modelsAdapter);
     }
 
@@ -126,7 +118,7 @@ public class LibraryFragment extends Fragment implements StartColoringActivity, 
                             public void run() {
                                 mainViewModel.fetchModel(vectorEntity.getId());
                             }
-                        }, 100);
+                        }, 500);
 
                         fragmentManager.unregisterFragmentLifecycleCallbacks(this);
                     }

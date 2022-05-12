@@ -31,6 +31,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.Slide;
 import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
+
+import com.digitalartsplayground.easycolor.BaseActivity;
 import com.digitalartsplayground.easycolor.R;
 import com.digitalartsplayground.easycolor.adapters.ColorPickerAdapter;
 import com.digitalartsplayground.easycolor.interfaces.FinishedColoringListener;
@@ -40,16 +42,7 @@ import com.digitalartsplayground.easycolor.models.ColoringVectorDrawable;
 import com.digitalartsplayground.easycolor.models.ReplayDrawable;
 import com.digitalartsplayground.easycolor.models.VectorModelContainer;
 import com.digitalartsplayground.easycolor.mvvm.viewmodels.ColoringFragmentViewModel;
-import com.digitalartsplayground.easycolor.utils.SharedPrefs;
 import com.digitalartsplayground.easycolor.zoomageview.ZoomageView;
-import com.ironsource.mediationsdk.ISBannerSize;
-import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.IronSourceBannerLayout;
-import com.ironsource.mediationsdk.logger.IronSourceError;
-import com.ironsource.mediationsdk.sdk.BannerListener;
-import com.ironsource.mediationsdk.sdk.InterstitialListener;
-
-import java.util.concurrent.TimeUnit;
 
 import nl.dionsegijn.konfetti.KonfettiView;
 import nl.dionsegijn.konfetti.models.Shape;
@@ -66,7 +59,6 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
     private float xScale;
     private float yScale;
     private boolean hintAvailable = true;
-    private SharedPrefs sharedPrefs;
     private ColoringFragmentViewModel coloringViewModel;
     private ZoomageView zoomageView;
     private VectorModelContainer vectorModelContainer;
@@ -78,9 +70,8 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
     private ObjectAnimator hintAnimator;
     private ReplayDrawable replayDrawable;
     private View mainView;
-    public static int bannerClickCount = 0;
-    private IronSourceBannerLayout banner;
     private FrameLayout bannerContainer;
+
 
     public static ColoringFragment newInstance(int modelID) {
         ColoringFragment coloringFragment = new ColoringFragment();
@@ -95,7 +86,6 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
         super.onCreate(savedInstanceState);
 
         coloringViewModel = new ViewModelProvider(this).get(ColoringFragmentViewModel.class);
-        sharedPrefs = SharedPrefs.getInstance(getActivity());
 
         if(getArguments() != null)
             modelID = getArguments().getInt(MODEL_ID);
@@ -103,11 +93,13 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         mainView = inflater.inflate(R.layout.fragment_coloring, container, false);
         bannerContainer = mainView.findViewById(R.id.banner_container);
         konfettiView  = mainView.findViewById(R.id.konfetti);
         zoomOutButton = mainView.findViewById(R.id.zoom_out_button);
         hintProgressBar = mainView.findViewById(R.id.hint_progress_bar);
+
         animateProgress(hintProgressBar, 100);
         observeModelFromRepository();
 
@@ -118,10 +110,12 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
     public void onResume() {
         super.onResume();
 
+        BaseActivity.loadInterstitial();
         int orientation = getResources().getConfiguration().orientation;
         if(orientation == Configuration.ORIENTATION_PORTRAIT) {
-            checkAdServingTimeLimit();
-            loadIronSourceBanner();
+            if(BaseActivity.MemoryLeakContainerActivity != null) {
+                BaseActivity.loadIronSourceBanner(bannerContainer);
+            }
         }
     }
 
@@ -129,7 +123,18 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
     @Override
     public void onPause() {
         super.onPause();
-        destroyBanner();
+
+        if(BaseActivity.MemoryLeakContainerActivity != null) {
+            BaseActivity.destroyBanner(bannerContainer);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if(bannerContainer != null)
+            bannerContainer.removeAllViews();
     }
 
     private void observeModelFromRepository() {
@@ -153,14 +158,12 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
 
 
     private void init() {
-        //IronSource.setInterstitialListener(interstitialListener);
-        //IronSource.loadInterstitial();
         initZoomageView();
         setHintButtonListener(mainView.findViewById(R.id.coloring_hint_button));
         setBackButtonListener(mainView.findViewById(R.id.coloring_back_button));
         setPlayButtonListener(mainView.findViewById(R.id.coloring_play_button));
         setResetButtonListener(mainView.findViewById(R.id.coloring_reset_button));
-        initRecylerView();
+        initRecyclerView();
         subscribeViewStateObserver();
     }
 
@@ -382,7 +385,7 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
         });
     }
 
-    private void initRecylerView() {
+    private void initRecyclerView() {
         colorsRecyclerView = mainView.findViewById(R.id.coloring_recyclerView);
         colorsRecyclerView.setHasFixedSize(true);
 
@@ -514,101 +517,5 @@ public class ColoringFragment extends Fragment implements PositionListener, Fini
             zoomOutButton.setVisibility(View.GONE);
         }
     }
-
-
-    public void checkAdServingTimeLimit(){
-
-        bannerClickCount = sharedPrefs.getBannerClickCounter();
-
-        if(sharedPrefs.getExpireDate() < System.currentTimeMillis()) {
-            sharedPrefs.resetAdPrefs();
-            bannerClickCount = 0;
-        }
-    }
-
-    private void loadIronSourceBanner() {
-
-        if(banner == null || banner.isDestroyed()) {
-            if(bannerClickCount < 5) {
-                banner = IronSource.createBanner(getActivity(), ISBannerSize.SMART);
-                bannerContainer.addView(banner);
-
-                if(banner != null) {
-                    banner.setBannerListener(bannerListener);
-                    IronSource.loadBanner(banner);
-                }
-            }
-        }
-    }
-
-    public void destroyBanner(){
-
-        if(bannerContainer != null) {
-            bannerContainer.removeAllViews();
-        }
-
-        if(banner != null && !banner.isDestroyed()) {
-            banner.removeBannerListener();
-            bannerListener = null;
-            IronSource.destroyBanner(banner);
-            banner = null;
-        }
-
-    }
-
-
-    BannerListener bannerListener = new BannerListener() {
-
-        @Override
-        public void onBannerAdLoaded() { }
-        @Override
-        public void onBannerAdLoadFailed(IronSourceError ironSourceError) {
-            // Called after a banner has attempted to load an ad but failed.
-            bannerContainer.removeAllViews();
-        }
-        @Override
-        public void onBannerAdClicked() {
-            bannerClickCount++;
-            sharedPrefs.setBannerClickCounter(bannerClickCount);
-            sharedPrefs.setExpireDate(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24));
-
-            if(bannerClickCount > 4) {
-                IronSource.destroyBanner(banner);
-            }
-        }
-        @Override
-        public void onBannerAdScreenPresented() {}
-        @Override
-        public void onBannerAdScreenDismissed() {}
-        @Override
-        public void onBannerAdLeftApplication() { }
-    };
-
-
-/*    InterstitialListener interstitialListener = new InterstitialListener() {
-        @Override
-        public void onInterstitialAdReady() {
-
-            int coinViewCount = sharedPrefs.getModelViewCount();
-
-            if(coinViewCount > 2) {
-                IronSource.showInterstitial();
-                sharedPrefs.setModelViewCount(0);
-            }
-        }
-
-        @Override
-        public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {}
-        @Override
-        public void onInterstitialAdOpened() {}
-        @Override
-        public void onInterstitialAdClosed() {}
-        @Override
-        public void onInterstitialAdShowSucceeded() {}
-        @Override
-        public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {}
-        @Override
-        public void onInterstitialAdClicked() { }
-    };*/
 
 }

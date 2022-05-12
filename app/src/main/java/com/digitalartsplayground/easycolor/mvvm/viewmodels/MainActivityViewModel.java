@@ -88,12 +88,15 @@ public class MainActivityViewModel extends AndroidViewModel {
     public void loadFirestoreMap() {
 
         long currentTime = System.currentTimeMillis();
+        long fetchedTime = sharedPrefs.getFirestoreFetchedTime();
         boolean fetchFromServer;
 
-        if((currentTime - sharedPrefs.getFirestoreFetchedTime()) > (24 * 60 * 60 * 1000))
+        if((currentTime - fetchedTime) > (24 * 60 * 60 * 1000)) {
+            sharedPrefs.setFirestoreFetchedTime(currentTime);
             fetchFromServer = true;
-        else
+        } else {
             fetchFromServer = false;
+        }
 
         liveFirestoreMap.addSource(repository.fetchFirestoreMap(fetchFromServer), new Observer<FirestoreMap>() {
             @Override
