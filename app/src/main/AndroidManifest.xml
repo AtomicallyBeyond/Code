@@ -16,9 +16,11 @@
         android:theme="@style/Theme.EasyColor"
         android:usesCleartextTraffic="true">
 
-        <activity android:name=".BaseActivity"
+        <activity
+            android:name=".BaseActivity"
             android:configChanges="orientation|screenSize"
-            android:persistent="true">
+            android:persistent="true"
+            android:exported="true">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

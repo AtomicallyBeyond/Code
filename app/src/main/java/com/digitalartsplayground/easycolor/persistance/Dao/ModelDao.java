@@ -1,4 +1,4 @@
-package com.digitalartsplayground.easycolor.persistance;
+package com.digitalartsplayground.easycolor.persistance.Dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;

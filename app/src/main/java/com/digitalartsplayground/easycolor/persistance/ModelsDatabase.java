@@ -1,15 +1,16 @@
 package com.digitalartsplayground.easycolor.persistance;
 
 import android.content.Context;
-
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.room.TypeConverter;
 import androidx.room.TypeConverters;
-
 import com.digitalartsplayground.easycolor.firestore.FirestoreMap;
+import com.digitalartsplayground.easycolor.models.BackupVector;
 import com.digitalartsplayground.easycolor.models.VectorEntity;
+import com.digitalartsplayground.easycolor.persistance.Dao.BackupModelDao;
+import com.digitalartsplayground.easycolor.persistance.Dao.ModelDao;
+import com.digitalartsplayground.easycolor.persistance.Dao.ModelIDsDao;
 
 @Database(entities = {VectorEntity.class, BackupVector.class, FirestoreMap.class}, version = 2, exportSchema = false)
 @TypeConverters({Converters.class})

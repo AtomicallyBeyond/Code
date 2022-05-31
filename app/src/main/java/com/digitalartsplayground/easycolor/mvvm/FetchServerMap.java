@@ -84,7 +84,6 @@ public abstract class FetchServerMap {
                                             @Override
                                             public void onChanged(FirestoreMap firestoreMap) {
                                                 if(firestoreMap != null) {
-                                                    firestoreMap.shuffleList(randomSeed);
                                                     liveFireMap.setValue(firestoreMap);
                                                 }
                                             }

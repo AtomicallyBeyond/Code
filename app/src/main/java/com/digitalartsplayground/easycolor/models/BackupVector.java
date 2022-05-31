@@ -1,4 +1,4 @@
-package com.digitalartsplayground.easycolor.persistance;
+package com.digitalartsplayground.easycolor.models;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;

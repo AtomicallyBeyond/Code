@@ -16,6 +16,8 @@ public class SharedPrefs {
     public static final String BANNER_CLICK_COUNTER = "bannerClickCounter";
     public static final String MODEL_VIEW_COUNT = "modelViewCount";
     public static final String FIRESTORE_MAP_FETCHED_TIME = "firestoreTime";
+    public static final String CURRENT_MODEL_ID = "currentModelID";
+    public static final int NULL_MODEL_ID = -1;
 
     private static SharedPrefs instance;
     private static SharedPreferences sharedPreferences;
@@ -36,6 +38,14 @@ public class SharedPrefs {
     public void resetAdPrefs(){
         setBannerClickCounter(0);
         setExpireDate(0);
+    }
+
+    public int getCurrentModelID() {
+        return sharedPreferences.getInt(CURRENT_MODEL_ID, NULL_MODEL_ID);
+    }
+
+    public void setCurrentModelId(int modelId) {
+        editor.putInt(CURRENT_MODEL_ID, modelId).apply();
     }
 
     public long getFirestoreFetchedTime() {

@@ -96,8 +96,6 @@ public class MainActivity extends AppCompatActivity{
     @SuppressWarnings("deprecation")
     @SuppressLint("MissingPermission")
     private void init() {
-/*        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
-        IronSource.init(this, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);*/
 
         PaintProvider.createPaint();
         PaintProvider.createHDPaint();

@@ -9,7 +9,7 @@ import androidx.lifecycle.Observer;
 import com.digitalartsplayground.easycolor.firestore.FirestoreMap;
 import com.digitalartsplayground.easycolor.models.VectorEntity;
 import com.digitalartsplayground.easycolor.mvvm.Repository;
-import com.digitalartsplayground.easycolor.persistance.BackupVector;
+import com.digitalartsplayground.easycolor.models.BackupVector;
 import com.digitalartsplayground.easycolor.utils.AppExecutors;
 import com.digitalartsplayground.easycolor.utils.SharedPrefs;
 import org.jetbrains.annotations.NotNull;
@@ -24,13 +24,14 @@ public class MainActivityViewModel extends AndroidViewModel {
 
     private final MediatorLiveData<FirestoreMap> liveFirestoreMap = new MediatorLiveData<>();
     private final MediatorLiveData<List<Integer>> liveArtworkIDs = new MediatorLiveData<>();
+    private LiveData<VectorEntity> liveArtworkModel;
+    private LiveData<VectorEntity> liveLibraryModel;
 
     //Integer in HashMap is the modelID
     private final HashMap<Integer, VectorEntity> modelHashMap = new HashMap<>();
     private final HashMap<Integer, VectorEntity> artworkHashMap = new HashMap<>();
 
     private boolean isLibraryCurrent = true;
-
 
     public MainActivityViewModel(@NonNull @NotNull Application application) {
         super(application);
@@ -64,7 +65,7 @@ public class MainActivityViewModel extends AndroidViewModel {
             @Override
             public void onChanged(VectorEntity vectorEntity) {
 
-                if(vectorEntity != null) {
+                if(vectorEntity != null && vectorEntity.isInProgress()) {
 
                     VectorEntity savedVector = artworkHashMap.get(vectorEntity.getId());
 
@@ -83,6 +84,15 @@ public class MainActivityViewModel extends AndroidViewModel {
         });
     }
 
+
+
+    public LiveData<FirestoreMap> getLiveFirestoreMap() {
+        return liveFirestoreMap;
+    }
+
+    public HashMap<Integer, VectorEntity> getModelHashMap() {
+        return modelHashMap;
+    }
 
     // FirestoreMap contains ids off all available models from cache.
     public void loadFirestoreMap() {
@@ -106,15 +116,6 @@ public class MainActivityViewModel extends AndroidViewModel {
                 }
             }
         });
-    }
-
-    public LiveData<FirestoreMap> getLiveFirestoreMap() {
-        return liveFirestoreMap;
-    }
-
-
-    public HashMap<Integer, VectorEntity> getModelHashMap() {
-        return modelHashMap;
     }
 
 
@@ -188,4 +189,53 @@ public class MainActivityViewModel extends AndroidViewModel {
     public void setLibraryCurrent(boolean libraryCurrent) {
         isLibraryCurrent = libraryCurrent;
     }
+
+    public void watchCurrentLibraryModel(int modelID) {
+        if(liveLibraryModel != null) {
+            liveFirestoreMap.removeSource(liveLibraryModel);
+        }
+
+        liveLibraryModel = repository.fetchLiveModel(modelID);
+        liveFirestoreMap.addSource(liveLibraryModel, new Observer<VectorEntity>() {
+            @Override
+            public void onChanged(VectorEntity vectorEntity) {
+                if(vectorEntity != null) {
+                    VectorEntity saveVector = modelHashMap.get(vectorEntity.getId());
+                    updateVector(saveVector, vectorEntity);
+                    saveVector = artworkHashMap.get(vectorEntity.getId());
+                    updateVector(saveVector, vectorEntity);
+                }
+            }
+        });
+    }
+
+    public void watchCurrentArtworkModel(int modelID) {
+        if(liveArtworkModel != null) {
+            liveArtworkIDs.removeSource(liveArtworkModel);
+        }
+
+        liveArtworkModel = repository.fetchLiveModel(modelID);
+        liveArtworkIDs.addSource(liveArtworkModel, new Observer<VectorEntity>() {
+            @Override
+            public void onChanged(VectorEntity vectorEntity) {
+
+                if(vectorEntity != null) {
+                    VectorEntity saveVector = artworkHashMap.get(vectorEntity.getId());
+                    updateVector(saveVector, vectorEntity);
+                    saveVector = modelHashMap.get(vectorEntity.getId());
+                    updateVector(saveVector, vectorEntity);
+                }
+            }
+        });
+    }
+
+
+    private void updateVector(VectorEntity saveVector, VectorEntity updater) {
+        if(saveVector != null) {
+            saveVector.setId(updater.getId());
+            saveVector.setModel(updater.getModel());
+            saveVector.loadDrawable();
+        }
+    }
+
 }

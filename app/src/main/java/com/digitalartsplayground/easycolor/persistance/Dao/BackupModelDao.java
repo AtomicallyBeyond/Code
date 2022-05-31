@@ -1,10 +1,12 @@
-package com.digitalartsplayground.easycolor.persistance;
+package com.digitalartsplayground.easycolor.persistance.Dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+
+import com.digitalartsplayground.easycolor.models.BackupVector;
 
 @Dao
 public interface BackupModelDao {

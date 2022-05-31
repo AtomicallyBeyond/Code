@@ -5,7 +5,6 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import com.digitalartsplayground.easycolor.interfaces.DrawableAvailable;
-import com.digitalartsplayground.easycolor.persistance.BackupVector;
 import com.digitalartsplayground.easycolor.utils.AppExecutors;
 
 @Entity(tableName = "models")

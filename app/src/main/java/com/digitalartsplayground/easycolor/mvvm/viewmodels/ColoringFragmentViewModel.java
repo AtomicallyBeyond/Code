@@ -11,7 +11,7 @@ import com.digitalartsplayground.easycolor.models.VectorModelContainer;
 import com.digitalartsplayground.easycolor.mvvm.Repository;
 import com.digitalartsplayground.easycolor.mvvm.SingleLiveEvent;
 import com.digitalartsplayground.easycolor.models.VectorEntity;
-import com.digitalartsplayground.easycolor.persistance.BackupVector;
+import com.digitalartsplayground.easycolor.models.BackupVector;
 import com.digitalartsplayground.easycolor.utils.AppExecutors;
 
 public class ColoringFragmentViewModel extends AndroidViewModel {
@@ -93,13 +93,20 @@ public class ColoringFragmentViewModel extends AndroidViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        vectorModelLiveData.getValue().saveModel();
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                repository.insertModel(vectorModelLiveData.getValue().getVectorEntity());
-            }
-        });
+        if(vectorModelLiveData.getValue() != null) {
+            vectorModelLiveData.getValue().saveModel();
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    repository.insertModel(vectorModelLiveData.getValue().getVectorEntity());
+/*                    repository.updateSelectedModel(
+                            vectorModelLiveData
+                                    .getValue()
+                                    .getVectorEntity()
+                                    .getId());*/
+                }
+            });
+        }
     }
 
 }

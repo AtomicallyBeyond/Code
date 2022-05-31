@@ -47,26 +47,25 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
         init();
-
-
-
     }
 
-    public void init() {
+    private void init() {
+        initIronSource();
+        Intent startIntent = new Intent(this, MainActivity.class);
+        startActivity(startIntent);
+    }
+
+    private void initIronSource() {
         IronSource.init(this, "113d4317d", IronSource.AD_UNIT.BANNER);
         IronSource.init(this, "113d4317d", IronSource.AD_UNIT.INTERSTITIAL);
         checkAdServingTimeLimit();
         loadBannerListener();
         loadInterstitialListener();
         IronSource.setInterstitialListener(interstitialListener);
-
-        Intent startIntent = new Intent(this, MainActivity.class);
-        startActivity(startIntent);
     }
 
 
-
-    public void checkAdServingTimeLimit(){
+    private void checkAdServingTimeLimit(){
         SharedPrefs sharedPrefs = SharedPrefs.getInstance(this);
         bannerClickCount = sharedPrefs.getBannerClickCounter();
 

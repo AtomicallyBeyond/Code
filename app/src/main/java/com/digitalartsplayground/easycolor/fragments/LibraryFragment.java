@@ -38,6 +38,11 @@ public class LibraryFragment extends Fragment implements StartColoringActivity, 
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         modelsAdapter.destroyAdapter();
@@ -106,26 +111,9 @@ public class LibraryFragment extends Fragment implements StartColoringActivity, 
             sharedPrefs.setModelViewCount(sharedPrefs.getModelViewCount() + 1);
 
             ColoringFragment coloringFragment = ColoringFragment.newInstance(vectorEntity.getId());
+            mainViewModel.watchCurrentLibraryModel(vectorEntity.getId());
 
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            fragmentManager.registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
-                @Override
-                public void onFragmentDetached(@NonNull @NotNull FragmentManager fm, @NonNull @NotNull Fragment f) {
-                    super.onFragmentDetached(fm, f);
-                    if(f instanceof ColoringFragment) {
-                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mainViewModel.fetchModel(vectorEntity.getId());
-                            }
-                        }, 500);
-
-                        fragmentManager.unregisterFragmentLifecycleCallbacks(this);
-                    }
-                }
-            }, false);
-
-            fragmentManager
+            getActivity().getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.fragment_container, coloringFragment)
                     .commit();
